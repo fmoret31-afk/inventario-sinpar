@@ -1,415 +1,498 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIN PAR - Dashboard Analytics & Control QR</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIN PAR · Inventario Inteligente</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
-    .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    /* Estilos globales y personalizados */
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f6f8fc;
+      color: #0b1a33;
     }
-    .pulse-btn { animation: pulse-ring 2s infinite; }
+    .glass {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .kpi-card {
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 30px -8px rgba(37, 99, 235, 0.15);
+    }
+    .table-row-hover:hover {
+      background-color: #f1f5f9;
+      transition: background 0.15s ease;
+    }
+    .badge {
+      font-weight: 600;
+      padding: 0.25rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+    }
+    .badge-disponible { background: #dcfce7; color: #166534; }
+    .badge-pendiente { background: #fef9c3; color: #854d0e; }
+    .badge-critico { background: #fee2e2; color: #991b1b; }
+    .badge-otro { background: #e5e7eb; color: #374151; }
+
+    /* Animación de carga */
+    .loader {
+      border: 3px solid #e5e7eb;
+      border-top: 3px solid #2563eb;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Scroll personalizado */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Modal QR */
+    .modal-overlay {
+      background: rgba(11, 26, 51, 0.6);
+      backdrop-filter: blur(6px);
+    }
   </style>
 </head>
-<body class="bg-slate-950 font-sans text-slate-100 min-h-screen flex flex-col">
+<body>
 
-  <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+  <header class="sticky top-0 z-50 glass border-b border-white/30 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
-          <i class="fa-solid fa-gem text-white text-xl"></i>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-blue-200 border border-slate-200/80 bg-white flex items-center justify-center p-0.5">
+          <img id="app-logo" src="" alt="SIN PAR Logo" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://via.placeholder.com/100?text=SIN+PAR';">
         </div>
         <div>
-          <h1 class="font-extrabold text-xl tracking-wide bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">SIN PAR</h1>
-          <p class="text-[10px] uppercase tracking-widest text-indigo-400 font-semibold">Analytics & Control de Joyería</p>
+          <h1 class="font-poppins font-extrabold text-xl text-slate-900 tracking-tight">SIN <span class="gradient-text">PAR</span></h1>
+          <p class="text-[10px] uppercase tracking-widest text-indigo-600 font-bold leading-none">Inventario · KPI · QR</p>
         </div>
       </div>
-      
-      <button onclick="cargarDatos()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
+      <button onclick="cargarDatos()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 transition shadow-sm hover:shadow">
         <i id="btn-refresh-icon" class="fa-solid fa-rotate-right"></i>
-        <span class="hidden sm:inline">Sincronizar</span>
+        <span class="hidden sm:inline">Actualizar</span>
       </button>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow space-y-6 w-full">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
     <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl shadow-sm">
-        <p class="text-xs font-semibold text-slate-400 uppercase">Variedad de Joyas</p>
-        <h3 id="kpi-total-items" class="text-2xl font-black text-white mt-1">0</h3>
+      <div class="kpi-card bg-white rounded-2xl p-5 border border-slate-200/80">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Productos</span>
+          <i class="fa-regular fa-gem text-blue-500 text-lg"></i>
+        </div>
+        <p id="kpi-total-items" class="text-2xl font-extrabold text-slate-800 mt-2">0</p>
       </div>
-      <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl shadow-sm">
-        <p class="text-xs font-semibold text-slate-400 uppercase">Stock Total</p>
-        <h3 id="kpi-total-stock" class="text-2xl font-black text-emerald-400 mt-1">0 u.</h3>
+      <div class="kpi-card bg-white rounded-2xl p-5 border border-slate-200/80">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Stock total</span>
+          <i class="fa-regular fa-boxes text-emerald-500 text-lg"></i>
+        </div>
+        <p id="kpi-total-stock" class="text-2xl font-extrabold text-emerald-600 mt-2">0 u.</p>
       </div>
-      <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl shadow-sm">
-        <p class="text-xs font-semibold text-slate-400 uppercase">Valor Inventario</p>
-        <h3 id="kpi-total-valor" class="text-2xl font-black text-indigo-400 mt-1">S/ 0.00</h3>
+      <div class="kpi-card bg-white rounded-2xl p-5 border border-slate-200/80">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Valor inventario</span>
+          <i class="fa-regular fa-coin text-amber-500 text-lg"></i>
+        </div>
+        <p id="kpi-total-valor" class="text-2xl font-extrabold text-amber-600 mt-2">S/ 0.00</p>
       </div>
-      <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl shadow-sm">
-        <p class="text-xs font-semibold text-slate-400 uppercase">Stock Crítico (&lt;2)</p>
-        <h3 id="kpi-low-stock" class="text-2xl font-black text-rose-400 mt-1">0</h3>
+      <div class="kpi-card bg-white rounded-2xl p-5 border border-slate-200/80">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Stock crítico</span>
+          <i class="fa-regular fa-triangle-exclamation text-rose-500 text-lg"></i>
+        </div>
+        <p id="kpi-low-stock" class="text-2xl font-extrabold text-rose-500 mt-2">0</p>
       </div>
     </section>
 
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl shadow-md">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-bold text-slate-200 flex items-center space-x-2">
-            <i class="fa-solid fa-chart-pie text-indigo-400"></i>
-            <span>Distribución de Joyas por Categoría</span>
-          </h3>
-        </div>
-        <div class="relative h-64 w-full flex items-center justify-center">
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2 mb-3">
+          <i class="fa-regular fa-chart-pie text-indigo-500"></i>
+          <span>Distribución por categoría</span>
+        </h3>
+        <div class="h-60 w-full relative">
           <canvas id="categoryChart"></canvas>
         </div>
       </div>
-
-      <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl shadow-md">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-bold text-slate-200 flex items-center space-x-2">
-            <i class="fa-solid fa-chart-column text-emerald-400"></i>
-            <span>Top Joyas por Valor Total de Inventario</span>
-          </h3>
-        </div>
-        <div class="relative h-64 w-full">
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2 mb-3">
+          <i class="fa-regular fa-chart-bar text-emerald-500"></i>
+          <span>Top 5 joyas por valor total</span>
+        </h3>
+        <div class="h-60 w-full relative">
           <canvas id="valueChart"></canvas>
         </div>
       </div>
-
     </section>
 
-    <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        
-        <div class="relative flex-grow max-w-md">
-          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-          <input 
-            type="text" 
-            id="searchInput" 
-            placeholder="Buscar por SKU (Ej: JOY-001), nombre o categoría..." 
-            class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onkeyup="filtrarTablaTexto()"
-          >
+    <section class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center gap-3">
+        <div class="relative flex-grow">
+          <i class="fa-regular fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+          <input type="text" id="searchInput" placeholder="Buscar por SKU, nombre, categoría, estado o proveedor..."
+                 class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition"
+                 onkeyup="filtrarTabla()">
         </div>
-
-        <div class="flex items-center space-x-2">
-          <button onclick="filtrarBajoStock()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs px-3.5 py-2.5 rounded-xl border border-amber-500/20 transition flex items-center space-x-2">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>Stock Crítico</span>
+        <div class="flex gap-2">
+          <button onclick="filtrarCritico()" class="bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold px-4 py-2.5 rounded-xl border border-amber-200 transition flex items-center gap-2">
+            <i class="fa-regular fa-triangle-exclamation"></i> Crítico
           </button>
-
-          <button onclick="abrirCamaraQR()" class="pulse-btn bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition flex items-center space-x-2">
-            <i class="fa-solid fa-qrcode text-base"></i>
-            <span>ESCANEAR QR</span>
+          <button onclick="iniciarEscaner()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md shadow-indigo-200 transition flex items-center gap-2">
+            <i class="fa-regular fa-qrcode"></i> Escanear QR
           </button>
         </div>
       </div>
 
-      <div id="qr-reader-container" class="hidden bg-slate-950 p-4 rounded-xl border border-indigo-500/40 flex flex-col items-center justify-center space-y-4">
-        <div id="qr-reader" class="w-full max-w-sm overflow-hidden rounded-xl border-2 border-indigo-500"></div>
-        <button onclick="cerrarCamaraQR()" class="bg-rose-600/80 hover:bg-rose-600 text-white text-xs px-4 py-2 rounded-lg flex items-center space-x-1">
-          <i class="fa-solid fa-xmark"></i>
-          <span>Cerrar Escáner</span>
-        </button>
-      </div>
-
-      <div id="scanned-card" class="hidden bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 border border-indigo-500/40 p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-6 shadow-2xl">
-        <img id="card-img" src="" class="w-28 h-28 object-cover rounded-xl border-2 border-indigo-400 shadow-lg">
-        <div class="space-y-2 text-center sm:text-left flex-grow">
-          <div class="inline-block bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full" id="card-category">Categoría</div>
-          <h3 id="card-title" class="text-lg font-bold text-white">Nombre de la Joya</h3>
-          <p id="card-sku" class="font-mono text-xs text-indigo-400 font-semibold">SKU: -</p>
-          <div class="flex items-center justify-center sm:justify-start space-x-6 pt-1">
-            <div>
-              <p class="text-[10px] text-slate-400 uppercase font-semibold">Precio Venta</p>
-              <p id="card-price" class="text-xl font-black text-emerald-400">S/ 0.00</p>
-            </div>
-            <div>
-              <p class="text-[10px] text-slate-400 uppercase font-semibold">Stock Actual</p>
-              <p id="card-stock" class="text-xl font-black text-white">0 u.</p>
-            </div>
+      <div id="scanned-card" class="hidden bg-gradient-to-br from-indigo-50/80 to-blue-50/80 border border-indigo-200 p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-6 shadow-sm">
+        <img id="card-img" src="" class="w-20 h-20 object-cover rounded-xl border-2 border-white shadow-md bg-white" onerror="this.src='https://via.placeholder.com/120?text=No+Imagen'">
+        <div class="space-y-1.5 text-center sm:text-left flex-grow">
+          <div class="inline-block bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full" id="card-category">Categoría</div>
+          <h3 id="card-title" class="text-base font-bold text-slate-900">Nombre</h3>
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs font-medium text-slate-600">
+            <span>SKU: <strong id="card-sku" class="text-indigo-600 font-mono">--</strong></span>
+            <span>Proveedor: <strong id="card-proveedor" class="text-slate-800">--</strong></span>
+            <span>Estado: <strong id="card-estado" class="text-emerald-600">--</strong></span>
+          </div>
+          <div class="flex items-center justify-center sm:justify-start gap-6 pt-1">
+            <div><p class="text-[10px] text-slate-400 uppercase font-bold">Precio</p><p id="card-price" class="text-lg font-black text-emerald-600">S/ 0.00</p></div>
+            <div><p class="text-[10px] text-slate-400 uppercase font-bold">Stock</p><p id="card-stock" class="text-lg font-black text-slate-800">0 u.</p></div>
           </div>
         </div>
-        <button onclick="limpiarFiltroQR()" class="self-start text-xs text-slate-400 hover:text-white p-2">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+        <button onclick="limpiarFiltroQR()" class="text-slate-400 hover:text-slate-700 p-2"><i class="fa-regular fa-xmark text-lg"></i></button>
       </div>
-
     </section>
 
-    <section class="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
       <div class="overflow-x-auto custom-scrollbar">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-900 border-b border-slate-800 text-slate-400 text-[11px] uppercase tracking-wider font-semibold">
-              <th class="p-4">Vista Previa</th>
-              <th class="p-4">SKU / ID</th>
-              <th class="p-4">Categoría</th>
-              <th class="p-4">Nombre del Producto</th>
-              <th class="p-4 text-right">Precio Venta</th>
-              <th class="p-4 text-center">Stock</th>
+            <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
+              <th class="p-3.5">Imagen</th>
+              <th class="p-3.5">SKU</th>
+              <th class="p-3.5">Categoría</th>
+              <th class="p-3.5">Nombre del Producto</th>
+              <th class="p-3.5 text-right">Precio (S/)</th>
+              <th class="p-3.5 text-center">Stock</th>
+              <th class="p-3.5 text-center">Estado</th>
+              <th class="p-3.5">Proveedor</th>
             </tr>
           </thead>
-          <tbody id="inventoryTable" class="divide-y divide-slate-800 text-sm">
-            <tr>
-              <td colspan="6" class="p-10 text-center text-slate-500">
-                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-500 mb-3"></i>
-                <p>Cargando datos desde SINPAR.xlsx...</p>
-              </td>
-            </tr>
+          <tbody id="inventoryTable" class="divide-y divide-slate-100 text-sm">
+            <tr><td colspan="8" class="p-10 text-center text-slate-400">
+              <div class="flex flex-col items-center gap-2">
+                <div class="loader"></div>
+                <p>Cargando inventario...</p>
+              </div>
+            </td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
+    <footer class="text-center text-[11px] text-slate-400 py-2 border-t border-slate-200/60">
+      SIN PAR · Datos sincronizados desde Google Sheets · <span id="lastUpdate"></span>
+    </footer>
   </main>
 
-  <script>
-    // URL DE APPS SCRIPT
-    const API_URL = "https://script.google.com/macros/s/AKfycbyTzwkLsW3uOcm3D55jKIcJZ4TejrltUXFWQLJQZhb5KtR78bXkh7yifoYtRBhRtbyb/exec"; 
-    
-    let inventarioGlobal = [];
-    let html5QrCode = null;
-    let chartCategoryInstance = null;
-    let chartValueInstance = null;
+  <div id="qr-modal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i class="fa-regular fa-camera text-indigo-600"></i> Escanear QR</h3>
+        <button onclick="detenerEscaner()" class="text-slate-400 hover:text-slate-600"><i class="fa-regular fa-xmark text-xl"></i></button>
+      </div>
+      <div id="reader" class="w-full bg-slate-100 rounded-xl overflow-hidden border-2 border-indigo-400 min-h-[220px]"></div>
+      <p class="text-xs text-slate-500 text-center">Apunta la cámara al código QR de la etiqueta.</p>
+      <button onclick="detenerEscaner()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-2.5 rounded-xl font-bold">Cancelar</button>
+    </div>
+  </div>
 
-    // Cargar Datos desde Google Sheets / Apps Script
+  <script>
+    // 🔽 RUTA O ENLACE DEL LOGO (Reemplaza con la ruta de tu imagen de logo, ej: 'logo.png' o una URL)
+    const LOGO_URL = "https://drive.google.com/file/d/1SjCwcRRzHfzYUH1fpgJeR9Nipqdakynn/view?usp=sharing"; 
+
+    // 🔽 REEMPLAZA ESTA URL CON LA DE TU APPS SCRIPT
+    const API_URL = "https://script.google.com/macros/s/AKfycbyTzwkLsW3uOcm3D55jKIcJZ4TejrltUXFWQLJQZhb5KtR78bXkh7yifoYtRBhRtbyb/exec";
+
+    let inventario = [];
+    let chartCat, chartVal;
+    let html5Scanner = null;
+
+    // Inicializar Logo
+    function inicializarLogo() {
+      const imgLogo = document.getElementById('app-logo');
+      if (imgLogo) imgLogo.src = LOGO_URL;
+    }
+
+    // ========== CARGAR DATOS ==========
     async function cargarDatos() {
-      const btnIcon = document.getElementById('btn-refresh-icon');
-      if (btnIcon) btnIcon.classList.add('fa-spin');
+      const icon = document.getElementById('btn-refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
 
       try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        inventarioGlobal = data.items || [];
-        
-        actualizarKPIs(inventarioGlobal);
-        generarGraficas(inventarioGlobal);
-        renderTabla(inventarioGlobal);
+        const resp = await fetch(API_URL);
+        if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
+        const data = await resp.json();
+
+        inventario = data.map(item => ({
+          sku: item.sku || item["SKU / ID"] || '',
+          categoria: item.categoria || item["Categoría"] || '',
+          nombre: item.nombre || item["Nombre del Producto"] || '',
+          precio: parseFloat(item.precio || item["Precio Venta (PEN)"] || 0),
+          stockInicial: parseInt(item.stockInicial || item["Stock Inicial"] || 0),
+          stockActual: parseInt(item.stockActual || item["Stock Actual"] || 0),
+          estado: item.estado || item["Estado"] || 'Disponible',
+          proveedor: item.proveedor || item["Proveedor"] || '-',
+          imagen: item.imagen || item["Imagen"] || 'https://via.placeholder.com/80?text=Sin+Imagen'
+        }));
+
+        actualizarKPIs(inventario);
+        generarGraficas(inventario);
+        renderTabla(inventario);
+        document.getElementById('lastUpdate').textContent = `Última actualización: ${new Date().toLocaleString()}`;
+
       } catch (err) {
-        console.error("Error al sincronizar inventario:", err);
+        console.error(err);
+        document.getElementById('inventoryTable').innerHTML = `
+          <tr><td colspan="8" class="p-6 text-center text-rose-500">
+            <i class="fa-regular fa-circle-exclamation text-2xl block mb-2"></i>
+            Error al cargar datos. Verifica la URL del Apps Script y que la hoja sea pública.
+          </td></tr>`;
       } finally {
-        if (btnIcon) btnIcon.classList.remove('fa-spin');
+        if (icon) icon.classList.remove('fa-spin');
       }
     }
 
-    // Actualizar KPIs
+    // ========== KPIS ==========
     function actualizarKPIs(items) {
-      let totalStock = 0;
-      let totalValor = 0;
-      let lowStock = 0;
-
-      items.forEach(item => {
-        const stock = parseInt(item["Stock Inicial"]) || 0;
-        const precio = parseFloat(item["Precio Venta (PEN)"]) || 0;
-
+      let totalStock = 0, totalValor = 0, criticos = 0;
+      items.forEach(p => {
+        const stock = p.stockActual || p.stockInicial || 0;
+        const precio = p.precio || 0;
         totalStock += stock;
         totalValor += stock * precio;
-        if (stock < 2) lowStock++;
+        if (stock < 2) criticos++;
       });
-
       document.getElementById('kpi-total-items').textContent = items.length;
       document.getElementById('kpi-total-stock').textContent = `${totalStock} u.`;
       document.getElementById('kpi-total-valor').textContent = `S/ ${totalValor.toFixed(2)}`;
-      document.getElementById('kpi-low-stock').textContent = lowStock;
+      document.getElementById('kpi-low-stock').textContent = criticos;
     }
 
-    // Generar Gráficas Estadísticas con Chart.js
+    // ========== GRÁFICOS ==========
     function generarGraficas(items) {
-      // 1. Procesar categorías
-      const categorias = {};
-      items.forEach(item => {
-        const cat = item["Categoría"] || "Sin Categoría";
-        categorias[cat] = (categorias[cat] || 0) + 1;
+      const catMap = {};
+      items.forEach(p => {
+        const cat = p.categoria || 'Sin categoría';
+        catMap[cat] = (catMap[cat] || 0) + 1;
       });
+      const labels = Object.keys(catMap);
+      const values = Object.values(catMap);
+      const colores = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#f97316'];
 
-      // Render Chart 1 (Circular)
-      const ctxCat = document.getElementById('categoryChart').getContext('2d');
-      if (chartCategoryInstance) chartCategoryInstance.destroy();
-
-      chartCategoryInstance = new Chart(ctxCat, {
+      // Doughnut
+      const ctx1 = document.getElementById('categoryChart').getContext('2d');
+      if (chartCat) chartCat.destroy();
+      chartCat = new Chart(ctx1, {
         type: 'doughnut',
         data: {
-          labels: Object.keys(categorias),
+          labels: labels,
           datasets: [{
-            data: Object.values(categorias),
-            backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'],
-            borderWidth: 0
+            data: values,
+            backgroundColor: colores.slice(0, labels.length),
+            borderWidth: 2,
+            borderColor: '#fff'
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } }
-          }
+            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 11 } } }
+          },
+          cutout: '65%'
         }
       });
 
-      // 2. Procesar Top 5 productos por valor acumulado
-      const ordenadosPorValor = [...items].map(item => {
-        const stock = parseInt(item["Stock Inicial"]) || 0;
-        const precio = parseFloat(item["Precio Venta (PEN)"]) || 0;
-        return {
-          nombre: item["Nombre del Producto"] || item["SKU / ID"],
-          valor: stock * precio
-        };
-      }).sort((a, b) => b.valor - a.valor).slice(0, 5);
+      // Top 5 por valor
+      const top = [...items]
+        .map(p => ({ nombre: p.nombre || p.sku, valor: (p.stockActual || p.stockInicial || 0) * (p.precio || 0) }))
+        .sort((a, b) => b.valor - a.valor)
+        .slice(0, 5);
 
-      // Render Chart 2 (Barras)
-      const ctxVal = document.getElementById('valueChart').getContext('2d');
-      if (chartValueInstance) chartValueInstance.destroy();
-
-      chartValueInstance = new Chart(ctxVal, {
+      const ctx2 = document.getElementById('valueChart').getContext('2d');
+      if (chartVal) chartVal.destroy();
+      chartVal = new Chart(ctx2, {
         type: 'bar',
         data: {
-          labels: ordenadosPorValor.map(i => i.nombre.length > 15 ? i.nombre.substring(0, 15) + '...' : i.nombre),
+          labels: top.map(i => i.nombre.length > 14 ? i.nombre.slice(0, 14) + '…' : i.nombre),
           datasets: [{
-            label: 'Valor Total en Soles (S/)',
-            data: ordenadosPorValor.map(i => i.valor),
-            backgroundColor: '#10b981',
-            borderRadius: 8
+            label: 'Valor total (S/)',
+            data: top.map(i => i.valor),
+            backgroundColor: ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef'],
+            borderRadius: 6,
+            borderSkipped: false
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+            y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } }
           },
-          plugins: {
-            legend: { display: false }
-          }
+          plugins: { legend: { display: false } }
         }
       });
     }
 
-    // Renderizar Tabla
+    // ========== TABLA ==========
     function renderTabla(items) {
       const tbody = document.getElementById('inventoryTable');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="p-10 text-center text-slate-500">
-              No se encontraron coincidencias en el inventario.
-            </td>
-          </tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No hay coincidencias</td></tr>`;
         return;
       }
+      tbody.innerHTML = items.map(p => {
+        const stock = p.stockActual || p.stockInicial || 0;
+        const precio = p.precio || 0;
+        const estado = p.estado || 'Disponible';
+        const estadoLower = estado.toLowerCase();
 
-      tbody.innerHTML = items.map(item => {
-        const sku = item["SKU / ID"] || "-";
-        const cat = item["Categoría"] || "Joyas";
-        const nombre = item["Nombre del Producto"] || "Sin Nombre";
-        const precio = parseFloat(item["Precio Venta (PEN)"]) || 0;
-        const stock = parseInt(item["Stock Inicial"]) || 0;
-        const imgUrl = item["Imagen"] || item["Imagen "] || "https://via.placeholder.com/80?text=Sin+Foto";
+        let badgeClass = 'badge-otro';
+        if (estadoLower.includes('disponible')) badgeClass = 'badge-disponible';
+        else if (estadoLower.includes('pendiente')) badgeClass = 'badge-pendiente';
+        else if (estadoLower.includes('critico')) badgeClass = 'badge-critico';
 
-        const stockBadge = stock < 2 
-          ? `<span class="bg-rose-500/20 border border-rose-500/40 text-rose-300 px-2.5 py-1 rounded-lg text-xs font-bold">${stock}</span>`
-          : `<span class="text-slate-200 font-bold">${stock}</span>`;
+        const stockBadge = stock < 2
+          ? `<span class="bg-rose-100 text-rose-700 font-bold px-2.5 py-1 rounded-lg text-xs">${stock}</span>`
+          : `<span class="font-bold">${stock}</span>`;
 
-        return `
-          <tr class="hover:bg-slate-800/40 transition">
-            <td class="p-3.5">
-              <img src="${imgUrl}" class="w-12 h-12 object-cover rounded-xl border border-slate-700 shadow-md" onerror="this.src='https://via.placeholder.com/80?text=Sin+Foto'">
-            </td>
-            <td class="p-3.5 font-mono text-xs font-bold text-indigo-400">${sku}</td>
-            <td class="p-3.5 text-xs text-slate-400">${cat}</td>
-            <td class="p-3.5 font-semibold text-slate-100">${nombre}</td>
-            <td class="p-3.5 text-right font-black text-emerald-400 text-base">S/ ${precio.toFixed(2)}</td>
-            <td class="p-3.5 text-center">${stockBadge}</td>
-          </tr>
-        `;
+        const img = p.imagen || 'https://via.placeholder.com/80?text=Sin+Imagen';
+
+        return `<tr class="table-row-hover">
+          <td class="p-3.5"><img src="${img}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 shadow-sm" onerror="this.src='https://via.placeholder.com/80?text=Error'"></td>
+          <td class="p-3.5 font-mono text-xs font-bold text-indigo-600">${p.sku || '-'}</td>
+          <td class="p-3.5 text-xs text-slate-500 font-medium">${p.categoria || '-'}</td>
+          <td class="p-3.5 font-semibold text-slate-800">${p.nombre || 'Sin nombre'}</td>
+          <td class="p-3.5 text-right font-black text-emerald-600">S/ ${precio.toFixed(2)}</td>
+          <td class="p-3.5 text-center">${stockBadge}</td>
+          <td class="p-3.5 text-center"><span class="badge ${badgeClass}">${estado}</span></td>
+          <td class="p-3.5 text-xs text-slate-600 font-medium">${p.proveedor || '-'}</td>
+        </tr>`;
       }).join('');
     }
 
-    // Cámara Lector QR
-    function abrirCamaraQR() {
-      const container = document.getElementById('qr-reader-container');
-      container.classList.remove('hidden');
-
-      if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
-
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 15, qrbox: { width: 250, height: 250 } },
-        (decodedText) => {
-          procesarEscaneoQR(decodedText);
-          cerrarCamaraQR();
-        },
-        () => {}
-      ).catch(() => alert("Por favor concede los permisos de cámara a tu navegador."));
-    }
-
-    function cerrarCamaraQR() {
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => document.getElementById('qr-reader-container').classList.add('hidden'));
-      } else {
-        document.getElementById('qr-reader-container').classList.add('hidden');
-      }
-    }
-
-    function procesarEscaneoQR(codigo) {
-      const codLimpio = codigo.trim().toLowerCase();
-      
-      const producto = inventarioGlobal.find(item => {
-        const sku = String(item["SKU / ID"] || '').trim().toLowerCase();
-        return sku === codLimpio || codLimpio.includes(sku);
-      });
-
-      if (producto) {
-        document.getElementById('card-img').src = producto["Imagen"] || producto["Imagen "] || 'https://via.placeholder.com/120?text=Sin+Foto';
-        document.getElementById('card-category').textContent = producto["Categoría"] || 'Joyas';
-        document.getElementById('card-title').textContent = producto["Nombre del Producto"] || 'Joya';
-        document.getElementById('card-sku').textContent = `SKU: ${producto["SKU / ID"] || '-'}`;
-        document.getElementById('card-price').textContent = `S/ ${(parseFloat(producto["Precio Venta (PEN)"]) || 0).toFixed(2)}`;
-        document.getElementById('card-stock').textContent = `${producto["Stock Inicial"] || 0} u.`;
-
-        document.getElementById('scanned-card').classList.remove('hidden');
-        renderTabla([producto]);
-      } else {
-        alert(`No se encontró joya en inventario con el código QR: ${codigo}`);
-      }
-    }
-
-    function limpiarFiltroQR() {
-      document.getElementById('scanned-card').classList.add('hidden');
-      document.getElementById('searchInput').value = "";
-      renderTabla(inventarioGlobal);
-    }
-
-    // Filtros por texto
-    function filtrarTablaTexto() {
+    // ========== BÚSQUEDA Y FILTROS ==========
+    function filtrarTabla() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
-      if (!q) { renderTabla(inventarioGlobal); return; }
-      const filtrados = inventarioGlobal.filter(item => 
-        Object.values(item).some(val => String(val).toLowerCase().includes(q))
+      if (!q) { renderTabla(inventario); return; }
+      const filtrados = inventario.filter(p =>
+        Object.values(p).some(v => String(v).toLowerCase().includes(q))
       );
       renderTabla(filtrados);
     }
 
-    function filtrarBajoStock() {
-      const bajos = inventarioGlobal.filter(item => (parseInt(item["Stock Inicial"]) || 0) < 2);
-      renderTabla(bajos);
+    function filtrarCritico() {
+      const criticos = inventario.filter(p => (p.stockActual || p.stockInicial || 0) < 2);
+      renderTabla(criticos);
     }
 
-    // Inicialización
+    function limpiarFiltroQR() {
+      document.getElementById('scanned-card').classList.add('hidden');
+      document.getElementById('searchInput').value = '';
+      renderTabla(inventario);
+    }
+
+    // ========== ESCÁNER QR ==========
+    function iniciarEscaner() {
+      const modal = document.getElementById('qr-modal');
+      modal.classList.remove('hidden');
+
+      if (!html5Scanner) {
+        html5Scanner = new Html5Qrcode("reader");
+      }
+
+      const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+      html5Scanner.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+          procesarQR(decodedText);
+          detenerEscaner();
+        },
+        () => {}
+      ).catch(() => {
+        html5Scanner.start({ facingMode: "user" }, config, (decodedText) => {
+          procesarQR(decodedText);
+          detenerEscaner();
+        }, () => {}).catch(() => alert('Permite el acceso a la cámara para escanear.'));
+      });
+    }
+
+    function detenerEscaner() {
+      if (html5Scanner && html5Scanner.isScanning) {
+        html5Scanner.stop().then(() => {
+          document.getElementById('qr-modal').classList.add('hidden');
+        });
+      } else {
+        document.getElementById('qr-modal').classList.add('hidden');
+      }
+    }
+
+    function procesarQR(codigo) {
+      const cod = codigo.trim().toLowerCase();
+      const encontrado = inventario.find(p => 
+        String(p.sku || '').toLowerCase().includes(cod) || cod.includes(String(p.sku || '').toLowerCase())
+      );
+      if (encontrado) {
+        document.getElementById('card-img').src = encontrado.imagen || 'https://via.placeholder.com/120?text=Sin+Imagen';
+        document.getElementById('card-category').textContent = encontrado.categoria || 'Joyas';
+        document.getElementById('card-title').textContent = encontrado.nombre || 'Sin nombre';
+        document.getElementById('card-sku').textContent = encontrado.sku || '-';
+        document.getElementById('card-proveedor').textContent = encontrado.proveedor || '-';
+        document.getElementById('card-estado').textContent = encontrado.estado || 'Disponible';
+        document.getElementById('card-price').textContent = `S/ ${(encontrado.precio || 0).toFixed(2)}`;
+        document.getElementById('card-stock').textContent = `${encontrado.stockActual || encontrado.stockInicial || 0} u.`;
+        document.getElementById('scanned-card').classList.remove('hidden');
+        renderTabla([encontrado]);
+      } else {
+        alert(`No se encontró producto con código: ${codigo}`);
+      }
+    }
+
+    // ========== INICIALIZAR ==========
+    inicializarLogo();
     cargarDatos();
   </script>
 </body>
