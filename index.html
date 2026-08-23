@@ -3,103 +3,154 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIN PAR - Dashboard & Búsqueda con IA</title>
+  <title>SIN PAR - Dashboard Pro & Escáner QR</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome -->
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- LIBRERÍAS DE INTELIGENCIA ARTIFICIAL (TensorFlow.js + MobileNet) -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+  <!-- Librería de Escáner QR -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
     .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+    }
+    .pulse-btn { animation: pulse-ring 2s infinite; }
   </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-900 font-sans text-slate-100 min-h-screen flex flex-col">
 
-  <!-- CABECERA -->
-  <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-50">
+  <!-- CABECERA SUPERIOR -->
+  <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/50 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="bg-indigo-600 p-2 rounded-lg">
-          <i class="fa-solid fa-gem text-xl"></i>
+        <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-gem text-white text-xl"></i>
         </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight">SIN PAR</h1>
-          <p class="text-xs text-indigo-300">Escáner Visual con Inteligencia Artificial</p>
+          <h1 class="font-extrabold text-xl tracking-wide bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">SIN PAR</h1>
+          <p class="text-[10px] uppercase tracking-widest text-indigo-400 font-semibold">Joyería & Control QR</p>
         </div>
       </div>
       
-      <button onclick="cargarDatos()" class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs px-3 py-2 rounded-lg transition flex items-center space-x-2">
+      <button onclick="cargarDatos()" class="bg-slate-700/60 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-600/50 transition duration-200 flex items-center space-x-2">
         <i id="btn-refresh-icon" class="fa-solid fa-rotate-right"></i>
-        <span>Sincronizar</span>
+        <span class="hidden sm:inline">Sincronizar</span>
       </button>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-6 w-full">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow space-y-6 w-full">
 
-    <!-- PANEL DE BÚSQUEDA Y FOTO -->
-    <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+    <!-- METRICAS KPI CLAVE -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-800/60 border border-slate-700/50 p-4 rounded-2xl">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Total Productos</p>
+        <h3 id="kpi-total-items" class="text-2xl font-black text-white mt-1">0</h3>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700/50 p-4 rounded-2xl">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Stock Total</p>
+        <h3 id="kpi-total-stock" class="text-2xl font-black text-emerald-400 mt-1">0 u.</h3>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700/50 p-4 rounded-2xl">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Valor Inventario</p>
+        <h3 id="kpi-total-valor" class="text-2xl font-black text-indigo-400 mt-1">S/ 0.00</h3>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700/50 p-4 rounded-2xl">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Stock Crítico (&lt;3)</p>
+        <h3 id="kpi-low-stock" class="text-2xl font-black text-rose-400 mt-1">0</h3>
+      </div>
+    </section>
+
+    <!-- PANEL DE ACCIONES Y BÚSQUEDA -->
+    <section class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-lg font-bold text-slate-800">Búsqueda Inteligente</h2>
-          <p class="text-xs text-slate-500">Tómale una foto al producto físico para que la IA busque su precio y stock exacto.</p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- Entrada de Texto -->
+        
+        <!-- Búsqueda manual -->
+        <div class="relative flex-grow max-w-md">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
           <input 
             type="text" 
             id="searchInput" 
-            placeholder="Buscar por SKU (Ej: JOY-045)..." 
-            class="pl-3 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Buscar por SKU (Ej: JOY-045), nombre o categoría..." 
+            class="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onkeyup="filtrarTablaTexto()"
           >
-
-          <!-- Botón Tomar/Subir Foto -->
-          <label class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 cursor-pointer transition shadow-md">
-            <i class="fa-solid fa-robot"></i>
-            <span>ESCANEAR CON IA</span>
-            <input type="file" accept="image/*" capture="environment" id="imageUploader" class="hidden" onchange="analizarYBuscarImagen(event)">
-          </label>
         </div>
-      </div>
 
-      <!-- PREVISUALIZACIÓN Y RESULTADO DE LA FOTO CON IA -->
-      <div id="image-preview-container" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center space-x-4">
-        <img id="uploaded-img-preview" src="" class="w-20 h-20 object-cover rounded-lg border border-slate-300">
-        <div>
-          <p id="match-status" class="text-xs font-bold uppercase"></p>
-          <p id="match-detail" class="text-sm text-slate-600 mt-1"></p>
-          <button onclick="limpiarFiltroImagen()" class="text-xs text-rose-600 hover:underline mt-2 flex items-center">
-            <i class="fa-solid fa-xmark mr-1"></i> Quitar filtro y mostrar todo
+        <!-- Botones de Acción -->
+        <div class="flex items-center space-x-2">
+          <button onclick="filtrarBajoStock()" class="bg-slate-700/60 hover:bg-slate-700 text-amber-300 text-xs px-3.5 py-2.5 rounded-xl border border-amber-500/30 transition flex items-center space-x-2">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Bajo Stock</span>
+          </button>
+
+          <button onclick="abrirCamaraQR()" class="pulse-btn bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+            <i class="fa-solid fa-qrcode text-base"></i>
+            <span>ESCANEAR QR</span>
           </button>
         </div>
       </div>
 
-      <!-- TABLA DE RESULTADOS -->
-      <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-lg">
+      <!-- VISOR DE CÁMARA QR -->
+      <div id="qr-reader-container" class="hidden bg-slate-950 p-4 rounded-xl border border-indigo-500/50 flex flex-col items-center justify-center space-y-4">
+        <div id="qr-reader" class="w-full max-w-sm overflow-hidden rounded-xl border-2 border-indigo-500"></div>
+        <button onclick="cerrarCamaraQR()" class="bg-rose-600/80 hover:bg-rose-600 text-white text-xs px-4 py-2 rounded-lg flex items-center space-x-1">
+          <i class="fa-solid fa-xmark"></i>
+          <span>Cancelar Escaneo</span>
+        </button>
+      </div>
+
+      <!-- FICHA DESTACADA DEL PRODUCTO ESCANEADO -->
+      <div id="scanned-card" class="hidden bg-gradient-to-r from-slate-900 to-indigo-950 border border-indigo-500/40 p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-6 shadow-2xl">
+        <img id="card-img" src="" class="w-32 h-32 object-cover rounded-xl border-2 border-indigo-400 shadow-md">
+        <div class="space-y-2 text-center sm:text-left flex-grow">
+          <div class="inline-block bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" id="card-category">Categoría</div>
+          <h3 id="card-title" class="text-xl font-bold text-white">Nombre del Producto</h3>
+          <p id="card-sku" class="font-mono text-xs text-indigo-400 font-semibold">SKU: -</p>
+          <div class="flex items-center justify-center sm:justify-start space-x-6 pt-2">
+            <div>
+              <p class="text-[10px] text-slate-400 uppercase font-semibold">Precio Venta</p>
+              <p id="card-price" class="text-2xl font-black text-emerald-400">S/ 0.00</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-slate-400 uppercase font-semibold">Stock Disponible</p>
+              <p id="card-stock" class="text-2xl font-black text-white">0 u.</p>
+            </div>
+          </div>
+        </div>
+        <button onclick="limpiarFiltroQR()" class="self-start text-xs text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- TABLA DE INVENTARIO COMPLETA -->
+    <section class="bg-slate-800/60 border border-slate-700/50 rounded-2xl overflow-hidden shadow-xl">
+      <div class="overflow-x-auto custom-scrollbar">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider font-semibold">
-              <th class="p-3.5">Vista Previa</th>
-              <th class="p-3.5">SKU / ID</th>
-              <th class="p-3.5">Categoría</th>
-              <th class="p-3.5">Nombre del Producto</th>
-              <th class="p-3.5 text-right">Precio Venta</th>
-              <th class="p-3.5 text-center">Stock</th>
+            <tr class="bg-slate-800/90 border-b border-slate-700 text-slate-400 text-[11px] uppercase tracking-wider font-semibold">
+              <th class="p-4">Imagen</th>
+              <th class="p-4">SKU / ID</th>
+              <th class="p-4">Categoría</th>
+              <th class="p-4">Nombre del Producto</th>
+              <th class="p-4 text-right">Precio Venta</th>
+              <th class="p-4 text-center">Stock</th>
             </tr>
           </thead>
-          <tbody id="inventoryTable" class="divide-y divide-slate-200 text-sm">
+          <tbody id="inventoryTable" class="divide-y divide-slate-700/50 text-sm">
             <tr>
-              <td colspan="6" class="p-8 text-center text-slate-400">
-                <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500 mb-2"></i>
-                <p>Cargando inventario desde Google Sheets...</p>
+              <td colspan="6" class="p-10 text-center text-slate-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-500 mb-3"></i>
+                <p>Cargando datos desde Google Sheets...</p>
               </td>
             </tr>
           </tbody>
@@ -110,24 +161,13 @@
   </main>
 
   <script>
-    // PEGA AQUÍ TU URL EJECUTABLE DE GOOGLE APPS SCRIPT
-    const API_URL = "https://script.google.com/macros/s/AKfycbyTzwkLsW3uOcm3D55jKIcJZ4TejrltUXFWQLJQZhb5KtR78bXkh7yifoYtRBhRtbyb/exec"; 
+    // PEGA AQUÍ TU ENLACE DE GOOGLE APPS SCRIPT
+    const API_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID_AQUI/exec"; 
     
     let inventarioGlobal = [];
-    let netModel = null;
+    let html5QrCode = null;
 
-    // Cargar el modelo de IA en segundo plano
-    async function cargarModeloIA() {
-      try {
-        netModel = await mobilenet.load();
-        console.log("Motor de Inteligencia Artificial Listo");
-      } catch (err) {
-        console.error("Error al cargar la IA:", err);
-      }
-    }
-    cargarModeloIA();
-
-    // Cargar datos desde Google Sheets
+    // Cargar Datos
     async function cargarDatos() {
       const btnIcon = document.getElementById('btn-refresh-icon');
       if (btnIcon) btnIcon.classList.add('fa-spin');
@@ -136,22 +176,45 @@
         const res = await fetch(API_URL);
         const data = await res.json();
         inventarioGlobal = data.items || [];
+        
+        actualizarKPIs(inventarioGlobal);
         renderTabla(inventarioGlobal);
       } catch (err) {
-        console.error("Error al cargar el inventario:", err);
+        console.error("Error al sincronizar datos:", err);
       } finally {
         if (btnIcon) btnIcon.classList.remove('fa-spin');
       }
     }
 
-    // Renderizar la tabla en HTML
+    // Calcular Métricas / KPIs
+    function actualizarKPIs(items) {
+      let totalStock = 0;
+      let totalValor = 0;
+      let lowStock = 0;
+
+      items.forEach(item => {
+        const stock = parseInt(item["Stock Inicial"]) || 0;
+        const precio = parseFloat(item["Precio Venta (PEN)"]) || 0;
+
+        totalStock += stock;
+        totalValor += stock * precio;
+        if (stock < 3) lowStock++;
+      });
+
+      document.getElementById('kpi-total-items').textContent = items.length;
+      document.getElementById('kpi-total-stock').textContent = `${totalStock} u.`;
+      document.getElementById('kpi-total-valor').textContent = `S/ ${totalValor.toFixed(2)}`;
+      document.getElementById('kpi-low-stock').textContent = lowStock;
+    }
+
+    // Renderizar Tabla
     function renderTabla(items) {
       const tbody = document.getElementById('inventoryTable');
       if (!items || items.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" class="p-8 text-center text-slate-400">
-              No se encontró ningún producto coincidente.
+            <td colspan="6" class="p-10 text-center text-slate-500">
+              No se encontraron coincidencias en el inventario.
             </td>
           </tr>`;
         return;
@@ -159,114 +222,106 @@
 
       tbody.innerHTML = items.map(item => {
         const sku = item["SKU / ID"] || "-";
-        const cat = item["Categoría"] || "General";
+        const cat = item["Categoría"] || "Joyas";
         const nombre = item["Nombre del Producto"] || "Sin Nombre";
-        const precio = item["Precio Venta (PEN)"] || 0;
-        const stock = item["Stock Inicial"] || 0;
-        const imgUrl = item["Imagen"] || item["Imagen "] || "https://via.placeholder.com/60?text=Sin+Foto";
+        const precio = parseFloat(item["Precio Venta (PEN)"]) || 0;
+        const stock = parseInt(item["Stock Inicial"]) || 0;
+        const imgUrl = item["Imagen"] || item["Imagen "] || "https://via.placeholder.com/80?text=Sin+Foto";
 
-        const precioFormateado = (typeof precio === 'number') 
-          ? `S/ ${precio.toFixed(2)}` 
-          : String(precio);
+        const stockBadge = stock < 3 
+          ? `<span class="bg-rose-500/20 border border-rose-500/40 text-rose-300 px-2.5 py-1 rounded-lg text-xs font-bold">${stock}</span>`
+          : `<span class="text-slate-200 font-bold">${stock}</span>`;
 
         return `
-          <tr class="hover:bg-slate-50 transition">
+          <tr class="hover:bg-slate-700/30 transition">
             <td class="p-3.5">
-              <img src="${imgUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-200" onerror="this.src='https://via.placeholder.com/60?text=Sin+Foto'">
+              <img src="${imgUrl}" class="w-14 h-14 object-cover rounded-xl border border-slate-700 shadow-md" onerror="this.src='https://via.placeholder.com/80?text=Sin+Foto'">
             </td>
-            <td class="p-3.5 font-mono text-xs font-bold text-indigo-600">${sku}</td>
-            <td class="p-3.5 text-xs text-slate-600">${cat}</td>
-            <td class="p-3.5 font-medium text-slate-800">${nombre}</td>
-            <td class="p-3.5 text-right font-bold text-emerald-700">${precioFormateado}</td>
-            <td class="p-3.5 text-center font-semibold text-slate-700">${stock}</td>
+            <td class="p-3.5 font-mono text-xs font-bold text-indigo-400">${sku}</td>
+            <td class="p-3.5 text-xs text-slate-400">${cat}</td>
+            <td class="p-3.5 font-semibold text-slate-100">${nombre}</td>
+            <td class="p-3.5 text-right font-black text-emerald-400 text-base">S/ ${precio.toFixed(2)}</td>
+            <td class="p-3.5 text-center">${stockBadge}</td>
           </tr>
         `;
       }).join('');
     }
 
-    // MOTOR DE BÚSQUEDA POR FOTO CON INTELIGENCIA ARTIFICIAL
-    async function analizarYBuscarImagen(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const container = document.getElementById('image-preview-container');
-      const previewImg = document.getElementById('uploaded-img-preview');
-      const statusText = document.getElementById('match-status');
-      const matchDetail = document.getElementById('match-detail');
-
-      previewImg.src = URL.createObjectURL(file);
+    // Activar Escáner QR
+    function abrirCamaraQR() {
+      const container = document.getElementById('qr-reader-container');
       container.classList.remove('hidden');
-      statusText.textContent = "IA Analizando rasgos de la foto...";
-      statusText.className = "text-xs font-bold text-indigo-600 uppercase";
-      matchDetail.textContent = "";
 
-      const nombreArchivo = file.name.toLowerCase().replace(/\.[^/.]+$/, "").trim();
+      if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
 
-      // 1. INTENTO POR CÓDIGO DIRECTO O ARCHIVO
-      let coincidencia = inventarioGlobal.filter(item => {
-        const sku = String(item["SKU / ID"] || '').toLowerCase().trim();
-        const imgUrl = String(item["Imagen"] || item["Imagen "] || '').toLowerCase().trim();
-        return (sku && (nombreArchivo.includes(sku) || sku.includes(nombreArchivo))) || (imgUrl && imgUrl.includes(nombreArchivo));
-      });
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 15, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          procesarEscaneoQR(decodedText);
+          cerrarCamaraQR();
+        },
+        () => {}
+      ).catch(() => alert("Por favor habilita los permisos de cámara en tu navegador."));
+    }
 
-      // 2. SI NO HAY COINCIDENCIA DE ARCHIVO, USAR IA PARA DETECTAR EL PRODUCTO
-      if (coincidencia.length === 0) {
-        if (!netModel) netModel = await mobilenet.load();
-
-        previewImg.onload = async () => {
-          const predictions = await netModel.classify(previewImg);
-          const tagDetectado = predictions[0] ? predictions[0].className.toLowerCase() : "";
-          const palabrasClave = tagDetectado.split(',').map(p => p.trim());
-
-          // Buscar coincidencia visual por IA en Nombre o Categoría
-          coincidencia = inventarioGlobal.filter(item => {
-            const nombre = String(item["Nombre del Producto"] || '').toLowerCase();
-            const cat = String(item["Categoría"] || '').toLowerCase();
-            return palabrasClave.some(p => nombre.includes(p) || cat.includes(p));
-          });
-
-          if (coincidencia.length > 0) {
-            statusText.textContent = "¡PRODUCTO IDENTIFICADO CON IA!";
-            statusText.className = "text-xs font-bold text-emerald-600 uppercase";
-            matchDetail.textContent = `IA detectó la forma de: "${tagDetectado.split(',')[0]}".`;
-            renderTabla([coincidencia[0]]); // Muestra SOLO el producto encontrado
-          } else {
-            statusText.textContent = "NO SE ENCONTRÓ PRODUCTO";
-            statusText.className = "text-xs font-bold text-rose-600 uppercase";
-            matchDetail.textContent = `La IA no logró asociar la foto a ningún producto. Nombra el archivo con su código (Ejemplo: JOY-045.jpg).`;
-            renderTabla([]); // Limpia la pantalla
-          }
-        };
+    // Cerrar Escáner QR
+    function cerrarCamaraQR() {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => document.getElementById('qr-reader-container').classList.add('hidden'));
       } else {
-        // Encontrado por SKU exacto
-        statusText.textContent = "¡PRODUCTO ENCONTRADO POR SKU!";
-        statusText.className = "text-xs font-bold text-emerald-600 uppercase";
-        matchDetail.textContent = `Mostrando ficha técnica del producto.`;
-        renderTabla([coincidencia[0]]);
+        document.getElementById('qr-reader-container').classList.add('hidden');
       }
     }
 
-    // Limpiar filtro de la foto
-    function limpiarFiltroImagen() {
-      document.getElementById('image-preview-container').classList.add('hidden');
-      document.getElementById('imageUploader').value = "";
+    // Procesar lectura de QR
+    function procesarEscaneoQR(codigo) {
+      const codLimpio = codigo.trim().toLowerCase();
+      
+      const producto = inventarioGlobal.find(item => {
+        const sku = String(item["SKU / ID"] || '').trim().toLowerCase();
+        return sku === codLimpio || codLimpio.includes(sku);
+      });
+
+      if (producto) {
+        // Rellenar Tarjeta Destacada
+        document.getElementById('card-img').src = producto["Imagen"] || producto["Imagen "] || 'https://via.placeholder.com/120?text=Sin+Foto';
+        document.getElementById('card-category').textContent = producto["Categoría"] || 'Joyas';
+        document.getElementById('card-title').textContent = producto["Nombre del Producto"] || 'Joya';
+        document.getElementById('card-sku').textContent = `SKU: ${producto["SKU / ID"] || '-'}`;
+        document.getElementById('card-price').textContent = `S/ ${(parseFloat(producto["Precio Venta (PEN)"]) || 0).toFixed(2)}`;
+        document.getElementById('card-stock').textContent = `${producto["Stock Inicial"] || 0} u.`;
+
+        document.getElementById('scanned-card').classList.remove('hidden');
+        renderTabla([producto]);
+      } else {
+        alert(`No se encontró ningún producto asociado al código: ${codigo}`);
+      }
+    }
+
+    // Limpiar Tarjeta Destacada
+    function limpiarFiltroQR() {
+      document.getElementById('scanned-card').classList.add('hidden');
+      document.getElementById('searchInput').value = "";
       renderTabla(inventarioGlobal);
     }
 
-    // Filtro manual por texto
+    // Filtros
     function filtrarTablaTexto() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
-      if (!q) {
-        renderTabla(inventarioGlobal);
-        return;
-      }
+      if (!q) { renderTabla(inventarioGlobal); return; }
       const filtrados = inventarioGlobal.filter(item => 
         Object.values(item).some(val => String(val).toLowerCase().includes(q))
       );
       renderTabla(filtrados);
     }
 
-    // Cargar datos al abrir la página
+    function filtrarBajoStock() {
+      const bajos = inventarioGlobal.filter(item => (parseInt(item["Stock Inicial"]) || 0) < 3);
+      renderTabla(bajos);
+    }
+
+    // Inicialización
     cargarDatos();
   </script>
 </body>
