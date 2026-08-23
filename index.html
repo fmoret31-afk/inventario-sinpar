@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIN PAR - Dashboard & Búsqueda por Foto</title>
+  <title>SIN PAR - Dashboard & Búsqueda con IA</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- LIBRERÍAS DE INTELIGENCIA ARTIFICIAL (TensorFlow.js + MobileNet) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
 
   <style>
     .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
@@ -27,7 +30,7 @@
         </div>
         <div>
           <h1 class="font-bold text-lg leading-tight">SIN PAR</h1>
-          <p class="text-xs text-indigo-300">Inventario & Búsqueda por Foto</p>
+          <p class="text-xs text-indigo-300">Escáner Visual con Inteligencia Artificial</p>
         </div>
       </div>
       
@@ -44,8 +47,8 @@
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-lg font-bold text-slate-800">Búsqueda de Productos</h2>
-          <p class="text-xs text-slate-500">Sube la foto del producto para mostrar únicamente su ficha con precio y stock.</p>
+          <h2 class="text-lg font-bold text-slate-800">Búsqueda Inteligente</h2>
+          <p class="text-xs text-slate-500">Tómale una foto al producto físico para que la IA busque su precio y stock exacto.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
@@ -60,21 +63,21 @@
 
           <!-- Botón Tomar/Subir Foto -->
           <label class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 cursor-pointer transition shadow-md">
-            <i class="fa-solid fa-camera"></i>
-            <span>Tomar / Subir Foto</span>
+            <i class="fa-solid fa-robot"></i>
+            <span>ESCANEAR CON IA</span>
             <input type="file" accept="image/*" capture="environment" id="imageUploader" class="hidden" onchange="analizarYBuscarImagen(event)">
           </label>
         </div>
       </div>
 
-      <!-- PREVISUALIZACIÓN Y RESULTADO DE LA FOTO -->
+      <!-- PREVISUALIZACIÓN Y RESULTADO DE LA FOTO CON IA -->
       <div id="image-preview-container" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center space-x-4">
         <img id="uploaded-img-preview" src="" class="w-20 h-20 object-cover rounded-lg border border-slate-300">
         <div>
           <p id="match-status" class="text-xs font-bold uppercase"></p>
           <p id="match-detail" class="text-sm text-slate-600 mt-1"></p>
           <button onclick="limpiarFiltroImagen()" class="text-xs text-rose-600 hover:underline mt-2 flex items-center">
-            <i class="fa-solid fa-xmark mr-1"></i> Mostrar todo el inventario de nuevo
+            <i class="fa-solid fa-xmark mr-1"></i> Quitar filtro y mostrar todo
           </button>
         </div>
       </div>
@@ -111,6 +114,18 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyTzwkLsW3uOcm3D55jKIcJZ4TejrltUXFWQLJQZhb5KtR78bXkh7yifoYtRBhRtbyb/exec"; 
     
     let inventarioGlobal = [];
+    let netModel = null;
+
+    // Cargar el modelo de IA en segundo plano
+    async function cargarModeloIA() {
+      try {
+        netModel = await mobilenet.load();
+        console.log("Motor de Inteligencia Artificial Listo");
+      } catch (err) {
+        console.error("Error al cargar la IA:", err);
+      }
+    }
+    cargarModeloIA();
 
     // Cargar datos desde Google Sheets
     async function cargarDatos() {
@@ -136,7 +151,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="6" class="p-8 text-center text-slate-400">
-              No se encontró ningún producto que coincida.
+              No se encontró ningún producto coincidente.
             </td>
           </tr>`;
         return;
@@ -169,7 +184,7 @@
       }).join('');
     }
 
-    // FUNCIÓN PRINCIPAL DE BÚSQUEDA POR FOTO DIRECTA
+    // MOTOR DE BÚSQUEDA POR FOTO CON INTELIGENCIA ARTIFICIAL
     async function analizarYBuscarImagen(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -181,37 +196,53 @@
 
       previewImg.src = URL.createObjectURL(file);
       container.classList.remove('hidden');
-      statusText.textContent = "Buscando producto en el inventario...";
+      statusText.textContent = "IA Analizando rasgos de la foto...";
       statusText.className = "text-xs font-bold text-indigo-600 uppercase";
       matchDetail.textContent = "";
 
-      const nombreArchivo = file.name.toLowerCase().replace(/\.[^/.]+$/, "").trim(); // Quita .jpg/.png
+      const nombreArchivo = file.name.toLowerCase().replace(/\.[^/.]+$/, "").trim();
 
-      // Buscar por coincidencia entre el archivo subido y el SKU/Imagen/Nombre de Sheets
+      // 1. INTENTO POR CÓDIGO DIRECTO O ARCHIVO
       let coincidencia = inventarioGlobal.filter(item => {
         const sku = String(item["SKU / ID"] || '').toLowerCase().trim();
-        const nombre = String(item["Nombre del Producto"] || '').toLowerCase().trim();
         const imgUrl = String(item["Imagen"] || item["Imagen "] || '').toLowerCase().trim();
-
-        return (
-          (sku && (nombreArchivo.includes(sku) || sku.includes(nombreArchivo))) ||
-          (imgUrl && imgUrl.includes(nombreArchivo)) ||
-          (nombre && nombreArchivo.includes(nombre))
-        );
+        return (sku && (nombreArchivo.includes(sku) || sku.includes(nombreArchivo))) || (imgUrl && imgUrl.includes(nombreArchivo));
       });
 
-      if (coincidencia.length > 0) {
-        statusText.textContent = "¡PRODUCTO ENCONTRADO!";
-        statusText.className = "text-xs font-bold text-emerald-600 uppercase";
-        matchDetail.textContent = `Mostrando la ficha técnica del producto seleccionado.`;
-        
-        // Muestra ÚNICAMENTE el producto exacto en pantalla
-        renderTabla([coincidencia[0]]);
+      // 2. SI NO HAY COINCIDENCIA DE ARCHIVO, USAR IA PARA DETECTAR EL PRODUCTO
+      if (coincidencia.length === 0) {
+        if (!netModel) netModel = await mobilenet.load();
+
+        previewImg.onload = async () => {
+          const predictions = await netModel.classify(previewImg);
+          const tagDetectado = predictions[0] ? predictions[0].className.toLowerCase() : "";
+          const palabrasClave = tagDetectado.split(',').map(p => p.trim());
+
+          // Buscar coincidencia visual por IA en Nombre o Categoría
+          coincidencia = inventarioGlobal.filter(item => {
+            const nombre = String(item["Nombre del Producto"] || '').toLowerCase();
+            const cat = String(item["Categoría"] || '').toLowerCase();
+            return palabrasClave.some(p => nombre.includes(p) || cat.includes(p));
+          });
+
+          if (coincidencia.length > 0) {
+            statusText.textContent = "¡PRODUCTO IDENTIFICADO CON IA!";
+            statusText.className = "text-xs font-bold text-emerald-600 uppercase";
+            matchDetail.textContent = `IA detectó la forma de: "${tagDetectado.split(',')[0]}".`;
+            renderTabla([coincidencia[0]]); // Muestra SOLO el producto encontrado
+          } else {
+            statusText.textContent = "NO SE ENCONTRÓ PRODUCTO";
+            statusText.className = "text-xs font-bold text-rose-600 uppercase";
+            matchDetail.textContent = `La IA no logró asociar la foto a ningún producto. Nombra el archivo con su código (Ejemplo: JOY-045.jpg).`;
+            renderTabla([]); // Limpia la pantalla
+          }
+        };
       } else {
-        statusText.textContent = "PRODUCTO NO ENCONTRADO";
-        statusText.className = "text-xs font-bold text-rose-600 uppercase";
-        matchDetail.textContent = `No se encontró ningún SKU que coincida con "${nombreArchivo}". Nombra la foto con el código (ejemplo: JOY-045.jpg).`;
-        renderTabla([]); // Limpia la tabla
+        // Encontrado por SKU exacto
+        statusText.textContent = "¡PRODUCTO ENCONTRADO POR SKU!";
+        statusText.className = "text-xs font-bold text-emerald-600 uppercase";
+        matchDetail.textContent = `Mostrando ficha técnica del producto.`;
+        renderTabla([coincidencia[0]]);
       }
     }
 
@@ -235,7 +266,7 @@
       renderTabla(filtrados);
     }
 
-    // Inicializar al cargar la página
+    // Cargar datos al abrir la página
     cargarDatos();
   </script>
 </body>
