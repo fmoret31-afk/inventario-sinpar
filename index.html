@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIN PAR - Dashboard & Búsqueda Visual</title>
+  <title>SIN PAR - Dashboard & Búsqueda por Foto</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- TensorFlow.js & MobileNet para Reconocimiento de Imágenes -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
 
   <style>
     .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
@@ -43,12 +40,12 @@
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-6 w-full">
 
-    <!-- PANEL BÚSQUEDA Y CÁMARA -->
+    <!-- PANEL DE BÚSQUEDA Y FOTO -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-lg font-bold text-slate-800">Búsqueda de Productos</h2>
-          <p class="text-xs text-slate-500">Toma una foto al producto o busca por texto para obtener el precio y stock en soles.</p>
+          <p class="text-xs text-slate-500">Sube la foto del producto para mostrar únicamente su ficha con precio y stock.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
@@ -56,9 +53,9 @@
           <input 
             type="text" 
             id="searchInput" 
-            placeholder="Buscar por SKU, joya..." 
+            placeholder="Buscar por SKU (Ej: JOY-045)..." 
             class="pl-3 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onkeyup="filtrarTabla()"
+            onkeyup="filtrarTablaTexto()"
           >
 
           <!-- Botón Tomar/Subir Foto -->
@@ -70,14 +67,14 @@
         </div>
       </div>
 
-      <!-- PREVISUALIZACIÓN DE FOTO ANALIZADA -->
+      <!-- PREVISUALIZACIÓN Y RESULTADO DE LA FOTO -->
       <div id="image-preview-container" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center space-x-4">
         <img id="uploaded-img-preview" src="" class="w-20 h-20 object-cover rounded-lg border border-slate-300">
         <div>
-          <p id="match-status" class="text-xs font-bold text-indigo-700 uppercase">Analizando rasgos visuales...</p>
+          <p id="match-status" class="text-xs font-bold uppercase"></p>
           <p id="match-detail" class="text-sm text-slate-600 mt-1"></p>
           <button onclick="limpiarFiltroImagen()" class="text-xs text-rose-600 hover:underline mt-2 flex items-center">
-            <i class="fa-solid fa-xmark mr-1"></i> Quitar filtro de imagen
+            <i class="fa-solid fa-xmark mr-1"></i> Mostrar todo el inventario de nuevo
           </button>
         </div>
       </div>
@@ -110,22 +107,12 @@
   </main>
 
   <script>
-    // REEMPLAZA ESTA URL CON TU ENLACE EJECUTABLE DE APPS SCRIPT
+    // PEGA AQUÍ TU URL EJECUTABLE DE GOOGLE APPS SCRIPT
     const API_URL = "https://script.google.com/macros/s/AKfycbyTzwkLsW3uOcm3D55jKIcJZ4TejrltUXFWQLJQZhb5KtR78bXkh7yifoYtRBhRtbyb/exec"; 
+    
     let inventarioGlobal = [];
-    let netModel = null;
 
-    // Inicializar Inteligencia Artificial en segundo plano
-    async function initAIModel() {
-      try {
-        netModel = await mobilenet.load();
-        console.log("IA TensorFlow/MobileNet lista para escanear");
-      } catch (err) {
-        console.error("Error al cargar motor de IA:", err);
-      }
-    }
-    initAIModel();
-
+    // Cargar datos desde Google Sheets
     async function cargarDatos() {
       const btnIcon = document.getElementById('btn-refresh-icon');
       if (btnIcon) btnIcon.classList.add('fa-spin');
@@ -136,19 +123,20 @@
         inventarioGlobal = data.items || [];
         renderTabla(inventarioGlobal);
       } catch (err) {
-        console.error("Error al cargar inventario:", err);
+        console.error("Error al cargar el inventario:", err);
       } finally {
         if (btnIcon) btnIcon.classList.remove('fa-spin');
       }
     }
 
+    // Renderizar la tabla en HTML
     function renderTabla(items) {
       const tbody = document.getElementById('inventoryTable');
       if (!items || items.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="6" class="p-8 text-center text-slate-400">
-              No se encontraron coincidencias.
+              No se encontró ningún producto que coincida.
             </td>
           </tr>`;
         return;
@@ -162,8 +150,7 @@
         const stock = item["Stock Inicial"] || 0;
         const imgUrl = item["Imagen"] || item["Imagen "] || "https://via.placeholder.com/60?text=Sin+Foto";
 
-        // Si el precio es texto como "Pendiente Precio", mostrarlo limpio
-        const precioFormateado = typeof precio === 'number' 
+        const precioFormateado = (typeof precio === 'number') 
           ? `S/ ${precio.toFixed(2)}` 
           : String(precio);
 
@@ -182,6 +169,7 @@
       }).join('');
     }
 
+    // FUNCIÓN PRINCIPAL DE BÚSQUEDA POR FOTO DIRECTA
     async function analizarYBuscarImagen(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -193,63 +181,61 @@
 
       previewImg.src = URL.createObjectURL(file);
       container.classList.remove('hidden');
-      statusText.textContent = "Procesando rasgos visuales de la foto...";
+      statusText.textContent = "Buscando producto en el inventario...";
+      statusText.className = "text-xs font-bold text-indigo-600 uppercase";
       matchDetail.textContent = "";
 
-      if (!netModel) {
-        netModel = await mobilenet.load();
+      const nombreArchivo = file.name.toLowerCase().replace(/\.[^/.]+$/, "").trim(); // Quita .jpg/.png
+
+      // Buscar por coincidencia entre el archivo subido y el SKU/Imagen/Nombre de Sheets
+      let coincidencia = inventarioGlobal.filter(item => {
+        const sku = String(item["SKU / ID"] || '').toLowerCase().trim();
+        const nombre = String(item["Nombre del Producto"] || '').toLowerCase().trim();
+        const imgUrl = String(item["Imagen"] || item["Imagen "] || '').toLowerCase().trim();
+
+        return (
+          (sku && (nombreArchivo.includes(sku) || sku.includes(nombreArchivo))) ||
+          (imgUrl && imgUrl.includes(nombreArchivo)) ||
+          (nombre && nombreArchivo.includes(nombre))
+        );
+      });
+
+      if (coincidencia.length > 0) {
+        statusText.textContent = "¡PRODUCTO ENCONTRADO!";
+        statusText.className = "text-xs font-bold text-emerald-600 uppercase";
+        matchDetail.textContent = `Mostrando la ficha técnica del producto seleccionado.`;
+        
+        // Muestra ÚNICAMENTE el producto exacto en pantalla
+        renderTabla([coincidencia[0]]);
+      } else {
+        statusText.textContent = "PRODUCTO NO ENCONTRADO";
+        statusText.className = "text-xs font-bold text-rose-600 uppercase";
+        matchDetail.textContent = `No se encontró ningún SKU que coincida con "${nombreArchivo}". Nombra la foto con el código (ejemplo: JOY-045.jpg).`;
+        renderTabla([]); // Limpia la tabla
       }
-
-      const imgElement = document.createElement('img');
-      imgElement.src = previewImg.src;
-      imgElement.onload = async () => {
-        const predictions = await netModel.classify(imgElement);
-        const tagDetectado = predictions[0] ? predictions[0].className.toLowerCase() : "";
-        const fileName = file.name.toLowerCase();
-
-        // 1. Coincidencia por nombre de archivo o SKU
-        let coincidencia = inventarioGlobal.filter(item => {
-          const sku = String(item["SKU / ID"] || '').toLowerCase();
-          const imgUrl = String(item["Imagen"] || item["Imagen "] || '').toLowerCase();
-          return (sku && fileName.includes(sku)) || (imgUrl && imgUrl.includes(fileName.split('.')[0]));
-        });
-
-        // 2. Si no hay coincidencia exacta de archivo, buscar por tag de la IA
-        if (coincidencia.length === 0) {
-          const palabrasClave = tagDetectado.split(',').map(s => s.trim());
-          coincidencia = inventarioGlobal.filter(item => {
-            const nombre = String(item["Nombre del Producto"] || '').toLowerCase();
-            const cat = String(item["Categoría"] || '').toLowerCase();
-            return palabrasClave.some(p => nombre.includes(p) || cat.includes(p));
-          });
-        }
-
-        if (coincidencia.length > 0) {
-          statusText.textContent = "¡Producto Identificado!";
-          matchDetail.textContent = `Se encontraron ${coincidencia.length} coincidencia(s) en la base de datos.`;
-          renderTabla(coincidencia);
-        } else {
-          statusText.textContent = "Análisis completado";
-          matchDetail.textContent = `Objeto detectado: "${tagDetectado.split(',')[0]}". Mostrando inventario general.`;
-          renderTabla(inventarioGlobal);
-        }
-      };
     }
 
+    // Limpiar filtro de la foto
     function limpiarFiltroImagen() {
       document.getElementById('image-preview-container').classList.add('hidden');
       document.getElementById('imageUploader').value = "";
       renderTabla(inventarioGlobal);
     }
 
-    function filtrarTabla() {
+    // Filtro manual por texto
+    function filtrarTablaTexto() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (!q) {
+        renderTabla(inventarioGlobal);
+        return;
+      }
       const filtrados = inventarioGlobal.filter(item => 
         Object.values(item).some(val => String(val).toLowerCase().includes(q))
       );
       renderTabla(filtrados);
     }
 
+    // Inicializar al cargar la página
     cargarDatos();
   </script>
 </body>
