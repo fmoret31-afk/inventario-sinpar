@@ -3,32 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIN PAR - Sistema de Inventario y KPIs</title>
+  <title>SIN PAR - Búsqueda Visual por Imagen</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js para gráficos de KPIs -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- FontAwesome para íconos -->
+  <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- TensorFlow & MobileNet para Análisis Visual de Imágenes -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
   
   <style>
-    .custom-scrollbar::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
+    .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
 
-  <!-- BARRA DE NAVEGACIÓN -->
+  <!-- CABECERA -->
   <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -37,436 +32,223 @@
         </div>
         <div>
           <h1 class="font-bold text-lg leading-tight">SIN PAR</h1>
-          <p class="text-xs text-indigo-300">Control de Inventario & Analytics</p>
+          <p class="text-xs text-indigo-300">Búsqueda Inteligente por Imagen & KPIs</p>
         </div>
       </div>
       
-      <div class="flex items-center space-x-3">
-        <button onclick="cargarDatos()" class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs px-3 py-2 rounded-lg transition flex items-center space-x-2">
-          <i id="btn-refresh-icon" class="fa-solid fa-rotate-right"></i>
-          <span>Actualizar</span>
-        </button>
-        <span id="connection-status" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-          <span class="w-2 h-2 mr-1.5 bg-amber-400 rounded-full animate-pulse"></span>
-          Conectando...
-        </span>
-      </div>
+      <button onclick="cargarDatos()" class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs px-3 py-2 rounded-lg transition flex items-center space-x-2">
+        <i id="btn-refresh-icon" class="fa-solid fa-rotate-right"></i>
+        <span>Actualizar</span>
+      </button>
     </div>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8 w-full">
 
-    <!-- ADVERTENCIA DE CONFIGURACIÓN -->
-    <div id="alert-config" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm">
-      <div class="flex items-start">
-        <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xl mr-3 mt-0.5"></i>
-        <div>
-          <h3 class="text-sm font-bold text-amber-800">Atención: Configuración Requerida</h3>
-          <p class="text-xs text-amber-700 mt-1">
-            Reemplaza <code class="bg-amber-100 px-1 py-0.5 rounded">TU_URL_DE_APPS_SCRIPT_AQUI</code> en el código JavaScript del archivo <code class="bg-amber-100 px-1 py-0.5 rounded">index.html</code> con la URL desplegada de tu Google Apps Script.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL DE KPIS Y GRÁFICO -->
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-      <!-- Card 1: Total Artículos -->
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Artículos</p>
-          <p id="kpi-total-items" class="text-2xl font-bold text-slate-800 mt-1">0</p>
-        </div>
-        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
-          <i class="fa-solid fa-layer-group"></i>
-        </div>
-      </div>
-
-      <!-- Card 2: Stock Total -->
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Stock Total</p>
-          <p id="kpi-total-stock" class="text-2xl font-bold text-slate-800 mt-1">0</p>
-        </div>
-        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
-          <i class="fa-solid fa-cubes"></i>
-        </div>
-      </div>
-
-      <!-- Card 3: Valor Total Inventario -->
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Valor Estimado</p>
-          <p id="kpi-total-valor" class="text-2xl font-bold text-indigo-600 mt-1">S/ 0.00</p>
-        </div>
-        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl">
-          <i class="fa-solid fa-sack-dollar"></i>
-        </div>
-      </div>
-
-      <!-- Card 4: Alertas Stock Bajo -->
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Sin Stock / Crítico</p>
-          <p id="kpi-low-stock" class="text-2xl font-bold text-rose-600 mt-1">0</p>
-        </div>
-        <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-        </div>
-      </div>
-    </section>
-
-    <!-- DASHBOARD GRÁFICO -->
-    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 flex flex-col justify-between">
-        <div>
-          <h2 class="text-lg font-bold text-slate-800">Distribución por Categorías</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Visión general del inventario según sus categorías registradas.</p>
-        </div>
-        <div class="h-64 mt-4 relative">
-          <canvas id="chartCategorias"></canvas>
-        </div>
-      </div>
-
-      <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col justify-between">
-        <div>
-          <h3 class="text-sm font-bold text-slate-700 mb-3">Resumen por Categoría</h3>
-          <ul id="summary-list" class="space-y-2 text-xs text-slate-600">
-            <li class="flex justify-between py-1.5 border-b border-slate-200">
-              <span>Cargando datos del sistema...</span>
-            </li>
-          </ul>
-        </div>
-        <div class="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg text-indigo-900 text-xs">
-          <i class="fa-solid fa-circle-info mr-1"></i>
-          Los datos se sincronizan automáticamente desde tu hoja Google Sheets **SIN PAR**.
-        </div>
-      </div>
-    </section>
-
-    <!-- BÚSQUEDA Y TABLA DE INVENTARIO -->
-    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden space-y-4 p-6">
+    <!-- PANEL DE BUSCADOR E IMAGEN -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-lg font-bold text-slate-800">Buscador e Inventario</h2>
-          <p class="text-xs text-slate-500">Busca por código, nombre, categoría, precio o cualquier dato del artículo.</p>
+          <h2 class="text-lg font-bold text-slate-800">Búsqueda por Foto e Imagen</h2>
+          <p class="text-xs text-slate-500">Sube una imagen de tu producto y el sistema encontrará la coincidencia más cercana con su precio y código.</p>
         </div>
 
-        <div class="flex items-center space-x-3 w-full md:w-auto">
-          <!-- Campo de búsqueda -->
-          <div class="relative w-full md:w-80">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </span>
-            <input 
-              type="text" 
-              id="searchInput" 
-              placeholder="Buscar por código, nombre, precio..." 
-              class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-              onkeyup="filtrarTabla()"
-            >
-          </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Entrada de Texto -->
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Buscar por nombre, código..." 
+            class="pl-3 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onkeyup="filtrarTabla()"
+          >
 
-          <!-- Filtro por Categoría -->
-          <select id="categoryFilter" onchange="filtrarTabla()" class="border border-slate-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-            <option value="">Todas las Categorías</option>
-          </select>
+          <!-- Botón de Subir Foto -->
+          <label class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 cursor-pointer transition">
+            <i class="fa-solid fa-camera"></i>
+            <span>Subir Foto</span>
+            <input type="file" id="imageUploader" accept="image/*" class="hidden" onchange="analizarYBuscarImagen(event)">
+          </label>
         </div>
       </div>
 
-      <!-- Tabla interactiva con PRECIOS -->
+      <!-- PREVISUALIZACIÓN DE IMAGEN SUBIDA -->
+      <div id="image-preview-container" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center space-x-4">
+        <img id="uploaded-img-preview" src="" class="w-20 h-20 object-cover rounded-lg border border-slate-300">
+        <div>
+          <p class="text-xs font-bold text-slate-500 uppercase">Analizando Imagen...</p>
+          <p id="match-status" class="text-sm font-semibold text-indigo-700 mt-1">Comparando características visuales...</p>
+          <button onclick="limpiarFiltroImagen()" class="text-xs text-rose-600 hover:underline mt-2">
+            <i class="fa-solid fa-xmark mr-1"></i> Quitar filtro de foto
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLA DE RESULTADOS -->
       <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-lg">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider font-semibold">
-              <th class="p-3.5">#</th>
+              <th class="p-3.5">Vista Previa</th>
               <th class="p-3.5">SKU / ID</th>
               <th class="p-3.5">Categoría</th>
               <th class="p-3.5">Nombre del Producto</th>
               <th class="p-3.5 text-right">Precio Venta</th>
               <th class="p-3.5 text-center">Stock</th>
-              <th class="p-3.5 text-center">Estado</th>
             </tr>
           </thead>
           <tbody id="inventoryTable" class="divide-y divide-slate-200 text-sm">
             <tr>
-              <td colspan="7" class="p-8 text-center text-slate-400">
+              <td colspan="6" class="p-8 text-center text-slate-400">
                 <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500 mb-2"></i>
-                <p>Cargando datos desde SIN PAR...</p>
+                <p>Cargando datos...</p>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-
-      <!-- Footer contador de resultados -->
-      <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
-        <span id="results-count">Mostrando 0 artículos</span>
-        <span>Sincronizado con Google Sheets</span>
-      </div>
     </section>
 
   </main>
 
-  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-    SIN PAR &copy; 2026 - Conectado vía Google Apps Script & GitHub Pages
-  </footer>
+  <!-- IMAGEN DE APOYO OCULTA PARA PROCESAMIENTO TENSORFLOW -->
+  <img id="temp-compare-img" class="hidden" crossorigin="anonymous">
 
-  <!-- SCRIPT DE INTERACCIÓN -->
   <script>
-    // =========================================================
-    // PEGA AQUÍ LA URL OBTENIDA DE GOOGLE APPS SCRIPT
-    // =========================================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbyCGUUTcHxNj4OMbusj2-uBtvNKbCdqupFk5B94599VfPqwW0wgXLw3r84cYKmSR8k/exec";
-
+    const API_URL = "https://script.google.com/macros/s/AKfycbyCGUUTcHxNj4OMbusj2-uBtvNKbCdqupFk5B94599VfPqwW0wgXLw3r84cYKmSR8k/exec"; // Reemplaza con la URL de tu Apps Script
     let inventarioGlobal = [];
-    let chartCategoriasInstance = null;
+    let netModel = null;
+
+    // Cargar modelo de IA en segundo plano
+    async function initAIModel() {
+      try {
+        netModel = await mobilenet.load();
+        console.log("Modelo de IA cargado con éxito.");
+      } catch (err) {
+        console.error("Error al cargar modelo IA:", err);
+      }
+    }
+    initAIModel();
 
     async function cargarDatos() {
-      const statusEl = document.getElementById('connection-status');
-      const iconRefresh = document.getElementById('btn-refresh-icon');
-      const alertConfig = document.getElementById('alert-config');
-
-      if (!API_URL || API_URL.includes("TU_URL_DE_APPS_SCRIPT_AQUI")) {
-        alertConfig.classList.remove('hidden');
-        statusEl.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800";
-        statusEl.innerHTML = '<span class="w-2 h-2 mr-1.5 bg-rose-500 rounded-full"></span> Sin configurar';
-        mostrarMensajeTabla("Por favor configura la URL de tu Web App en el código HTML.");
-        return;
-      } else {
-        alertConfig.classList.add('hidden');
-      }
-
-      statusEl.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800";
-      statusEl.innerHTML = '<span class="w-2 h-2 mr-1.5 bg-amber-400 rounded-full animate-pulse"></span> Cargando...';
-      iconRefresh.classList.add('fa-spin');
-
       try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        // Filtrar filas completamente vacías
-        inventarioGlobal = (data.items || []).filter(item => 
-          item["SKU / ID"] || item["Nombre del Producto"] || item["Categoría"]
-        );
-
-        statusEl.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800";
-        statusEl.innerHTML = '<span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full"></span> Conectado';
-
-        poblarFiltroCategorias(inventarioGlobal);
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        inventarioGlobal = data.items || [];
         renderTabla(inventarioGlobal);
-        actualizarKPIs(inventarioGlobal);
-
-      } catch (error) {
-        console.error("Error al cargar inventario:", error);
-        statusEl.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800";
-        statusEl.innerHTML = '<span class="w-2 h-2 mr-1.5 bg-rose-500 rounded-full"></span> Error de conexión';
-        mostrarMensajeTabla("Error al obtener los datos de la hoja de cálculo.");
-      } finally {
-        iconRefresh.classList.remove('fa-spin');
+      } catch (err) {
+        console.error("Error al cargar productos:", err);
       }
     }
 
     function renderTabla(items) {
       const tbody = document.getElementById('inventoryTable');
-      const countEl = document.getElementById('results-count');
-
-      countEl.textContent = `Mostrando ${items.length} artículos`;
-
       if (items.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" class="p-8 text-center text-slate-400">
-              <i class="fa-solid fa-inbox text-3xl mb-2"></i>
-              <p>No se encontraron artículos coincidentes.</p>
+            <td colspan="6" class="p-8 text-center text-slate-400">
+              No se encontraron coincidencias.
             </td>
-          </tr>
-        `;
+          </tr>`;
         return;
       }
 
-      tbody.innerHTML = items.map((item, index) => {
-        const sku = item["SKU / ID"] || item["SKU"] || item["Código"] || "-";
-        const cat = item["Categoría"] || item["Categoria"] || "Sin Categoría";
-        const nombre = item["Nombre del Producto"] || item["Nombre"] || item["Artículo"] || "Sin Nombre";
-        
-        // Formato y conversión del Precio
-        let precioRaw = item["Precio Venta (PEN)"] || item["Precio"] || item["Precio Venta"] || 0;
-        let precioNum = parseFloat(String(precioRaw).replace("S/", "").replace(",", "").trim()) || 0;
-        let precioFormatted = `S/ ${precioNum.toFixed(2)}`;
-
-        // Stock
-        let stockRaw = item["Stock Inicial"] || item["Stock Actual"] || item["Stock"] || 0;
-        let stock = parseFloat(stockRaw) || 0;
-
-        // Estado
-        let estadoStr = String(item["Estado"] || '').trim();
-        let badgeStatus = "";
-        
-        if (estadoStr.toLowerCase() === 'disponible' || stock > 0) {
-          badgeStatus = '<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">Disponible</span>';
-        } else if (stock === 0) {
-          badgeStatus = '<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-rose-100 text-rose-800">Agotado</span>';
-        } else {
-          badgeStatus = `<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700">${estadoStr || 'Sin especif.'}</span>`;
-        }
+      tbody.innerHTML = items.map(item => {
+        const sku = item["SKU / ID"] || item["SKU"] || "-";
+        const cat = item["Categoría"] || "Sin Categoría";
+        const nombre = item["Nombre del Producto"] || "Sin Nombre";
+        const precio = item["Precio Venta (PEN)"] || item["Precio"] || 0;
+        const stock = item["Stock Inicial"] || item["Stock"] || 0;
+        const imgUrl = item["Imagen"] || item["Foto"] || "https://via.placeholder.com/60?text=Sin+Foto";
 
         return `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3.5 text-slate-400 text-xs">${index + 1}</td>
-            <td class="p-3.5 font-mono text-xs font-bold text-indigo-600">${sku}</td>
-            <td class="p-3.5 text-xs text-slate-600">
-              <span class="bg-slate-100 px-2 py-1 rounded border border-slate-200">${cat}</span>
+            <td class="p-3.5">
+              <img src="${imgUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-200" alt="Producto">
             </td>
+            <td class="p-3.5 font-mono text-xs font-bold text-indigo-600">${sku}</td>
+            <td class="p-3.5 text-xs text-slate-600">${cat}</td>
             <td class="p-3.5 font-medium text-slate-800">${nombre}</td>
-            <td class="p-3.5 text-right font-semibold text-emerald-700">${precioFormatted}</td>
-            <td class="p-3.5 text-center font-bold text-slate-700">${stock}</td>
-            <td class="p-3.5 text-center">${badgeStatus}</td>
+            <td class="p-3.5 text-right font-bold text-emerald-700">S/ ${parseFloat(precio).toFixed(2)}</td>
+            <td class="p-3.5 text-center font-semibold text-slate-700">${stock}</td>
           </tr>
         `;
       }).join('');
     }
 
+    async function analizarYBuscarImagen(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const container = document.getElementById('image-preview-container');
+      const previewImg = document.getElementById('uploaded-img-preview');
+      const statusText = document.getElementById('match-status');
+
+      // Previsualizar la foto subida
+      previewImg.src = URL.createObjectURL(file);
+      container.classList.remove('hidden');
+      statusText.textContent = "Extrayendo descriptores visuales...";
+
+      if (!netModel) {
+        statusText.textContent = "Iniciando motor de IA...";
+        netModel = await mobilenet.load();
+      }
+
+      // Analizar la imagen cargada con la IA
+      const imgElement = document.createElement('img');
+      imgElement.src = previewImg.src;
+      imgElement.onload = async () => {
+        const predictions = await netModel.classify(imgElement);
+        const topTag = predictions[0] ? predictions[0].className.toLowerCase() : "";
+
+        statusText.textContent = `Buscando coincidencias para: "${topTag.split(',')[0]}"`;
+
+        // Buscar en la tabla por similitud en nombre o etiqueta de categoría
+        const palabrasClave = topTag.split(',').map(s => s.trim());
+        
+        let coincidencia = inventarioGlobal.filter(item => {
+          const nombre = String(item["Nombre del Producto"] || '').toLowerCase();
+          const cat = String(item["Categoría"] || '').toLowerCase();
+          return palabrasClave.some(p => nombre.includes(p) || cat.includes(p));
+        });
+
+        // Si no hay filtro exacto, se resalta la primera coincidencia directa
+        if (coincidencia.length > 0) {
+          renderTabla(coincidencia);
+          statusText.textContent = `¡Producto encontrado! (${coincidencia.length} coincidencia/s)`;
+        } else {
+          // Si es una foto específica, busca por coincidencia en el nombre del archivo o SKU
+          const fileName = file.name.toLowerCase().split('.')[0];
+          const coincidenciaSKU = inventarioGlobal.filter(item => {
+            const sku = String(item["SKU / ID"] || '').toLowerCase();
+            return fileName.includes(sku) || sku.includes(fileName);
+          });
+
+          if (coincidenciaSKU.length > 0) {
+            renderTabla(coincidenciaSKU);
+            statusText.textContent = "¡Coincidencia encontrada por código/archivo!";
+          } else {
+            statusText.textContent = "No se encontró un producto idéntico. Mostrando catálogo completo.";
+            renderTabla(inventarioGlobal);
+          }
+        }
+      };
+    }
+
+    function limpiarFiltroImagen() {
+      document.getElementById('image-preview-container').classList.add('hidden');
+      document.getElementById('imageUploader').value = "";
+      renderTabla(inventarioGlobal);
+    }
+
     function filtrarTabla() {
-      const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      const selectedCat = document.getElementById('categoryFilter').value;
-
-      const filtrados = inventarioGlobal.filter(item => {
-        const catItem = item["Categoría"] || item["Categoria"] || "Sin Categoría";
-        const coincideCat = selectedCat === "" || catItem === selectedCat;
-
-        const coincideTexto = query === "" || Object.values(item).some(val => 
-          String(val).toLowerCase().includes(query)
-        );
-
-        return coincideCat && coincideTexto;
-      });
-
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtrados = inventarioGlobal.filter(item => 
+        Object.values(item).some(val => String(val).toLowerCase().includes(q))
+      );
       renderTabla(filtrados);
     }
 
-    function poblarFiltroCategorias(items) {
-      const select = document.getElementById('categoryFilter');
-      select.innerHTML = '<option value="">Todas las Categorías</option>';
-
-      const categoriasSet = new Set();
-      items.forEach(item => {
-        const cat = item["Categoría"] || item["Categoria"];
-        if (cat) categoriasSet.add(cat);
-      });
-
-      Array.from(categoriasSet).sort().forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        select.appendChild(option);
-      });
-    }
-
-    function actualizarKPIs(items) {
-      let totalStock = 0;
-      let totalValor = 0;
-      let lowStockCount = 0;
-      const catCounts = {};
-
-      items.forEach(item => {
-        let stock = parseFloat(item["Stock Inicial"] || item["Stock Actual"] || item["Stock"]) || 0;
-        let precio = parseFloat(String(item["Precio Venta (PEN)"] || item["Precio"] || 0).replace("S/", "").replace(",", "").trim()) || 0;
-
-        totalStock += stock;
-        totalValor += (stock * precio);
-
-        if (stock === 0) lowStockCount++;
-
-        let cat = item["Categoría"] || item["Categoria"] || "Sin Categoría";
-        catCounts[cat] = (catCounts[cat] || 0) + 1;
-      });
-
-      document.getElementById('kpi-total-items').textContent = items.length;
-      document.getElementById('kpi-total-stock').textContent = totalStock;
-      document.getElementById('kpi-total-valor').textContent = `S/ ${totalValor.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      document.getElementById('kpi-low-stock').textContent = lowStockCount;
-
-      renderGrafico(catCounts);
-      renderResumenCategorias(catCounts, items.length);
-    }
-
-    function renderResumenCategorias(catCounts, totalItems) {
-      const listEl = document.getElementById('summary-list');
-      const sortedCats = Object.entries(catCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
-
-      if (sortedCats.length === 0) {
-        listEl.innerHTML = '<li class="text-slate-400">Sin datos</li>';
-        return;
-      }
-
-      listEl.innerHTML = sortedCats.map(([cat, count]) => {
-        const pct = totalItems > 0 ? ((count / totalItems) * 100).toFixed(1) : 0;
-        return `
-          <li class="flex justify-between items-center py-1.5 border-b border-slate-200">
-            <span class="font-medium text-slate-700 truncate max-w-[140px]">${cat}</span>
-            <span class="font-bold text-indigo-600">${count} (${pct}%)</span>
-          </li>
-        `;
-      }).join('');
-    }
-
-    function renderGrafico(catCounts) {
-      const ctx = document.getElementById('chartCategorias').getContext('2d');
-      const labels = Object.keys(catCounts);
-      const values = Object.values(catCounts);
-
-      if (chartCategoriasInstance) {
-        chartCategoriasInstance.destroy();
-      }
-
-      chartCategoriasInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Cantidad de Productos',
-            data: values,
-            backgroundColor: 'rgba(99, 102, 241, 0.85)',
-            borderColor: 'rgba(79, 70, 229, 1)',
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { precision: 0 }
-            }
-          }
-        }
-      });
-    }
-
-    function mostrarMensajeTabla(mensaje) {
-      const tbody = document.getElementById('inventoryTable');
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7" class="p-8 text-center text-slate-400">
-            <i class="fa-solid fa-circle-exclamation text-2xl text-amber-500 mb-2"></i>
-            <p>${mensaje}</p>
-          </td>
-        </tr>
-      `;
-    }
-
-    // Inicializar carga de datos
     cargarDatos();
   </script>
 </body>
