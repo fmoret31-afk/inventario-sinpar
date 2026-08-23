@@ -3,43 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIN PAR - Dashboard Pro & Escáner QR</title>
+  <title>SIN PAR - Dashboard Analytics & Control QR</title>
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Librería de Escáner QR -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
     .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     @keyframes pulse-ring {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
     }
     .pulse-btn { animation: pulse-ring 2s infinite; }
   </style>
 </head>
-<body class="bg-slate-900 font-sans text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 font-sans text-slate-100 min-h-screen flex flex-col">
 
-  <!-- CABECERA SUPERIOR -->
-  <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/50 sticky top-0 z-50">
+  <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/30">
+        <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
           <i class="fa-solid fa-gem text-white text-xl"></i>
         </div>
         <div>
           <h1 class="font-extrabold text-xl tracking-wide bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">SIN PAR</h1>
-          <p class="text-[10px] uppercase tracking-widest text-indigo-400 font-semibold">Joyería & Control QR</p>
+          <p class="text-[10px] uppercase tracking-widest text-indigo-400 font-semibold">Analytics & Control de Joyería</p>
         </div>
       </div>
       
-      <button onclick="cargarDatos()" class="bg-slate-700/60 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-600/50 transition duration-200 flex items-center space-x-2">
+      <button onclick="cargarDatos()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
         <i id="btn-refresh-icon" class="fa-solid fa-rotate-right"></i>
         <span class="hidden sm:inline">Sincronizar</span>
       </button>
@@ -48,80 +45,102 @@
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow space-y-6 w-full">
 
-    <!-- METRICAS KPI CLAVE -->
     <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-slate-800/60 border border-slate-700/50 p-4 rounded-2xl">
-        <p class="text-xs font-semibold text-slate-400 uppercase">Total Productos</p>
+      <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl shadow-sm">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Variedad de Joyas</p>
         <h3 id="kpi-total-items" class="text-2xl font-black text-white mt-1">0</h3>
       </div>
-      <div class="bg-slate-800/60 border border-slate-700/50 p-4 rounded-2xl">
+      <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl shadow-sm">
         <p class="text-xs font-semibold text-slate-400 uppercase">Stock Total</p>
         <h3 id="kpi-total-stock" class="text-2xl font-black text-emerald-400 mt-1">0 u.</h3>
       </div>
-      <div class="bg-slate-800/60 border border-slate-700/50 p-4 rounded-2xl">
+      <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl shadow-sm">
         <p class="text-xs font-semibold text-slate-400 uppercase">Valor Inventario</p>
         <h3 id="kpi-total-valor" class="text-2xl font-black text-indigo-400 mt-1">S/ 0.00</h3>
       </div>
-      <div class="bg-slate-800/60 border border-slate-700/50 p-4 rounded-2xl">
-        <p class="text-xs font-semibold text-slate-400 uppercase">Stock Crítico (&lt;3)</p>
+      <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl shadow-sm">
+        <p class="text-xs font-semibold text-slate-400 uppercase">Stock Crítico (&lt;2)</p>
         <h3 id="kpi-low-stock" class="text-2xl font-black text-rose-400 mt-1">0</h3>
       </div>
     </section>
 
-    <!-- PANEL DE ACCIONES Y BÚSQUEDA -->
-    <section class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 space-y-4">
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl shadow-md">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-chart-pie text-indigo-400"></i>
+            <span>Distribución de Joyas por Categoría</span>
+          </h3>
+        </div>
+        <div class="relative h-64 w-full flex items-center justify-center">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl shadow-md">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-chart-column text-emerald-400"></i>
+            <span>Top Joyas por Valor Total de Inventario</span>
+          </h3>
+        </div>
+        <div class="relative h-64 w-full">
+          <canvas id="valueChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         
-        <!-- Búsqueda manual -->
         <div class="relative flex-grow max-w-md">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
           <input 
             type="text" 
             id="searchInput" 
-            placeholder="Buscar por SKU (Ej: JOY-045), nombre o categoría..." 
-            class="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Buscar por SKU (Ej: JOY-001), nombre o categoría..." 
+            class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onkeyup="filtrarTablaTexto()"
           >
         </div>
 
-        <!-- Botones de Acción -->
         <div class="flex items-center space-x-2">
-          <button onclick="filtrarBajoStock()" class="bg-slate-700/60 hover:bg-slate-700 text-amber-300 text-xs px-3.5 py-2.5 rounded-xl border border-amber-500/30 transition flex items-center space-x-2">
+          <button onclick="filtrarBajoStock()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs px-3.5 py-2.5 rounded-xl border border-amber-500/20 transition flex items-center space-x-2">
             <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>Bajo Stock</span>
+            <span>Stock Crítico</span>
           </button>
 
-          <button onclick="abrirCamaraQR()" class="pulse-btn bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+          <button onclick="abrirCamaraQR()" class="pulse-btn bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition flex items-center space-x-2">
             <i class="fa-solid fa-qrcode text-base"></i>
             <span>ESCANEAR QR</span>
           </button>
         </div>
       </div>
 
-      <!-- VISOR DE CÁMARA QR -->
-      <div id="qr-reader-container" class="hidden bg-slate-950 p-4 rounded-xl border border-indigo-500/50 flex flex-col items-center justify-center space-y-4">
+      <div id="qr-reader-container" class="hidden bg-slate-950 p-4 rounded-xl border border-indigo-500/40 flex flex-col items-center justify-center space-y-4">
         <div id="qr-reader" class="w-full max-w-sm overflow-hidden rounded-xl border-2 border-indigo-500"></div>
         <button onclick="cerrarCamaraQR()" class="bg-rose-600/80 hover:bg-rose-600 text-white text-xs px-4 py-2 rounded-lg flex items-center space-x-1">
           <i class="fa-solid fa-xmark"></i>
-          <span>Cancelar Escaneo</span>
+          <span>Cerrar Escáner</span>
         </button>
       </div>
 
-      <!-- FICHA DESTACADA DEL PRODUCTO ESCANEADO -->
-      <div id="scanned-card" class="hidden bg-gradient-to-r from-slate-900 to-indigo-950 border border-indigo-500/40 p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-6 shadow-2xl">
-        <img id="card-img" src="" class="w-32 h-32 object-cover rounded-xl border-2 border-indigo-400 shadow-md">
+      <div id="scanned-card" class="hidden bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 border border-indigo-500/40 p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-6 shadow-2xl">
+        <img id="card-img" src="" class="w-28 h-28 object-cover rounded-xl border-2 border-indigo-400 shadow-lg">
         <div class="space-y-2 text-center sm:text-left flex-grow">
-          <div class="inline-block bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" id="card-category">Categoría</div>
-          <h3 id="card-title" class="text-xl font-bold text-white">Nombre del Producto</h3>
+          <div class="inline-block bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full" id="card-category">Categoría</div>
+          <h3 id="card-title" class="text-lg font-bold text-white">Nombre de la Joya</h3>
           <p id="card-sku" class="font-mono text-xs text-indigo-400 font-semibold">SKU: -</p>
-          <div class="flex items-center justify-center sm:justify-start space-x-6 pt-2">
+          <div class="flex items-center justify-center sm:justify-start space-x-6 pt-1">
             <div>
               <p class="text-[10px] text-slate-400 uppercase font-semibold">Precio Venta</p>
-              <p id="card-price" class="text-2xl font-black text-emerald-400">S/ 0.00</p>
+              <p id="card-price" class="text-xl font-black text-emerald-400">S/ 0.00</p>
             </div>
             <div>
-              <p class="text-[10px] text-slate-400 uppercase font-semibold">Stock Disponible</p>
-              <p id="card-stock" class="text-2xl font-black text-white">0 u.</p>
+              <p class="text-[10px] text-slate-400 uppercase font-semibold">Stock Actual</p>
+              <p id="card-stock" class="text-xl font-black text-white">0 u.</p>
             </div>
           </div>
         </div>
@@ -132,13 +151,12 @@
 
     </section>
 
-    <!-- TABLA DE INVENTARIO COMPLETA -->
-    <section class="bg-slate-800/60 border border-slate-700/50 rounded-2xl overflow-hidden shadow-xl">
+    <section class="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
       <div class="overflow-x-auto custom-scrollbar">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-800/90 border-b border-slate-700 text-slate-400 text-[11px] uppercase tracking-wider font-semibold">
-              <th class="p-4">Imagen</th>
+            <tr class="bg-slate-900 border-b border-slate-800 text-slate-400 text-[11px] uppercase tracking-wider font-semibold">
+              <th class="p-4">Vista Previa</th>
               <th class="p-4">SKU / ID</th>
               <th class="p-4">Categoría</th>
               <th class="p-4">Nombre del Producto</th>
@@ -146,11 +164,11 @@
               <th class="p-4 text-center">Stock</th>
             </tr>
           </thead>
-          <tbody id="inventoryTable" class="divide-y divide-slate-700/50 text-sm">
+          <tbody id="inventoryTable" class="divide-y divide-slate-800 text-sm">
             <tr>
-              <td colspan="6" class="p-10 text-center text-slate-400">
+              <td colspan="6" class="p-10 text-center text-slate-500">
                 <i class="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-500 mb-3"></i>
-                <p>Cargando datos desde Google Sheets...</p>
+                <p>Cargando datos desde SINPAR.xlsx...</p>
               </td>
             </tr>
           </tbody>
@@ -161,13 +179,15 @@
   </main>
 
   <script>
-    // PEGA AQUÍ TU ENLACE DE GOOGLE APPS SCRIPT
+    // URL DE APPS SCRIPT
     const API_URL = "https://script.google.com/macros/s/AKfycbyTzwkLsW3uOcm3D55jKIcJZ4TejrltUXFWQLJQZhb5KtR78bXkh7yifoYtRBhRtbyb/exec"; 
     
     let inventarioGlobal = [];
     let html5QrCode = null;
+    let chartCategoryInstance = null;
+    let chartValueInstance = null;
 
-    // Cargar Datos
+    // Cargar Datos desde Google Sheets / Apps Script
     async function cargarDatos() {
       const btnIcon = document.getElementById('btn-refresh-icon');
       if (btnIcon) btnIcon.classList.add('fa-spin');
@@ -178,15 +198,16 @@
         inventarioGlobal = data.items || [];
         
         actualizarKPIs(inventarioGlobal);
+        generarGraficas(inventarioGlobal);
         renderTabla(inventarioGlobal);
       } catch (err) {
-        console.error("Error al sincronizar datos:", err);
+        console.error("Error al sincronizar inventario:", err);
       } finally {
         if (btnIcon) btnIcon.classList.remove('fa-spin');
       }
     }
 
-    // Calcular Métricas / KPIs
+    // Actualizar KPIs
     function actualizarKPIs(items) {
       let totalStock = 0;
       let totalValor = 0;
@@ -198,13 +219,84 @@
 
         totalStock += stock;
         totalValor += stock * precio;
-        if (stock < 3) lowStock++;
+        if (stock < 2) lowStock++;
       });
 
       document.getElementById('kpi-total-items').textContent = items.length;
       document.getElementById('kpi-total-stock').textContent = `${totalStock} u.`;
       document.getElementById('kpi-total-valor').textContent = `S/ ${totalValor.toFixed(2)}`;
       document.getElementById('kpi-low-stock').textContent = lowStock;
+    }
+
+    // Generar Gráficas Estadísticas con Chart.js
+    function generarGraficas(items) {
+      // 1. Procesar categorías
+      const categorias = {};
+      items.forEach(item => {
+        const cat = item["Categoría"] || "Sin Categoría";
+        categorias[cat] = (categorias[cat] || 0) + 1;
+      });
+
+      // Render Chart 1 (Circular)
+      const ctxCat = document.getElementById('categoryChart').getContext('2d');
+      if (chartCategoryInstance) chartCategoryInstance.destroy();
+
+      chartCategoryInstance = new Chart(ctxCat, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(categorias),
+          datasets: [{
+            data: Object.values(categorias),
+            backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } }
+          }
+        }
+      });
+
+      // 2. Procesar Top 5 productos por valor acumulado
+      const ordenadosPorValor = [...items].map(item => {
+        const stock = parseInt(item["Stock Inicial"]) || 0;
+        const precio = parseFloat(item["Precio Venta (PEN)"]) || 0;
+        return {
+          nombre: item["Nombre del Producto"] || item["SKU / ID"],
+          valor: stock * precio
+        };
+      }).sort((a, b) => b.valor - a.valor).slice(0, 5);
+
+      // Render Chart 2 (Barras)
+      const ctxVal = document.getElementById('valueChart').getContext('2d');
+      if (chartValueInstance) chartValueInstance.destroy();
+
+      chartValueInstance = new Chart(ctxVal, {
+        type: 'bar',
+        data: {
+          labels: ordenadosPorValor.map(i => i.nombre.length > 15 ? i.nombre.substring(0, 15) + '...' : i.nombre),
+          datasets: [{
+            label: 'Valor Total en Soles (S/)',
+            data: ordenadosPorValor.map(i => i.valor),
+            backgroundColor: '#10b981',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
     }
 
     // Renderizar Tabla
@@ -228,14 +320,14 @@
         const stock = parseInt(item["Stock Inicial"]) || 0;
         const imgUrl = item["Imagen"] || item["Imagen "] || "https://via.placeholder.com/80?text=Sin+Foto";
 
-        const stockBadge = stock < 3 
+        const stockBadge = stock < 2 
           ? `<span class="bg-rose-500/20 border border-rose-500/40 text-rose-300 px-2.5 py-1 rounded-lg text-xs font-bold">${stock}</span>`
           : `<span class="text-slate-200 font-bold">${stock}</span>`;
 
         return `
-          <tr class="hover:bg-slate-700/30 transition">
+          <tr class="hover:bg-slate-800/40 transition">
             <td class="p-3.5">
-              <img src="${imgUrl}" class="w-14 h-14 object-cover rounded-xl border border-slate-700 shadow-md" onerror="this.src='https://via.placeholder.com/80?text=Sin+Foto'">
+              <img src="${imgUrl}" class="w-12 h-12 object-cover rounded-xl border border-slate-700 shadow-md" onerror="this.src='https://via.placeholder.com/80?text=Sin+Foto'">
             </td>
             <td class="p-3.5 font-mono text-xs font-bold text-indigo-400">${sku}</td>
             <td class="p-3.5 text-xs text-slate-400">${cat}</td>
@@ -247,7 +339,7 @@
       }).join('');
     }
 
-    // Activar Escáner QR
+    // Cámara Lector QR
     function abrirCamaraQR() {
       const container = document.getElementById('qr-reader-container');
       container.classList.remove('hidden');
@@ -262,10 +354,9 @@
           cerrarCamaraQR();
         },
         () => {}
-      ).catch(() => alert("Por favor habilita los permisos de cámara en tu navegador."));
+      ).catch(() => alert("Por favor concede los permisos de cámara a tu navegador."));
     }
 
-    // Cerrar Escáner QR
     function cerrarCamaraQR() {
       if (html5QrCode && html5QrCode.isScanning) {
         html5QrCode.stop().then(() => document.getElementById('qr-reader-container').classList.add('hidden'));
@@ -274,7 +365,6 @@
       }
     }
 
-    // Procesar lectura de QR
     function procesarEscaneoQR(codigo) {
       const codLimpio = codigo.trim().toLowerCase();
       
@@ -284,7 +374,6 @@
       });
 
       if (producto) {
-        // Rellenar Tarjeta Destacada
         document.getElementById('card-img').src = producto["Imagen"] || producto["Imagen "] || 'https://via.placeholder.com/120?text=Sin+Foto';
         document.getElementById('card-category').textContent = producto["Categoría"] || 'Joyas';
         document.getElementById('card-title').textContent = producto["Nombre del Producto"] || 'Joya';
@@ -295,18 +384,17 @@
         document.getElementById('scanned-card').classList.remove('hidden');
         renderTabla([producto]);
       } else {
-        alert(`No se encontró ningún producto asociado al código: ${codigo}`);
+        alert(`No se encontró joya en inventario con el código QR: ${codigo}`);
       }
     }
 
-    // Limpiar Tarjeta Destacada
     function limpiarFiltroQR() {
       document.getElementById('scanned-card').classList.add('hidden');
       document.getElementById('searchInput').value = "";
       renderTabla(inventarioGlobal);
     }
 
-    // Filtros
+    // Filtros por texto
     function filtrarTablaTexto() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
       if (!q) { renderTabla(inventarioGlobal); return; }
@@ -317,7 +405,7 @@
     }
 
     function filtrarBajoStock() {
-      const bajos = inventarioGlobal.filter(item => (parseInt(item["Stock Inicial"]) || 0) < 3);
+      const bajos = inventarioGlobal.filter(item => (parseInt(item["Stock Inicial"]) || 0) < 2);
       renderTabla(bajos);
     }
 
