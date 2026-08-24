@@ -32,8 +32,9 @@
     }
   </script>
 
-  <!-- Font Awesome -->
+  <!-- Font Awesome (versión sólida por defecto para mejor visibilidad) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <!-- QR Scanner -->
@@ -74,6 +75,7 @@
     .badge-pendiente  { background: #F5EBD9; color: #8A5A17; border: 1px solid #E7D2A8; }
     .badge-critico    { background: #F6E3DE; color: #8C2E22; border: 1px solid #E8C3B6; }
     .badge-otro       { background: #ECEEF1; color: #475569; border: 1px solid #DADFE6; }
+    .badge-sin-imagen { background: #F1E5D9; color: #8A6B3F; border: 1px solid #DBC8B0; }
 
     .loader {
       border: 3px solid #E9E3D6;
@@ -96,11 +98,12 @@
       -webkit-backdrop-filter: blur(6px);
     }
 
+    /* Logo circular mejorado */
     .logo-container {
       width: 46px;
       height: 46px;
       background: #FAF8F4;
-      border-radius: 9999px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -108,10 +111,19 @@
       box-shadow: 0 0 0 3px rgba(176,141,87,0.15);
       overflow: hidden;
       transition: transform 0.2s;
+      flex-shrink: 0;
     }
     .logo-container:hover { transform: scale(1.05); }
-    .logo-container img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
-    .logo-fallback { font-size: 1.3rem; color: #B08D57; }
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .logo-container .logo-fallback {
+      font-size: 1.4rem;
+      color: #B08D57;
+    }
 
     .gold-rule { background: linear-gradient(90deg, transparent, #B08D57 15%, #DFC998 50%, #B08D57 85%, transparent); }
 
@@ -134,14 +146,87 @@
     @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
     :focus-visible { outline: 2px solid #B08D57; outline-offset: 2px; }
+
+    /* Botones de filtro (estilo mejorado) */
+    .filter-btn {
+      background: transparent;
+      border: 1px solid #E9E3D6;
+      color: #5B6472;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      transition: all 0.15s;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .filter-btn:hover {
+      background: #F2EFE8;
+      border-color: #C9A876;
+    }
+    .filter-btn.active {
+      background: #0B1526;
+      border-color: #0B1526;
+      color: white;
+      box-shadow: 0 2px 8px rgba(11,21,38,0.25);
+    }
+    .filter-btn.active:hover {
+      background: #12203D;
+    }
+
+    .img-placeholder {
+      filter: grayscale(0.6) brightness(1.1);
+      border: 1.5px dashed #B08D57;
+    }
+    .no-img-indicator {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      background: #8A6B3F;
+      color: white;
+      font-size: 0.5rem;
+      padding: 1px 4px;
+      border-radius: 9999px;
+      font-weight: 700;
+      line-height: 1;
+      border: 1px solid white;
+    }
+    .img-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* Ocultar/mostrar gráficos */
+    .toggle-charts-btn {
+      background: transparent;
+      border: none;
+      color: #8A6B3F;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 9999px;
+      transition: background 0.2s;
+    }
+    .toggle-charts-btn:hover {
+      background: #F2EFE8;
+    }
+    .charts-section.collapsed .charts-grid {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- HEADER (sin filtros) -->
   <header class="sticky top-0 z-50 bg-ink-900 text-white shadow-[0_8px_24px_-14px_rgba(11,21,38,0.5)]">
     <div class="relative overflow-hidden">
-      <!-- Signature engraved guilloché pattern, echoing certificate / currency engraving -->
+      <!-- Patrón grabado (fondo) -->
       <svg class="absolute inset-0 w-full h-full opacity-[0.1] pointer-events-none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="guilloche" width="140" height="70" patternUnits="userSpaceOnUse">
@@ -189,7 +274,7 @@
   </header>
 
   <!-- MAIN -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
 
     <!-- KPIs -->
     <section>
@@ -201,56 +286,61 @@
         <div class="kpi-card bg-white rounded-xl p-5 border border-paper-200 border-t-2 border-t-gold-500">
           <div class="flex items-center justify-between">
             <span class="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">Productos</span>
-            <i class="fa-regular fa-gem text-gold-500 text-base"></i>
+            <i class="fa-solid fa-gem text-gold-500 text-base"></i>
           </div>
           <p id="kpi-total-items" class="font-display text-3xl font-semibold text-ink-900 mt-2.5">0</p>
         </div>
         <div class="kpi-card bg-white rounded-xl p-5 border border-paper-200 border-t-2 border-t-gold-500">
           <div class="flex items-center justify-between">
             <span class="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">Stock total</span>
-            <i class="fa-regular fa-boxes-stacked text-emerald-700 text-base"></i>
+            <i class="fa-solid fa-boxes-stacked text-emerald-700 text-base"></i>
           </div>
           <p id="kpi-total-stock" class="font-display text-3xl font-semibold text-emerald-700 mt-2.5">0 u.</p>
         </div>
         <div class="kpi-card bg-white rounded-xl p-5 border border-paper-200 border-t-2 border-t-gold-500">
           <div class="flex items-center justify-between">
             <span class="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">Valor inventario</span>
-            <i class="fa-regular fa-coin text-gold-600 text-base"></i>
+            <i class="fa-solid fa-coins text-gold-600 text-base"></i>
           </div>
           <p id="kpi-total-valor" class="font-display text-3xl font-semibold text-gold-600 mt-2.5">S/ 0.00</p>
         </div>
         <div class="kpi-card bg-white rounded-xl p-5 border border-paper-200 border-t-2 border-t-gold-500">
           <div class="flex items-center justify-between">
             <span class="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">Stock crítico</span>
-            <i class="fa-regular fa-triangle-exclamation text-garnet-600 text-base"></i>
+            <i class="fa-solid fa-triangle-exclamation text-garnet-600 text-base"></i>
           </div>
           <p id="kpi-low-stock" class="font-display text-3xl font-semibold text-garnet-600 mt-2.5">0</p>
         </div>
       </div>
     </section>
 
-    <!-- GRÁFICOS -->
-    <section>
-      <div class="flex items-center gap-3 mb-4">
-        <span class="eyebrow">Análisis de catálogo</span>
-        <div class="h-px flex-grow bg-gradient-to-r from-gold-400/50 to-transparent"></div>
+    <!-- GRÁFICOS (con botón ocultar/mostrar) -->
+    <section id="chartsSection" class="charts-section">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="eyebrow">Análisis de catálogo</span>
+          <div class="h-px w-12 bg-gradient-to-r from-gold-400/50 to-transparent"></div>
+        </div>
+        <button onclick="toggleCharts()" class="toggle-charts-btn" id="toggleChartsBtn">
+          <i class="fa-solid fa-chevron-up"></i> Ocultar gráficos
+        </button>
       </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div class="charts-grid grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div class="panel-card bg-white rounded-xl p-5 border border-paper-200 border-t-2 border-t-gold-500">
           <h3 class="font-display text-[15px] font-semibold text-ink-900 flex items-center gap-2 mb-3">
-            <i class="fa-regular fa-chart-pie text-gold-500"></i>
+            <i class="fa-solid fa-chart-pie text-gold-500"></i>
             <span>Distribución por categoría</span>
           </h3>
-          <div class="h-60 w-full relative">
+          <div class="h-64 w-full relative">
             <canvas id="categoryChart"></canvas>
           </div>
         </div>
         <div class="panel-card bg-white rounded-xl p-5 border border-paper-200 border-t-2 border-t-gold-500">
           <h3 class="font-display text-[15px] font-semibold text-ink-900 flex items-center gap-2 mb-3">
-            <i class="fa-regular fa-chart-bar text-gold-500"></i>
+            <i class="fa-solid fa-chart-bar text-gold-500"></i>
             <span>Top 5 joyas por valor total</span>
           </h3>
-          <div class="h-60 w-full relative">
+          <div class="h-64 w-full relative">
             <canvas id="valueChart"></canvas>
           </div>
         </div>
@@ -266,24 +356,22 @@
       <div class="panel-card bg-white rounded-xl p-5 border border-paper-200 border-t-2 border-t-gold-500 space-y-4">
         <div class="flex flex-col md:flex-row md:items-center gap-3">
           <div class="relative flex-grow">
-            <i class="fa-regular fa-magnifying-glass absolute left-4 top-3 text-slate-400 text-sm"></i>
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-slate-400 text-sm"></i>
             <input type="text" id="searchInput" placeholder="Buscar por SKU, nombre, categoría, estado o proveedor..."
                    class="w-full pl-10 pr-4 py-2.5 bg-paper-50 border border-paper-200 rounded-full text-sm text-ink-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:bg-white transition"
-                   onkeyup="filtrarTabla()">
+                   onkeyup="aplicarFiltros()">
           </div>
-          <div class="flex gap-2">
-            <button onclick="filtrarCritico()" class="bg-garnet-100 hover:bg-[#F0D2C8] text-garnet-600 text-xs font-bold px-4 py-2.5 rounded-full border border-[#E8C3B6] transition flex items-center gap-2">
-              <i class="fa-regular fa-triangle-exclamation"></i> Crítico
-            </button>
-            <button onclick="iniciarEscaner()" class="bg-ink-900 hover:bg-ink-800 text-gold-300 text-sm font-bold px-5 py-2.5 rounded-full shadow-md shadow-ink-900/20 transition flex items-center gap-2 border border-gold-500/40">
-              <i class="fa-regular fa-qrcode"></i> Escanear QR
-            </button>
-          </div>
+          <button onclick="iniciarEscaner()" class="bg-ink-900 hover:bg-ink-800 text-gold-300 text-sm font-bold px-5 py-2.5 rounded-full shadow-md shadow-ink-900/20 transition flex items-center gap-2 border border-gold-500/40">
+            <i class="fa-solid fa-qrcode"></i> Escanear QR
+          </button>
         </div>
 
         <!-- Tarjeta de producto escaneado -->
         <div id="scanned-card" class="hidden bg-paper-100 border border-gold-300 p-5 rounded-xl flex flex-col sm:flex-row items-center gap-6">
-          <img id="card-img" src="" class="w-20 h-20 object-cover rounded-lg border-2 border-white shadow-md bg-white" onerror="this.src='https://via.placeholder.com/120/F2EFE8/8A6B3F?text=Sin+Imagen'">
+          <div class="img-wrapper">
+            <img id="card-img" src="" class="w-20 h-20 object-cover rounded-lg border-2 border-white shadow-md bg-white" onerror="this.src='https://via.placeholder.com/120/F2EFE8/8A6B3F?text=Sin+Imagen'">
+            <span id="card-noimg-badge" class="no-img-indicator hidden">Sin img</span>
+          </div>
           <div class="space-y-1.5 text-center sm:text-left flex-grow">
             <div class="inline-block bg-ink-900 text-gold-300 text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" id="card-category">Categoría</div>
             <h3 id="card-title" class="font-display text-lg font-semibold text-ink-900">Nombre</h3>
@@ -297,8 +385,39 @@
               <div><p class="text-[10px] text-slate-400 uppercase font-bold font-mono">Stock</p><p id="card-stock" class="text-lg font-bold font-mono text-ink-900">0 u.</p></div>
             </div>
           </div>
-          <button onclick="limpiarFiltroQR()" class="text-slate-400 hover:text-slate-700 p-2"><i class="fa-regular fa-xmark text-lg"></i></button>
+          <button onclick="limpiarFiltroQR()" class="text-slate-400 hover:text-slate-700 p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
+      </div>
+    </section>
+
+    <!-- FILTROS (ubicados justo antes de la tabla) -->
+    <section>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="eyebrow">Filtros de inventario</span>
+        <div class="h-px flex-grow bg-gradient-to-r from-gold-400/50 to-transparent"></div>
+      </div>
+      <div class="bg-white rounded-xl border border-paper-200 p-4 flex flex-wrap items-center gap-3 shadow-sm">
+        <span class="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1">Rápido:</span>
+
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Todos</button>
+        <button class="filter-btn" data-filter="critico" onclick="setFilter('critico')">
+          <i class="fa-solid fa-triangle-exclamation text-garnet-600 mr-1"></i> Crítico
+        </button>
+        <button class="filter-btn" data-filter="sin-imagen" onclick="setFilter('sin-imagen')">
+          <i class="fa-solid fa-image text-gold-600 mr-1"></i> Sin imagen
+        </button>
+
+        <div class="h-6 w-px bg-paper-200 mx-1"></div>
+
+        <select id="categoriaFilter" class="bg-paper-50 border border-paper-200 rounded-full text-xs px-3 py-2 focus:ring-2 focus:ring-gold-400 focus:outline-none" onchange="setCategoria(this.value)">
+          <option value="">Todas las categorías</option>
+        </select>
+
+        <button onclick="limpiarFiltros()" class="text-slate-400 hover:text-slate-700 text-xs ml-auto flex items-center gap-1">
+          <i class="fa-solid fa-rotate-left"></i> Limpiar
+        </button>
+
+        <span id="sinImagenCount" class="bg-gold-100 text-gold-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-gold-300 ml-1 hidden">0 sin imagen</span>
       </div>
     </section>
 
@@ -345,8 +464,8 @@
   <div id="qr-modal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
     <div class="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden">
       <div class="bg-ink-900 px-6 py-4 flex items-center justify-between">
-        <h3 class="font-display text-white font-semibold flex items-center gap-2"><i class="fa-regular fa-camera text-gold-400"></i> Escanear código QR</h3>
-        <button onclick="detenerEscaner()" class="text-white/60 hover:text-white"><i class="fa-regular fa-xmark text-xl"></i></button>
+        <h3 class="font-display text-white font-semibold flex items-center gap-2"><i class="fa-solid fa-camera text-gold-400"></i> Escanear código QR</h3>
+        <button onclick="detenerEscaner()" class="text-white/60 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
       <div class="p-6 space-y-4">
         <div id="reader" class="w-full bg-paper-100 rounded-xl overflow-hidden border-2 border-gold-400 min-h-[220px]"></div>
@@ -359,49 +478,41 @@
   <!-- SCRIPT PRINCIPAL -->
   <script>
     // =========================================================================
-    // ⚙️ CONFIGURACIÓN (CAMPOS PRINCIPALES A REEMPLAZAR)
+    // ⚙️ CONFIGURACIÓN
     // =========================================================================
-
-    // 1. Pega aquí el enlace original o ID de tu archivo de LOGO en Google Drive
     const LOGO_DRIVE_URL = "https://drive.google.com/file/d/1SjCwcRRzHfzYUH1fpgJeR9Nipqdakynn/view?usp=sharing";
-
-    // 2. Pega aquí el enlace de tu Google Apps Script (Web App URL)
     const API_URL = "https://script.google.com/macros/s/AKfycbz9FuM1US-ouIU14bEoYp9gfaWZ98Xu9PHgzR7z4dUhsAdPfELAGgX85gLPFhNiBl-B/exec";
 
     // =========================================================================
-
-    // Chart.js: tipografía y color de texto por defecto, alineados a la identidad visual
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.color = '#5B6472';
 
-    // Función que convierte cualquier URL de Google Drive en un enlace directo visible para la web
     function transformarUrlDrive(url) {
       if (!url || typeof url !== 'string') return '';
-      if (!url.includes('drive.google.com')) return url; // Retorna normal si no es de Drive
-
+      if (!url.includes('drive.google.com')) return url;
       let fileId = '';
       const matchId = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
       const matchQuery = url.match(/id=([a-zA-Z0-9_-]+)/);
-
-      if (matchId && matchId[1]) {
-        fileId = matchId[1];
-      } else if (matchQuery && matchQuery[1]) {
-        fileId = matchQuery[1];
-      } else if (url.length > 20 && !url.includes('/')) {
-        fileId = url; // Es el ID directo
-      }
-
+      if (matchId && matchId[1]) fileId = matchId[1];
+      else if (matchQuery && matchQuery[1]) fileId = matchQuery[1];
+      else if (url.length > 20 && !url.includes('/')) fileId = url;
       return fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : url;
     }
 
-    // Cargar Logo Inicial
     document.getElementById('appLogo').src = transformarUrlDrive(LOGO_DRIVE_URL);
 
     let inventario = [];
     let chartCat, chartVal;
     let html5Scanner = null;
 
-    // CARGAR DATOS DE GOOGLE SHEETS
+    // Estado de filtros
+    let filtroActivo = 'all';
+    let categoriaActiva = '';
+    let busquedaActual = '';
+
+    // =========================================================================
+    // CARGAR DATOS
+    // =========================================================================
     async function cargarDatos() {
       const icon = document.getElementById('btn-refresh-icon');
       const dot = document.getElementById('syncDot');
@@ -417,6 +528,7 @@
 
         inventario = data.map(item => {
           const rawImg = item.imagen || item["Imagen"] || '';
+          const imgUrl = transformarUrlDrive(rawImg) || 'https://via.placeholder.com/80/F2EFE8/8A6B3F?text=Sin+Imagen';
           return {
             sku: item.sku || item["SKU / ID"] || '',
             categoria: item.categoria || item["Categoría"] || '',
@@ -426,13 +538,16 @@
             stockActual: parseInt(item.stockActual || item["Stock Actual"] || 0),
             estado: item.estado || item["Estado"] || 'Disponible',
             proveedor: item.proveedor || item["Proveedor"] || '-',
-            imagen: transformarUrlDrive(rawImg) || 'https://via.placeholder.com/80/F2EFE8/8A6B3F?text=Sin+Imagen'
+            imagen: imgUrl,
+            tieneImagen: !imgUrl.includes('via.placeholder.com')
           };
         });
 
         actualizarKPIs(inventario);
         generarGraficas(inventario);
-        renderTabla(inventario);
+        poblarCategorias();
+        actualizarContadorSinImagen();
+        aplicarFiltros();
 
         const stamp = new Date().toLocaleString();
         document.getElementById('lastUpdate').textContent = `Última actualización: ${stamp}`;
@@ -443,7 +558,7 @@
         console.error(err);
         document.getElementById('inventoryTable').innerHTML = `
           <tr><td colspan="8" class="p-6 text-center text-garnet-600">
-            <i class="fa-regular fa-circle-exclamation text-2xl block mb-2"></i>
+            <i class="fa-solid fa-circle-exclamation text-2xl block mb-2"></i>
             Error al cargar datos. Verifica la URL de la Hoja de Cálculo y Apps Script.
           </td></tr>`;
         if (status) status.textContent = 'Error de sincronización';
@@ -453,7 +568,9 @@
       }
     }
 
-    // KPIS
+    // =========================================================================
+    // KPIs
+    // =========================================================================
     function actualizarKPIs(items) {
       let totalStock = 0, totalValor = 0, criticos = 0;
       items.forEach(p => {
@@ -469,8 +586,11 @@
       document.getElementById('kpi-low-stock').textContent = criticos;
     }
 
-    // GRÁFICOS
+    // =========================================================================
+    // GRÁFICOS (mejorados con colores, tooltips y más estilo)
+    // =========================================================================
     function generarGraficas(items) {
+      // Categorías
       const catMap = {};
       items.forEach(p => {
         const cat = p.categoria || 'Sin categoría';
@@ -478,8 +598,7 @@
       });
       const labels = Object.keys(catMap);
       const values = Object.values(catMap);
-      // Paleta inspirada en gemas: ónix, oro, esmeralda, granate, zafiro, citrino
-      const colores = ['#0B1526', '#B08D57', '#1F4D33', '#8C2E22', '#3E5C76', '#8A5A17', '#6B4E71'];
+      const colores = ['#0B1526', '#B08D57', '#1F4D33', '#8C2E22', '#3E5C76', '#8A5A17', '#6B4E71', '#9B6B43'];
 
       const ctx1 = document.getElementById('categoryChart').getContext('2d');
       if (chartCat) chartCat.destroy();
@@ -498,12 +617,22 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 11 } } }
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, font: { size: 11, weight: '500' } } },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  let percentage = ((context.parsed / total) * 100).toFixed(1);
+                  return `${context.label}: ${context.parsed} (${percentage}%)`;
+                }
+              }
+            }
           },
-          cutout: '65%'
+          cutout: '68%'
         }
       });
 
+      // Top 5 valor
       const top = [...items]
         .map(p => ({ nombre: p.nombre || p.sku, valor: (p.stockActual || p.stockInicial || 0) * (p.precio || 0) }))
         .sort((a, b) => b.valor - a.valor)
@@ -527,15 +656,104 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+            x: { grid: { display: false }, ticks: { font: { size: 10, weight: '500' } } },
             y: { beginAtZero: true, grid: { color: '#F2EFE8' }, ticks: { font: { size: 10 } } }
           },
-          plugins: { legend: { display: false } }
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `S/ ${context.parsed.y.toFixed(2)}`;
+                }
+              }
+            }
+          }
         }
       });
     }
 
+    // =========================================================================
+    // POBLAR CATEGORÍAS
+    // =========================================================================
+    function poblarCategorias() {
+      const select = document.getElementById('categoriaFilter');
+      const cats = [...new Set(inventario.map(p => p.categoria).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">Todas las categorías</option>';
+      cats.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        select.appendChild(opt);
+      });
+    }
+
+    // =========================================================================
+    // CONTADOR SIN IMAGEN
+    // =========================================================================
+    function actualizarContadorSinImagen() {
+      const count = inventario.filter(p => !p.tieneImagen).length;
+      const el = document.getElementById('sinImagenCount');
+      if (count > 0) {
+        el.textContent = `${count} sin imagen`;
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+
+    // =========================================================================
+    // FILTROS
+    // =========================================================================
+    function setFilter(tipo) {
+      filtroActivo = tipo;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === tipo);
+      });
+      aplicarFiltros();
+    }
+
+    function setCategoria(val) {
+      categoriaActiva = val;
+      aplicarFiltros();
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('searchInput').value = '';
+      busquedaActual = '';
+      categoriaActiva = '';
+      document.getElementById('categoriaFilter').value = '';
+      setFilter('all');
+    }
+
+    function aplicarFiltros() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      busquedaActual = q;
+
+      let resultado = [...inventario];
+
+      if (busquedaActual) {
+        resultado = resultado.filter(p =>
+          Object.values(p).some(v => String(v).toLowerCase().includes(busquedaActual))
+        );
+      }
+
+      if (categoriaActiva) {
+        resultado = resultado.filter(p => p.categoria === categoriaActiva);
+      }
+
+      if (filtroActivo === 'critico') {
+        resultado = resultado.filter(p => (p.stockActual || p.stockInicial || 0) < 2);
+      } else if (filtroActivo === 'sin-imagen') {
+        resultado = resultado.filter(p => !p.tieneImagen);
+      }
+
+      renderTabla(resultado);
+    }
+
+    // =========================================================================
     // TABLA
+    // =========================================================================
     function renderTabla(items) {
       const tbody = document.getElementById('inventoryTable');
       if (!items || items.length === 0) {
@@ -557,8 +775,17 @@
           ? `<span class="bg-garnet-100 text-garnet-600 font-mono font-bold px-2.5 py-1 rounded-lg text-xs">${stock}</span>`
           : `<span class="font-mono font-bold">${stock}</span>`;
 
+        const esPlaceholder = !p.tieneImagen;
+        const imgClass = esPlaceholder ? 'img-placeholder' : '';
+        const noImgBadge = esPlaceholder ? `<span class="no-img-indicator">Sin img</span>` : '';
+
         return `<tr class="table-row-hover">
-          <td class="p-3.5"><img src="${p.imagen}" class="w-12 h-12 object-cover rounded-lg border border-paper-200 shadow-sm" onerror="this.src='https://via.placeholder.com/80/F6E3DE/8C2E22?text=Error'"></td>
+          <td class="p-3.5">
+            <div class="img-wrapper">
+              <img src="${p.imagen}" class="w-12 h-12 object-cover rounded-lg border border-paper-200 shadow-sm ${imgClass}" onerror="this.src='https://via.placeholder.com/80/F6E3DE/8C2E22?text=Error'">
+              ${noImgBadge}
+            </div>
+          </td>
           <td class="p-3.5 font-mono text-xs font-bold text-gold-600">${p.sku || '-'}</td>
           <td class="p-3.5 text-xs text-slate-500 font-medium">${p.categoria || '-'}</td>
           <td class="p-3.5 font-semibold text-ink-900">${p.nombre || 'Sin nombre'}</td>
@@ -570,28 +797,9 @@
       }).join('');
     }
 
-    // BÚSQUEDA Y FILTROS
-    function filtrarTabla() {
-      const q = document.getElementById('searchInput').value.toLowerCase().trim();
-      if (!q) { renderTabla(inventario); return; }
-      const filtrados = inventario.filter(p =>
-        Object.values(p).some(v => String(v).toLowerCase().includes(q))
-      );
-      renderTabla(filtrados);
-    }
-
-    function filtrarCritico() {
-      const criticos = inventario.filter(p => (p.stockActual || p.stockInicial || 0) < 2);
-      renderTabla(criticos);
-    }
-
-    function limpiarFiltroQR() {
-      document.getElementById('scanned-card').classList.add('hidden');
-      document.getElementById('searchInput').value = '';
-      renderTabla(inventario);
-    }
-
+    // =========================================================================
     // ESCÁNER QR
+    // =========================================================================
     function iniciarEscaner() {
       const modal = document.getElementById('qr-modal');
       modal.classList.remove('hidden');
@@ -635,6 +843,12 @@
       );
       if (encontrado) {
         document.getElementById('card-img').src = encontrado.imagen;
+        const badge = document.getElementById('card-noimg-badge');
+        if (!encontrado.tieneImagen) {
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
         document.getElementById('card-category').textContent = encontrado.categoria || 'Joyas';
         document.getElementById('card-title').textContent = encontrado.nombre || 'Sin nombre';
         document.getElementById('card-sku').textContent = encontrado.sku || '-';
@@ -649,7 +863,36 @@
       }
     }
 
+    function limpiarFiltroQR() {
+      document.getElementById('scanned-card').classList.add('hidden');
+      document.getElementById('searchInput').value = '';
+      busquedaActual = '';
+      setFilter('all');
+      document.getElementById('categoriaFilter').value = '';
+      categoriaActiva = '';
+      aplicarFiltros();
+    }
+
+    // =========================================================================
+    // OCULTAR/MOSTRAR GRÁFICOS
+    // =========================================================================
+    let chartsVisible = true;
+    function toggleCharts() {
+      chartsVisible = !chartsVisible;
+      const section = document.getElementById('chartsSection');
+      const btn = document.getElementById('toggleChartsBtn');
+      if (chartsVisible) {
+        section.classList.remove('collapsed');
+        btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Ocultar gráficos';
+      } else {
+        section.classList.add('collapsed');
+        btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Mostrar gráficos';
+      }
+    }
+
+    // =========================================================================
     // INICIALIZACIÓN
+    // =========================================================================
     cargarDatos();
   </script>
 </body>
