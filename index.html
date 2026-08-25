@@ -112,30 +112,18 @@
       border: none; background: transparent; width: 100%; text-align: left; position: relative;
       font-family: 'Inter', sans-serif; letter-spacing: 0.02em;
     }
-    .sidebar-nav .nav-item i { width: 1.1rem; font-size: 0.85rem; color: rgba(232,221,202,0.4); transition: color 0.2s; }
     .sidebar-nav .nav-item:hover { color: var(--champagne); background: rgba(169,130,47,0.06); }
-    .sidebar-nav .nav-item:hover i { color: var(--gold); }
     .sidebar-nav .nav-item.active { color: var(--ivory); background: rgba(169,130,47,0.05); }
-    .sidebar-nav .nav-item.active i { color: var(--gold); }
     .sidebar-nav .nav-item.active::before { content: ''; position: absolute; left: -1.6rem; top: 50%; transform: translateY(-50%); width: 2px; height: 62%; background: var(--gold); }
-    .sidebar-nav .nav-item .badge-pend { margin-left: auto; background: rgba(169,130,47,0.16); color: var(--goldlight); font-size: 0.58rem; padding: 0.08rem 0.5rem; border-radius: 999px; font-weight: 600; font-family: 'IBM Plex Mono', monospace; }
 
     .sidebar-footer { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.65rem; color: rgba(232,221,202,0.35); border-top: 1px solid rgba(169,130,47,0.12); padding-top: 1.1rem; text-align: center; letter-spacing: 0.04em; }
 
     .main-content { margin-left: 232px; padding: 2.2rem 3rem 3rem; min-height: 100vh; transition: margin 0.35s cubic-bezier(0.4,0,0.2,1); background: var(--ivory); }
-    .main-content.expanded { margin-left: 0; }
 
     .topbar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.4rem; border-bottom: 1px solid var(--line); margin-bottom: 2.2rem; }
     .topbar-left { display: flex; align-items: center; gap: 1rem; }
-    .menu-toggle { background: transparent; border: none; color: var(--textsec); font-size: 1.15rem; cursor: pointer; padding: 0.25rem; display: none; }
     .topbar-title { font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600; color: var(--ink); letter-spacing: 0.01em; }
     .topbar-right { display: flex; align-items: center; gap: 1.1rem; }
-
-    .search-box { position: relative; display: flex; align-items: center; }
-    .search-box i { position: absolute; left: 0.9rem; font-size: 0.75rem; color: var(--stone); pointer-events: none; }
-    .search-box input { width: 220px; padding: 0.42rem 0.9rem 0.42rem 2.1rem; border: 1px solid var(--line-gold); border-radius: 999px; background: var(--paper); font-size: 0.75rem; font-family: 'Inter', sans-serif; color: var(--ink); outline: none; transition: all 0.2s; }
-    .search-box input::placeholder { color: var(--stone); }
-    .search-box input:focus { border-color: var(--gold); width: 260px; box-shadow: 0 0 0 3px rgba(169,130,47,0.08); }
 
     .sync-status { font-size: 0.68rem; color: var(--textsec); display: flex; align-items: center; gap: 0.5rem; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em; }
     .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); display: inline-block; }
@@ -185,8 +173,6 @@
     </div>
     <nav class="sidebar-nav">
       <button class="nav-item active" onclick="switchTab('inicio')">Inicio</button>
-      <button class="nav-item" onclick="switchTab('coleccion')">Colección</button>
-      <button class="nav-item" onclick="switchTab('ventas')">Ventas</button>
     </nav>
     <div class="sidebar-footer">Maison SIN PAR</div>
   </aside>
@@ -199,9 +185,11 @@
       <div class="topbar-right">
         <div class="sync-status">
           <span class="sync-dot pulse" id="syncDot"></span>
-          <span id="syncStatus">Sincronizando con Google Sheets...</span>
+          <span id="syncStatus">Conectando a Google Sheets...</span>
         </div>
-        <button class="btn-refresh" onclick="cargarDatos()"><svg id="btn-refresh-icon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11A8 8 0 1 0 19 15"/><path d="M20 5v6h-6"/></svg> Actualizar</button>
+        <button class="btn-refresh" onclick="cargarDatos()">
+          <svg id="btn-refresh-icon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11A8 8 0 1 0 19 15"/><path d="M20 5v6h-6"/></svg> Actualizar
+        </button>
       </div>
     </div>
 
@@ -211,7 +199,7 @@
           <div class="kpi-item"><div class="label">Piezas</div><div class="value" id="kpi-total-items">0</div></div>
           <div class="kpi-item"><div class="label">Stock Total</div><div class="value" id="kpi-total-stock">0 u.</div></div>
           <div class="kpi-item"><div class="label">Valor Inventario</div><div class="value" id="kpi-total-valor">S/ 0.00</div></div>
-          <div class="kpi-item"><div class="label">Estado API</div><div class="value" style="font-size:1rem; margin-top:0.5rem;" id="kpi-api-status">Conectado</div></div>
+          <div class="kpi-item"><div class="label">Estado API</div><div class="value" style="font-size:1rem; margin-top:0.5rem;" id="kpi-api-status">Listo</div></div>
         </div>
 
         <div class="table-wrapper">
@@ -241,8 +229,8 @@
   </div>
 
   <script>
-    // URL del Web App de Google Apps Script vinculado a la Hoja de Cálculo
-    const API_URL = "https://script.google.com/macros/s/AKfycbwAVyNP4DO01oo6gVcrha_r1SY4rpX0GMuEBwpgMhiqNPc794HfSMDxvEN6LKW1uBgY/exec";
+    // REEMPLAZA ESTA URL CON TU URL DE APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+    const API_URL = "https://script.google.com/macros/s/AKfycbx...TU_SCRIPT_ID.../exec";
     let inventario = [];
 
     function showToast(msg) {
@@ -252,7 +240,7 @@
       setTimeout(() => t.classList.remove('show'), 3500);
     }
 
-    // Consulta de datos en Google Sheets (GET)
+    // Petición GET para obtener datos
     async function cargarDatos() {
       const dot = document.getElementById('syncDot');
       const status = document.getElementById('syncStatus');
@@ -261,46 +249,61 @@
 
       try {
         const resp = await fetch(API_URL);
-        if (!resp.ok) throw new Error('Error al conectar con la API');
         const data = await resp.json();
 
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+
+        // Mapeo flexible de columnas
         inventario = data.map(item => ({
-          sku: item.sku || item["SKU / ID"] || '',
-          categoria: item.categoria || item["Categoría"] || '',
-          nombre: item.nombre || item["Nombre del Producto"] || '',
-          precio: parseFloat(item.precio || item["Precio Venta (PEN)"] || 0),
-          stockActual: parseInt(item.stockActual || item["Stock Actual"] || 0)
+          sku: item.SKU || item.sku || item["SKU / ID"] || '',
+          categoria: item.Categoria || item.categoria || item["Categoría"] || 'General',
+          nombre: item.Nombre || item.nombre || item["Nombre del Producto"] || '',
+          precio: parseFloat(item.Precio || item.precio || item["Precio Venta (PEN)"] || 0),
+          stockActual: parseInt(item.Stock || item.stockActual || item["Stock Actual"] || 0)
         }));
 
         renderTabla();
         actualizarKPIs();
-        if (status) status.textContent = 'Sincronizado con Google Sheets';
+        if (status) status.textContent = 'Sincronizado';
         if (dot) dot.classList.remove('pulse');
       } catch (err) {
         console.error(err);
-        showToast('Error de conexión con la hoja de cálculo');
+        showToast('Error al conectar con Google Sheets');
         if (status) status.textContent = 'Error de Sincronización';
         if (dot) { dot.classList.remove('pulse'); dot.classList.add('error'); }
       }
     }
 
-    // Envío de actualizaciones a Google Sheets (POST)
+    // Petición POST para guardar cambios usando text/plain (previene errores de CORS en Apps Script)
     async function actualizarEnHojaCalculo(payload) {
       const status = document.getElementById('syncStatus');
+      const dot = document.getElementById('syncDot');
       if (status) status.textContent = 'Guardando en Google Sheets…';
+      if (dot) dot.classList.add('pulse');
+
       try {
         const resp = await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
-        showToast('Cambios guardados en Google Sheets');
-        if (status) status.textContent = 'Sincronizado';
+
+        const resData = await resp.json();
+        if (resData.status === 'success') {
+          showToast('Cambios guardados exitosamente');
+          if (status) status.textContent = 'Sincronizado';
+        } else {
+          throw new Error(resData.message || 'Error en el servidor');
+        }
       } catch (err) {
         console.error(err);
         showToast('Error al intentar guardar los datos');
         if (status) status.textContent = 'Error al guardar';
+        if (dot) dot.classList.add('error');
+      } finally {
+        if (dot) dot.classList.remove('pulse');
       }
     }
 
@@ -362,7 +365,6 @@
       document.getElementById('pageTitle').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
     }
 
-    // Inicialización al cargar la pantalla
     window.addEventListener('DOMContentLoaded', cargarDatos);
   </script>
 </body>
