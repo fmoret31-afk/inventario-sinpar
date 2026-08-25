@@ -1146,21 +1146,22 @@
         return;
       }
 
-      const seguimiento = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
-      seguimiento.push({
-        id: Date.now(),
-        fecha: new Date().toISOString(),
-        producto: producto,
-        comprador: nombre,
-        email: email,
-        telefono: telefono,
-        direccion: direccion,
-        estado: 'Preparación'
+      cargarSeguimientoCompartido().then(seguimiento => {
+        seguimiento.push({
+          id: Date.now(),
+          fecha: new Date().toISOString(),
+          producto: producto,
+          comprador: nombre,
+          email: email,
+          telefono: telefono,
+          direccion: direccion,
+          estado: 'Preparación'
+        });
+        guardarSeguimientoCompartido(seguimiento);
+        if (currentTab === 'seguimiento') renderSeguimiento();
       });
-      localStorage.setItem(SEGUIMIENTO_KEY, JSON.stringify(seguimiento));
       closeFollowUp();
       showToast('Gracias por elegir SIN PAR. Tu pieza está siendo preparada.');
-      if (currentTab === 'seguimiento') renderSeguimiento();
     }
 
     function transformarUrlDrive(url) {
@@ -1176,36 +1177,147 @@
     }
 
     // =========================================================================
-    // LOCAL STORAGE
+    // SINCRONIZACIÓN COMPARTIDA (multi-dispositivo)
     // =========================================================================
-    function guardarEstadoLocal() {
+    // Todos los cambios (ventas, nombres editados, pendientes de pago, pedidos
+    // en seguimiento) se guardan en un almacenamiento compartido: cualquier
+    // persona que abra este mismo enlace, desde cualquier dispositivo, verá
+    // las mismas actualizaciones. Si el almacenamiento compartido no está
+    // disponible, se usa el almacenamiento local del navegador como respaldo.
+    const HAS_SHARED_STORAGE = (typeof window !== 'undefined') && !!window.storage;
+
+    function marcarSincronizado(ok) {
+      const dot = document.getElementById('syncDot');
+      const status = document.getElementById('syncStatus');
+      if (!dot || !status) return;
+      if (ok) {
+        dot.classList.remove('error'); dot.classList.remove('pulse');
+        status.textContent = HAS_SHARED_STORAGE ? 'Sincronizado' : 'Guardado en este dispositivo';
+      } else {
+        dot.classList.remove('pulse'); dot.classList.add('error');
+        status.textContent = 'Error de sincronización';
+      }
+    }
+
+    async function guardarEstadoCompartido() {
       const estado = inventario.map(p => ({
         sku: p.sku,
+        nombre: p.nombre || null,
+        precio: (p.precio === undefined || p.precio === null) ? null : p.precio,
         vendido: p.vendido || false,
         porPagar: p.porPagar || false,
         fechaVenta: p.fechaVenta || null,
         comprador: p.comprador || null
       }));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+      const raw = JSON.stringify(estado);
+      localStorage.setItem(STORAGE_KEY, raw);
+      if (!HAS_SHARED_STORAGE) { marcarSincronizado(true); return; }
+      try {
+        await window.storage.set('estado_inventario', raw, true);
+        marcarSincronizado(true);
+      } catch (err) {
+        console.error('No se pudo guardar en el almacenamiento compartido:', err);
+        marcarSincronizado(false);
+      }
     }
 
-    function cargarEstadoLocal() {
+    async function cargarEstadoCompartidoMap() {
+      let raw = null;
+      if (HAS_SHARED_STORAGE) {
+        try {
+          const res = await window.storage.get('estado_inventario', true);
+          raw = res ? res.value : null;
+          if (raw) localStorage.setItem(STORAGE_KEY, raw);
+        } catch (err) {
+          raw = localStorage.getItem(STORAGE_KEY);
+        }
+      } else {
+        raw = localStorage.getItem(STORAGE_KEY);
+      }
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return {};
         return JSON.parse(raw).reduce((map, e) => { map[e.sku] = e; return map; }, {});
       } catch { return {}; }
     }
 
-    function aplicarEstadoLocal(items) {
-      const map = cargarEstadoLocal();
-      return items.map(p => ({
-        ...p,
-        vendido: map[p.sku]?.vendido || false,
-        porPagar: map[p.sku]?.porPagar || false,
-        fechaVenta: map[p.sku]?.fechaVenta || null,
-        comprador: map[p.sku]?.comprador || null
-      }));
+    async function aplicarEstadoCompartido(items) {
+      const map = await cargarEstadoCompartidoMap();
+      return items.map(p => {
+        const e = map[p.sku];
+        if (!e) return p;
+        return {
+          ...p,
+          nombre: e.nombre || p.nombre,
+          precio: (e.precio === null || e.precio === undefined) ? p.precio : e.precio,
+          vendido: e.vendido || false,
+          porPagar: e.porPagar || false,
+          fechaVenta: e.fechaVenta || null,
+          comprador: e.comprador || null
+        };
+      });
+    }
+
+    // --- Pedidos en seguimiento (compartidos) ---
+    async function cargarSeguimientoCompartido() {
+      let raw = null;
+      if (HAS_SHARED_STORAGE) {
+        try {
+          const res = await window.storage.get('seguimiento_pedidos', true);
+          raw = res ? res.value : null;
+          if (raw) localStorage.setItem(SEGUIMIENTO_KEY, raw);
+        } catch (err) {
+          raw = localStorage.getItem(SEGUIMIENTO_KEY);
+        }
+      } else {
+        raw = localStorage.getItem(SEGUIMIENTO_KEY);
+      }
+      try { return raw ? JSON.parse(raw) : []; } catch { return []; }
+    }
+
+    async function guardarSeguimientoCompartido(pedidos) {
+      const raw = JSON.stringify(pedidos);
+      localStorage.setItem(SEGUIMIENTO_KEY, raw);
+      if (!HAS_SHARED_STORAGE) return;
+      try {
+        await window.storage.set('seguimiento_pedidos', raw, true);
+      } catch (err) {
+        console.error('No se pudo guardar el seguimiento compartido:', err);
+      }
+    }
+
+    // Sincroniza en segundo plano los cambios hechos desde otros dispositivos
+    // sin necesidad de recargar toda la colección desde la hoja de cálculo.
+    async function sincronizarCambiosCompartidos() {
+      if (!inventario.length) return;
+      try {
+        const map = await cargarEstadoCompartidoMap();
+        inventario = inventario.map(p => {
+          const e = map[p.sku];
+          if (!e) return p;
+          return {
+            ...p,
+            nombre: e.nombre || p.nombre,
+            precio: (e.precio === null || e.precio === undefined) ? p.precio : e.precio,
+            vendido: e.vendido || false,
+            porPagar: e.porPagar || false,
+            fechaVenta: e.fechaVenta || null,
+            comprador: e.comprador || null
+          };
+        });
+        actualizarKPIs();
+        actualizarContadorSinImagen();
+
+        // Evita interrumpir al usuario si está escribiendo o con un modal abierto
+        const activo = document.activeElement;
+        const ocupado = activo && (
+          activo.classList.contains('name-edit-input') ||
+          activo.classList.contains('buyer-input') ||
+          !!activo.closest?.('.modal-overlay.open')
+        );
+        if (!ocupado) renderizarTodo();
+      } catch (err) {
+        console.error('No se pudo sincronizar con otros dispositivos:', err);
+      }
     }
 
     // =========================================================================
@@ -1245,7 +1357,7 @@
           };
         });
 
-        items = aplicarEstadoLocal(items);
+        items = await aplicarEstadoCompartido(items);
         inventario = items;
 
         actualizarKPIs();
@@ -1499,7 +1611,7 @@
       if (!p) return;
       if (p.nombre === nombre) return;
       p.nombre = nombre;
-      guardarEstadoLocal();
+      guardarEstadoCompartido();
       renderizarTodo();
       showToast('✏️ Nombre del artículo actualizado');
     }
@@ -1572,7 +1684,7 @@
       p.precio = precio;
       p.fechaVenta = new Date(fecha).toISOString();
 
-      guardarEstadoLocal();
+      guardarEstadoCompartido();
       actualizarKPIs();
       cerrarEditarVenta();
       renderizarTodo();
@@ -1586,7 +1698,7 @@
       p.vendido = false;
       p.fechaVenta = null;
       p.comprador = null;
-      guardarEstadoLocal();
+      guardarEstadoCompartido();
       actualizarKPIs();
       if (fromModal) cerrarEditarVenta();
       renderizarTodo();
@@ -1626,51 +1738,56 @@
     }
 
     function renderSeguimiento() {
-      const pedidos = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
       const tbody = document.getElementById('seguimientoTable');
-      if (pedidos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr>`;
-        return;
-      }
-      pedidos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-      tbody.innerHTML = pedidos.map(p => {
-        const estado = p.estado || 'Preparación';
-        const opciones = ESTADOS_SEGUIMIENTO.map(e => `<option value="${e}" ${e === estado ? 'selected' : ''}>${e}</option>`).join('');
-        return `
-        <tr>
-          <td class="text-xs text-stone">${new Date(p.fecha).toLocaleString()}</td>
-          <td>${p.producto}</td>
-          <td class="font-medium">${p.comprador}</td>
-          <td class="text-xs">${p.email}</td>
-          <td class="text-xs">${p.telefono}</td>
-          <td class="text-xs">${p.direccion}</td>
-          <td>
-            <span class="status-dot" style="margin-bottom:0.3rem;"><span class="dot ${dotSeguimiento(estado)}"></span>${estado}</span>
-            <select class="filter-select" style="display:block;margin-top:0.3rem;" onchange="actualizarEstadoSeguimiento(${p.id}, this.value)">${opciones}</select>
-          </td>
-          <td><button class="btn-action undo" onclick="eliminarSeguimiento(${p.id})" title="Eliminar registro"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></td>
-        </tr>
-      `;
-      }).join('');
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-stone">Cargando…</td></tr>`;
+      cargarSeguimientoCompartido().then(pedidos => {
+        if (currentTab !== 'seguimiento') return;
+        if (pedidos.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr>`;
+          return;
+        }
+        pedidos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+        tbody.innerHTML = pedidos.map(p => {
+          const estado = p.estado || 'Preparación';
+          const opciones = ESTADOS_SEGUIMIENTO.map(e => `<option value="${e}" ${e === estado ? 'selected' : ''}>${e}</option>`).join('');
+          return `
+          <tr>
+            <td class="text-xs text-stone">${new Date(p.fecha).toLocaleString()}</td>
+            <td>${p.producto}</td>
+            <td class="font-medium">${p.comprador}</td>
+            <td class="text-xs">${p.email}</td>
+            <td class="text-xs">${p.telefono}</td>
+            <td class="text-xs">${p.direccion}</td>
+            <td>
+              <span class="status-dot" style="margin-bottom:0.3rem;"><span class="dot ${dotSeguimiento(estado)}"></span>${estado}</span>
+              <select class="filter-select" style="display:block;margin-top:0.3rem;" onchange="actualizarEstadoSeguimiento(${p.id}, this.value)">${opciones}</select>
+            </td>
+            <td><button class="btn-action undo" onclick="eliminarSeguimiento(${p.id})" title="Eliminar registro"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+          </tr>
+        `;
+        }).join('');
+      });
     }
 
     function actualizarEstadoSeguimiento(id, nuevoEstado) {
-      const pedidos = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
-      const p = pedidos.find(x => x.id === id);
-      if (!p) return;
-      p.estado = nuevoEstado;
-      localStorage.setItem(SEGUIMIENTO_KEY, JSON.stringify(pedidos));
-      renderSeguimiento();
-      showToast(`📦 Estado actualizado a "${nuevoEstado}"`);
+      cargarSeguimientoCompartido().then(pedidos => {
+        const p = pedidos.find(x => x.id === id);
+        if (!p) return;
+        p.estado = nuevoEstado;
+        guardarSeguimientoCompartido(pedidos);
+        renderSeguimiento();
+        showToast(`📦 Estado actualizado a "${nuevoEstado}"`);
+      });
     }
 
     function eliminarSeguimiento(id) {
       if (!confirm('¿Eliminar este pedido del seguimiento? Esta acción no se puede deshacer.')) return;
-      let pedidos = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
-      pedidos = pedidos.filter(x => x.id !== id);
-      localStorage.setItem(SEGUIMIENTO_KEY, JSON.stringify(pedidos));
-      renderSeguimiento();
-      showToast('🗑️ Registro eliminado');
+      cargarSeguimientoCompartido().then(pedidos => {
+        pedidos = pedidos.filter(x => x.id !== id);
+        guardarSeguimientoCompartido(pedidos);
+        renderSeguimiento();
+        showToast('🗑️ Registro eliminado');
+      });
     }
 
     // =========================================================================
@@ -2001,7 +2118,7 @@
       p.fechaVenta = new Date().toISOString();
       p.comprador = comprador;
 
-      guardarEstadoLocal();
+      guardarEstadoCompartido();
       actualizarKPIs();
       actualizarContadorSinImagen();
       renderizarTodo();
@@ -2016,7 +2133,7 @@
       p.vendido = false;
       p.fechaVenta = null;
       p.comprador = null;
-      guardarEstadoLocal();
+      guardarEstadoCompartido();
       actualizarKPIs();
       renderizarTodo();
       showToast('🔄 Venta deshecha');
@@ -2035,7 +2152,7 @@
         p.comprador = null;
         showToast('⏳ Marcado como por pagar');
       }
-      guardarEstadoLocal();
+      guardarEstadoCompartido();
       actualizarKPIs();
       renderizarTodo();
     }
@@ -2044,7 +2161,7 @@
       const p = inventario.find(i => i.sku === sku);
       if (!p) return;
       p.porPagar = false;
-      guardarEstadoLocal();
+      guardarEstadoCompartido();
       actualizarKPIs();
       renderizarTodo();
       showToast('💰 Pagado correctamente');
@@ -2069,6 +2186,9 @@
 
     cargarDatos();
     aplicarEstadoGraficosInicio();
+
+    // Revisa cada 20s si hay cambios guardados desde otro dispositivo
+    setInterval(sincronizarCambiosCompartidos, 20000);
   </script>
 </body>
 </html>
