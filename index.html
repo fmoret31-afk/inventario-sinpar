@@ -10,7 +10,7 @@
 <body class="bg-slate-50 min-h-screen p-4 font-sans text-gray-800">
 
   <div class="max-w-7xl mx-auto">
-    <!-- Encabezado con buscador, selector de vista y estado de sincronización -->
+    <!-- Encabezado con buscador, filtro, controles y botones de acción -->
     <header class="bg-white rounded-xl shadow-sm p-4 mb-6 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
@@ -22,22 +22,37 @@
         </p>
       </div>
 
-      <div class="w-full md:w-2/3 flex flex-col sm:flex-row gap-2">
+      <div class="w-full md:w-3/4 flex flex-col sm:flex-row gap-2">
+        <!-- Buscador general -->
         <input 
           type="text" 
           id="searchInput" 
           onkeyup="filterItems()" 
-          placeholder="Buscar por SKU, nombre, categoría, estado o proveedor..." 
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          placeholder="Buscar SKU, nombre, comprador..." 
+          class="w-full sm:w-1/3 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         >
+
+        <!-- Filtro por Categoría -->
+        <select 
+          id="categoryFilter" 
+          onchange="filterItems()" 
+          class="w-full sm:w-1/4 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white text-slate-700 font-medium"
+        >
+          <option value="">Todas las Categorías</option>
+        </select>
         
+        <!-- Botón Nuevo Producto -->
+        <button onclick="openNewModal()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm flex items-center justify-center gap-1 transition-colors shrink-0">
+          <span>➕</span> Nuevo
+        </button>
+
         <!-- Botones de Cambio de Vista -->
         <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 shrink-0">
           <button id="btnViewGrid" onclick="switchView('grid')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white shadow-sm transition-all">
             📱 Tarjetas
           </button>
           <button id="btnViewTable" onclick="switchView('table')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all">
-            📊 Tabla Horizontal
+            📊 Tabla
           </button>
         </div>
 
@@ -68,12 +83,9 @@
               <th class="p-3">Nombre del Producto</th>
               <th class="p-3">Categoría</th>
               <th class="p-3">Precio Venta</th>
-              <th class="p-3 text-center">Stock Inic.</th>
-              <th class="p-3 text-center">Entradas</th>
-              <th class="p-3 text-center">Salidas</th>
               <th class="p-3 text-center">Stock Act.</th>
-              <th class="p-3 text-center">Stock Mín.</th>
               <th class="p-3">Estado</th>
+              <th class="p-3">Comprado Por</th>
               <th class="p-3">Proveedor</th>
             </tr>
           </thead>
@@ -85,7 +97,7 @@
     </div>
   </div>
 
-  <!-- Modal Completo de Edición de Producto (Todas las columnas) -->
+  <!-- Modal Completo de Crear / Editar Producto -->
   <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100">
       <div class="flex justify-between items-center mb-4 pb-2 border-b">
@@ -94,33 +106,39 @@
       </div>
 
       <form id="editForm" onsubmit="saveItem(event)">
-        <input type="hidden" id="editSku">
-
-        <!-- Vista previa de imagen e inputs de nombre/cat -->
+        <!-- Vista previa de imagen e inputs -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div class="flex flex-col items-center justify-center bg-slate-50 p-3 rounded-xl border">
             <img id="editImgPreview" src="" class="w-32 h-32 object-cover rounded-lg mb-2 bg-white border" onerror="this.src='https://via.placeholder.com/150?text=Sin+Foto'">
-            <span class="text-[10px] text-slate-400 text-center">Modifica la URL de Drive si deseas cambiar la foto</span>
+            <span class="text-[10px] text-slate-400 text-center">Vista previa de imagen</span>
           </div>
 
           <div class="md:col-span-2 space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">SKU / ID</label>
+                <input type="text" id="editSku" class="w-full border rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-blue-500" required>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoría</label>
+                <input type="text" id="editCategoria" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+
             <div>
               <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre del Producto</label>
               <input type="text" id="editNombre" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" required>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoría</label>
-              <input type="text" id="editCategoria" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
-            </div>
+
             <div>
               <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Enlace Imagen (Google Drive)</label>
-              <input type="url" id="editImagen" class="w-full border rounded-lg p-2 text-xs font-mono focus:ring-2 focus:ring-blue-500" placeholder="https://drive.google.com/file/d/...">
+              <input type="url" id="editImagen" oninput="updatePreviewImage(this.value)" class="w-full border rounded-lg p-2 text-xs font-mono focus:ring-2 focus:ring-blue-500" placeholder="https://drive.google.com/file/d/...">
             </div>
           </div>
         </div>
 
-        <!-- Precios, Estados y Proveedor -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <!-- Precios, Estados, Comprador y Proveedor -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Precio Venta (PEN)</label>
             <input type="text" id="editPrecio" placeholder="S/ 0.00" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
@@ -135,12 +153,16 @@
             </select>
           </div>
           <div>
+            <label class="block text-xs font-bold text-blue-700 uppercase mb-1">Comprado por (Cliente)</label>
+            <input type="text" id="editComprador" placeholder="Nombre del cliente..." class="w-full border border-blue-200 rounded-lg p-2 text-sm bg-blue-50/30 focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Proveedor</label>
             <input type="text" id="editProveedor" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
           </div>
         </div>
 
-        <!-- Stocks y Entradas / Salidas -->
+        <!-- Control de Stocks -->
         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-5">
           <span class="block text-xs font-bold text-slate-700 uppercase mb-2">Control de Inventario</span>
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -180,9 +202,8 @@
 
     let inventoryData = [];
     let isEditing = false;
-    let currentView = "grid"; // 'grid' o 'table'
+    let currentView = "grid";
 
-    // Cambiar entre vista de Tarjetas y Tabla
     function switchView(view) {
       currentView = view;
       const btnGrid = document.getElementById("btnViewGrid");
@@ -204,7 +225,6 @@
       filterItems();
     }
 
-    // Cargar datos desde Google Sheets
     async function loadInventory(showStatus = false) {
       if (isEditing) return;
 
@@ -220,11 +240,33 @@
         document.getElementById("loading").classList.add("hidden");
         document.getElementById("syncDot").className = "w-2 h-2 rounded-full bg-green-500 inline-block";
 
+        updateCategoryDropdown();
         filterItems();
       } catch (err) {
         console.error("Error cargando inventario:", err);
         document.getElementById("syncDot").className = "w-2 h-2 rounded-full bg-red-500 inline-block";
       }
+    }
+
+    function updateCategoryDropdown() {
+      const categorySelect = document.getElementById("categoryFilter");
+      const currentSelected = categorySelect.value;
+
+      const categories = [...new Set(
+        inventoryData
+          .map(item => item["Categoría"])
+          .filter(cat => cat && cat.trim() !== "")
+      )].sort();
+
+      categorySelect.innerHTML = `<option value="">Todas las Categorías (${inventoryData.length})</option>`;
+      
+      categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        if (cat === currentSelected) option.selected = true;
+        categorySelect.appendChild(option);
+      });
     }
 
     // Renderizar Tarjetas
@@ -243,24 +285,32 @@
         const categoria = item["Categoría"] || "Sin Categoría";
         const precio = item["Precio Venta (PEN)"] || "-";
         const estado = item["Estado"] || "Disponible";
+        const comprador = item["Comprado por"] || item["Comprador"] || "";
+        const stockActual = Number(item["Stock Actual"] ?? 1);
         const imgUrl = item["Imagen_Directa"] || "https://via.placeholder.com/300x300?text=Sin+Imagen";
 
-        const statusBg = estado === "Disponible" ? "bg-emerald-100 text-emerald-800" :
-                         estado === "Vendido" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-700";
+        // Determinar si el activo ya no se tiene
+        const isOut = stockActual <= 0 || estado === "Vendido" || estado === "No se encontró";
+        
+        const cardBg = isOut ? "bg-red-50/60 border-red-200" : "bg-white border-slate-200";
+        const imgFilter = isOut ? "grayscale opacity-75" : "";
+        const statusBg = isOut ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800";
 
         const card = document.createElement("div");
-        card.className = "bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-slate-200 p-4 flex flex-col justify-between";
+        card.className = `${cardBg} rounded-xl shadow-sm hover:shadow-md transition-all border p-4 flex flex-col justify-between`;
         card.innerHTML = `
           <div>
             <div class="relative w-full h-48 mb-3 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center">
-              <img src="${imgUrl}" alt="${nombre}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x300?text=Foto+No+Disponible'">
+              <img src="${imgUrl}" alt="${nombre}" class="w-full h-full object-cover ${imgFilter}" onerror="this.src='https://via.placeholder.com/300x300?text=Foto+No+Disponible'">
               <span class="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-full ${statusBg}">
-                ${estado}
+                ${isOut && stockActual <= 0 ? 'Sin Stock' : estado}
               </span>
             </div>
             <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wide">${categoria}</span>
             <h3 class="font-bold text-slate-800 text-sm mt-1 line-clamp-2">${nombre}</h3>
             <p class="text-xs text-slate-400 mt-1">SKU: <span class="font-mono text-slate-600">${sku}</span></p>
+
+            ${comprador ? `<p class="mt-2 text-xs font-semibold text-purple-700 bg-purple-50 px-2 py-1 rounded-md border border-purple-100">👤 Comprado por: ${comprador}</p>` : ''}
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
@@ -277,13 +327,13 @@
       });
     }
 
-    // Renderizar Tabla Horizontal
+    // Renderizar Tabla
     function renderTable(items) {
       const tableBody = document.getElementById("tableBody");
       tableBody.innerHTML = "";
 
       if (items.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-slate-400">No se encontraron productos.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-slate-400">No se encontraron productos.</td></tr>`;
         return;
       }
 
@@ -292,20 +342,18 @@
         const nombre = item["Nombre del Producto"] || "Sin nombre";
         const categoria = item["Categoría"] || "-";
         const precio = item["Precio Venta (PEN)"] || "-";
-        const stockInicial = item["Stock Inicial"] ?? "-";
-        const entradas = item["Entradas"] ?? "-";
-        const salidas = item["Salidas"] ?? "-";
-        const stockActual = item["Stock Actual"] ?? "-";
-        const stockMinimo = item["Stock Mínimo"] ?? "-";
+        const stockActual = Number(item["Stock Actual"] ?? 1);
         const estado = item["Estado"] || "Disponible";
+        const comprador = item["Comprado por"] || item["Comprador"] || "-";
         const proveedor = item["Proveedor"] || "-";
         const imgUrl = item["Imagen_Directa"] || "https://via.placeholder.com/50";
 
-        const statusBg = estado === "Disponible" ? "bg-emerald-100 text-emerald-800" :
-                         estado === "Vendido" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-700";
+        const isOut = stockActual <= 0 || estado === "Vendido" || estado === "No se encontró";
+        const rowBg = isOut ? "bg-red-50/70 hover:bg-red-100/70" : "hover:bg-slate-50";
+        const statusBg = isOut ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800";
 
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.className = `${rowBg} transition-colors border-b border-slate-100`;
         tr.innerHTML = `
           <td class="p-3">
             <button onclick="openModal('${sku}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-semibold rounded transition-colors whitespace-nowrap">
@@ -313,48 +361,70 @@
             </button>
           </td>
           <td class="p-3">
-            <img src="${imgUrl}" class="w-10 h-10 object-cover rounded border bg-slate-100" onerror="this.src='https://via.placeholder.com/50?text=x'">
+            <img src="${imgUrl}" class="w-10 h-10 object-cover rounded border bg-slate-100 ${isOut ? 'grayscale' : ''}" onerror="this.src='https://via.placeholder.com/50?text=x'">
           </td>
           <td class="p-3 font-mono font-bold text-slate-700 whitespace-nowrap">${sku}</td>
           <td class="p-3 font-semibold text-slate-800 max-w-[200px] truncate" title="${nombre}">${nombre}</td>
           <td class="p-3 text-slate-600 whitespace-nowrap">${categoria}</td>
           <td class="p-3 font-bold text-slate-800 whitespace-nowrap">${precio}</td>
-          <td class="p-3 text-center text-slate-600">${stockInicial}</td>
-          <td class="p-3 text-center text-emerald-600 font-semibold">${entradas}</td>
-          <td class="p-3 text-center text-rose-600 font-semibold">${salidas}</td>
-          <td class="p-3 text-center font-bold bg-blue-50/50 text-blue-700">${stockActual}</td>
-          <td class="p-3 text-center text-slate-500">${stockMinimo}</td>
+          <td class="p-3 text-center font-bold ${isOut ? 'text-red-600 font-black' : 'text-blue-700'}">${stockActual}</td>
           <td class="p-3 whitespace-nowrap">
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBg}">${estado}</span>
           </td>
+          <td class="p-3 text-purple-800 font-semibold whitespace-nowrap">${comprador}</td>
           <td class="p-3 text-slate-500 whitespace-nowrap">${proveedor}</td>
         `;
         tableBody.appendChild(tr);
       });
     }
 
-    // Abrir modal de edición con todas las columnas
+    // Abrir Modal para crear Nuevo Producto
+    function openNewModal() {
+      isEditing = true;
+      document.getElementById("modalTitle").innerText = "➕ Nuevo Producto";
+      document.getElementById("editSku").value = "SKU-" + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById("editSku").readOnly = false;
+      document.getElementById("editNombre").value = "";
+      document.getElementById("editCategoria").value = "";
+      document.getElementById("editImagen").value = "";
+      document.getElementById("editPrecio").value = "S/ 0.00";
+      document.getElementById("editStockInicial").value = 1;
+      document.getElementById("editEntradas").value = 0;
+      document.getElementById("editSalidas").value = 0;
+      document.getElementById("editStockActual").value = 1;
+      document.getElementById("editStockMinimo").value = 1;
+      document.getElementById("editEstado").value = "Disponible";
+      document.getElementById("editComprador").value = "";
+      document.getElementById("editProveedor").value = "";
+      document.getElementById("editImgPreview").src = "https://via.placeholder.com/150?text=Nueva+Imagen";
+
+      document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    // Abrir Modal para Editar Producto
     function openModal(sku) {
       const item = inventoryData.find(i => String(i["SKU / ID"]).trim() === String(sku).trim());
       if (!item) return;
 
       isEditing = true;
+      document.getElementById("modalTitle").innerText = `Editar Producto: ${sku}`;
       document.getElementById("editSku").value = item["SKU / ID"] || "";
+      document.getElementById("editSku").readOnly = true;
       document.getElementById("editNombre").value = item["Nombre del Producto"] || "";
       document.getElementById("editCategoria").value = item["Categoría"] || "";
       document.getElementById("editImagen").value = item["Imagen"] || "";
       document.getElementById("editPrecio").value = item["Precio Venta (PEN)"] || "";
-      document.getElementById("editStockInicial").value = item["Stock Inicial"] !== undefined ? item["Stock Inicial"] : "";
-      document.getElementById("editEntradas").value = item["Entradas"] !== undefined ? item["Entradas"] : "";
-      document.getElementById("editSalidas").value = item["Salidas"] !== undefined ? item["Salidas"] : "";
-      document.getElementById("editStockActual").value = item["Stock Actual"] !== undefined ? item["Stock Actual"] : "";
-      document.getElementById("editStockMinimo").value = item["Stock Mínimo"] !== undefined ? item["Stock Mínimo"] : "";
+      document.getElementById("editStockInicial").value = item["Stock Inicial"] ?? "";
+      document.getElementById("editEntradas").value = item["Entradas"] ?? "";
+      document.getElementById("editSalidas").value = item["Salidas"] ?? "";
+      document.getElementById("editStockActual").value = item["Stock Actual"] ?? "";
+      document.getElementById("editStockMinimo").value = item["Stock Mínimo"] ?? "";
       document.getElementById("editEstado").value = item["Estado"] || "Disponible";
+      document.getElementById("editComprador").value = item["Comprado por"] || item["Comprador"] || "";
       document.getElementById("editProveedor").value = item["Proveedor"] || "";
 
       document.getElementById("editImgPreview").src = item["Imagen_Directa"] || "https://via.placeholder.com/150";
 
-      document.getElementById("modalTitle").innerText = `Editar Producto: ${sku}`;
       document.getElementById("editModal").classList.remove("hidden");
     }
 
@@ -363,7 +433,17 @@
       isEditing = false;
     }
 
-    // Guardar cambios hacia Google Sheets
+    function updatePreviewImage(url) {
+      if (url.includes("drive.google.com")) {
+        const idMatch = url.match(/\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
+        if (idMatch && idMatch[1]) {
+          url = `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
+        }
+      }
+      document.getElementById("editImgPreview").src = url || 'https://via.placeholder.com/150';
+    }
+
+    // Guardar o Crear Producto en Google Sheets
     async function saveItem(e) {
       e.preventDefault();
       const saveBtn = document.getElementById("saveBtn");
@@ -382,6 +462,7 @@
         "Stock Actual": document.getElementById("editStockActual").value,
         "Stock Mínimo": document.getElementById("editStockMinimo").value,
         "Estado": document.getElementById("editEstado").value,
+        "Comprado por": document.getElementById("editComprador").value,
         "Proveedor": document.getElementById("editProveedor").value
       };
 
@@ -405,16 +486,23 @@
       }
     }
 
-    // Filtrar en tiempo real por el buscador global
+    // Filtro de texto y categoría
     function filterItems() {
       const term = document.getElementById("searchInput").value.toLowerCase();
+      const selectedCategory = document.getElementById("categoryFilter").value;
+
       const filtered = inventoryData.filter(i => {
         const nom = (i["Nombre del Producto"] || "").toLowerCase();
         const sku = (i["SKU / ID"] || "").toLowerCase();
-        const cat = (i["Categoría"] || "").toLowerCase();
+        const cat = i["Categoría"] || "";
         const est = (i["Estado"] || "").toLowerCase();
         const prov = (i["Proveedor"] || "").toLowerCase();
-        return nom.includes(term) || sku.includes(term) || cat.includes(term) || est.includes(term) || prov.includes(term);
+        const comp = (i["Comprado por"] || i["Comprador"] || "").toLowerCase();
+
+        const matchesSearch = nom.includes(term) || sku.includes(term) || cat.toLowerCase().includes(term) || est.includes(term) || prov.includes(term) || comp.includes(term);
+        const matchesCategory = selectedCategory === "" || cat === selectedCategory;
+
+        return matchesSearch && matchesCategory;
       });
 
       if (currentView === "grid") {
@@ -424,7 +512,6 @@
       }
     }
 
-    // Inicialización y auto-sincronización cada 10s
     loadInventory();
     setInterval(() => {
       loadInventory();
