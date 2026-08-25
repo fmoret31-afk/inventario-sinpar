@@ -1,261 +1,259 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SIN PAR · Inventario de Joyería</title>
-
-  <!-- Google Fonts & Tailwind CSS -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario SINPAR - Joyas</title>
+  <!-- Tailwind CSS para diseño adaptable -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    :root {
-      --ink: #121014;
-      --ivory: #F6F1E7;
-      --paper: #FFFFFF;
-      --gold: #A9822F;
-      --goldpale: #F1E6CE;
-      --stone: #8B8378;
-      --textsec: #6E675C;
-      --line: rgba(18,16,20,0.09);
-      --line-gold: rgba(169,130,47,0.28);
-    }
-    body { font-family: 'Inter', sans-serif; background: var(--ivory); color: var(--ink); margin: 0; }
-    .sidebar { position: fixed; top: 0; left: 0; width: 232px; height: 100vh; background: var(--ink); color: var(--ivory); padding: 2rem 1.5rem; }
-    .main-content { margin-left: 232px; padding: 2rem 3rem; min-height: 100vh; }
-    
-    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .kpi-card { background: var(--paper); padding: 1.2rem; border: 1px solid var(--line); border-radius: 4px; }
-    .kpi-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--stone); text-transform: uppercase; }
-    .kpi-value { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 600; margin-top: 0.2rem; }
-
-    .table-wrapper { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-    th { background: var(--ivory); color: var(--textsec); font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; text-transform: uppercase; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--line); }
-    td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(18,16,20,0.05); }
-    tr:hover td { background: var(--goldpale); }
-
-    .btn { background: var(--ink); color: var(--ivory); padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: 0.2s; }
-    .btn:hover { background: var(--gold); }
-    .btn-secondary { background: transparent; border: 1px solid var(--line-gold); color: var(--ink); padding: 0.35rem 0.8rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
-    .btn-secondary:hover { background: var(--goldpale); }
-
-    #toast { visibility: hidden; position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--ivory); padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.8rem; z-index: 3000; opacity: 0; transition: 0.3s; }
-    #toast.show { visibility: visible; opacity: 1; }
-  </style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen p-4 font-sans text-gray-800">
 
-  <div id="toast"><span id="toastMsg">Notificación</span></div>
-
-  <aside class="sidebar">
-    <h1 style="font-family:'Fraunces',serif; font-size:1.4rem;">SIN <span style="color:var(--gold)">PAR</span></h1>
-    <p style="font-size:0.6rem; color:var(--stone); letter-spacing:0.1em; text-transform:uppercase;">Joyería Fina</p>
-  </aside>
-
-  <main class="main-content">
-    <!-- Topbar -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; padding-bottom:1rem; border-bottom:1px solid var(--line);">
-      <h2 style="font-family:'Fraunces',serif; font-size:1.2rem;">Gestión de Inventario</h2>
-      <div style="display:flex; align-items:center; gap:1rem;">
-        <span id="syncStatus" style="font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--textsec);">Conectando...</span>
-        <button class="btn-secondary" onclick="cargarDatos()">Actualizar</button>
+  <div class="max-w-7xl mx-auto">
+    <!-- Encabezado con buscador y estado de sincronización -->
+    <header class="bg-white rounded-xl shadow-sm p-4 mb-6 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <span>💎</span> Inventario SINPAR
+        </h1>
+        <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
+          <span id="syncDot" class="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+          Sincronizado en tiempo real con Google Sheets
+        </p>
       </div>
+
+      <div class="w-full md:w-1/2 flex gap-2">
+        <input 
+          type="text" 
+          id="searchInput" 
+          onkeyup="filterItems()" 
+          placeholder="Buscar por SKU, nombre o categoría..." 
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        >
+        <button onclick="loadInventory(true)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 text-sm font-semibold" title="Recargar manual">
+          🔄
+        </button>
+      </div>
+    </header>
+
+    <!-- Estado de Carga -->
+    <div id="loading" class="text-center py-16 bg-white rounded-xl shadow-sm border border-slate-200">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+      <p class="text-slate-600 font-medium">Cargando catálogo de joyas...</p>
     </div>
 
-    <!-- KPIs -->
-    <div class="kpis">
-      <div class="kpi-card"><div class="kpi-title">Total Ítems</div><div class="kpi-value" id="kpi-items">0</div></div>
-      <div class="kpi-card"><div class="kpi-title">Stock Total</div><div class="kpi-value" id="kpi-stock">0 u.</div></div>
-      <div class="kpi-card"><div class="kpi-title">Valor del Inventario</div><div class="kpi-value" id="kpi-valor">S/ 0.00</div></div>
-    </div>
+    <!-- Rejilla de Tarjetas -->
+    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  </div>
 
-    <!-- Formulario Agregar Producto -->
-    <div style="background:var(--paper); padding:1.2rem; border:1px solid var(--line); border-radius:4px; margin-bottom:1.5rem;">
-      <h3 style="font-family:'Fraunces',serif; font-size:0.95rem; margin-bottom:0.8rem;">Registrar Nuevo Producto</h3>
-      <form id="formNuevoProducto" onsubmit="agregarProducto(event)" style="display:grid; grid-template-columns: 1fr 1fr 2fr 1fr 1fr auto; gap:0.6rem; align-items:end;">
-        <div>
-          <label style="font-size:0.65rem; color:var(--stone);">SKU</label>
-          <input type="text" id="newSku" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+  <!-- Modal de Edición de Producto -->
+  <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-slate-800" id="modalTitle">Editar Producto</h2>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+      </div>
+
+      <form id="editForm" onsubmit="saveItem(event)">
+        <input type="hidden" id="editSku">
+
+        <div class="mb-3">
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre del Producto</label>
+          <input type="text" id="editNombre" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" required>
         </div>
-        <div>
-          <label style="font-size:0.65rem; color:var(--stone);">Categoría</label>
-          <input type="text" id="newCategoria" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+
+        <div class="mb-3">
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoría</label>
+          <input type="text" id="editCategoria" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
         </div>
-        <div>
-          <label style="font-size:0.65rem; color:var(--stone);">Nombre del Producto</label>
-          <input type="text" id="newNombre" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Precio Venta (PEN)</label>
+            <input type="text" id="editPrecio" placeholder="S/ 0.00" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Stock Actual</label>
+            <input type="number" id="editStock" min="0" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+          </div>
         </div>
-        <div>
-          <label style="font-size:0.65rem; color:var(--stone);">Precio (S/)</label>
-          <input type="number" step="0.01" id="newPrecio" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+
+        <div class="mb-5">
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado</label>
+          <select id="editEstado" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+            <option value="Disponible">Disponible</option>
+            <option value="Vendido">Vendido</option>
+            <option value="Pendiente Precio">Pendiente Precio</option>
+            <option value="No se encontró">No se encontró</option>
+          </select>
         </div>
-        <div>
-          <label style="font-size:0.65rem; color:var(--stone);">Stock Inicial</label>
-          <input type="number" id="newStock" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50">Cancelar</button>
+          <button type="submit" id="saveBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Guardar en Sheets</button>
         </div>
-        <button type="submit" class="btn">Guardar</button>
       </form>
     </div>
-
-    <!-- Tabla -->
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>SKU</th>
-            <th>Categoría</th>
-            <th>Nombre</th>
-            <th>Precio (S/)</th>
-            <th>Stock</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="inventoryTable">
-          <tr><td colspan="6" style="text-align:center; color:var(--stone); padding:2rem;">Cargando datos desde Google Sheets...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
+  </div>
 
   <script>
-    // PEGA AQUÍ LA URL QUE OBTENGAS AL DESPLEGAR EN GOOGLE APPS SCRIPT
-    const API_URL = "https://script.google.com/macros/s/AKfycbwNpwoPAzfFsUHlc1Lff7cmEdlrvoo15x3xHgvbrmWgvVL_77sZRbpWUR0mpZjChhJn/exec";
-    let inventario = [];
+    // ===== PEGA AQUÍ LA URL COMPLETA DE TU DESPLIEGUE DE APPS SCRIPT =====
+    const API_URL = "PEGAR_AQUI_TU_URL_DE_APPS_SCRIPT";
 
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      document.getElementById('toastMsg').textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
-    }
+    let inventoryData = [];
+    let isEditing = false;
 
-    async function cargarDatos() {
-      document.getElementById('syncStatus').textContent = 'Sincronizando...';
+    // Cargar datos desde Google Sheets
+    async function loadInventory(showStatus = false) {
+      if (isEditing) return; // Si estás editando en el modal, no interrumpir con la recarga
+
       try {
-        const resp = await fetch(API_URL);
-        const data = await resp.json();
+        if (showStatus) {
+          document.getElementById("syncDot").className = "w-2 h-2 rounded-full bg-yellow-500 inline-block animate-ping";
+        }
 
-        inventario = data.map(item => ({
-          sku: item.SKU || item.sku || '',
-          categoria: item.Categoria || item.categoria || '',
-          nombre: item.Nombre || item.nombre || '',
-          precio: parseFloat(item.Precio || item.precio || 0),
-          stock: parseInt(item.Stock || item.stock || 0)
-        }));
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        
+        inventoryData = data;
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("syncDot").className = "w-2 h-2 rounded-full bg-green-500 inline-block";
 
-        renderTabla();
-        actualizarKPIs();
-        document.getElementById('syncStatus').textContent = 'Sincronizado';
+        filterItems(); // Renderizar aplicando filtro activo si existe
       } catch (err) {
-        console.error(err);
-        showToast('Error al conectar con Google Sheets');
-        document.getElementById('syncStatus').textContent = 'Error de conexión';
+        console.error("Error cargando inventario:", err);
+        document.getElementById("syncDot").className = "w-2 h-2 rounded-full bg-red-500 inline-block";
       }
     }
 
-    async function enviarAGoogleSheets(payload) {
-      document.getElementById('syncStatus').textContent = 'Guardando...';
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        showToast('Guardado correctamente');
-        document.getElementById('syncStatus').textContent = 'Sincronizado';
-      } catch (err) {
-        console.error(err);
-        showToast('Error al guardar');
-        document.getElementById('syncStatus').textContent = 'Error al guardar';
-      }
-    }
+    // Dibujar las tarjetas en pantalla
+    function renderCards(items) {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
 
-    function renderTabla() {
-      const tbody = document.getElementById('inventoryTable');
-      if (inventario.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--stone); padding:2rem;">No hay productos registrados</td></tr>`;
+      if (items.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400">No se encontraron productos.</div>`;
         return;
       }
 
-      tbody.innerHTML = inventario.map(p => `
-        <tr>
-          <td style="font-family:'IBM Plex Mono',monospace; font-weight:500;">${p.sku}</td>
-          <td>${p.categoria}</td>
-          <td>
-            <input type="text" value="${p.nombre}" 
-                   style="background:transparent; border-bottom:1px dashed var(--stone); outline:none; width:100%;" 
-                   onchange="guardarNombre('${p.sku}', this.value)">
-          </td>
-          <td style="font-weight:600;">S/ ${p.precio.toFixed(2)}</td>
-          <td>${p.stock}</td>
-          <td>
-            <button class="btn" onclick="registrarVenta('${p.sku}')">Vender -1</button>
-          </td>
-        </tr>
-      `).join('');
-    }
+      items.forEach(item => {
+        const sku = item["SKU / ID"] || "-";
+        const nombre = item["Nombre del Producto"] || "Sin nombre";
+        const categoria = item["Categoría"] || "Sin Categoría";
+        const precio = item["Precio Venta (PEN)"] || "-";
+        const estado = item["Estado"] || "Disponible";
+        const imgUrl = item["Imagen_Directa"] || "https://via.placeholder.com/300x300?text=Sin+Imagen";
 
-    function actualizarKPIs() {
-      let totalStock = 0, totalValor = 0;
-      inventario.forEach(p => {
-        totalStock += p.stock;
-        totalValor += p.stock * p.precio;
+        const statusBg = estado === "Disponible" ? "bg-emerald-100 text-emerald-800" :
+                         estado === "Vendido" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-700";
+
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-slate-200 p-4 flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="relative w-full h-48 mb-3 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center">
+              <img src="${imgUrl}" alt="${nombre}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x300?text=Foto+No+Disponible'">
+              <span class="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-full ${statusBg}">
+                ${estado}
+              </span>
+            </div>
+            <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wide">${categoria}</span>
+            <h3 class="font-bold text-slate-800 text-sm mt-1 line-clamp-2">${nombre}</h3>
+            <p class="text-xs text-slate-400 mt-1">SKU: <span class="font-mono text-slate-600">${sku}</span></p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div>
+              <p class="text-[10px] text-slate-400">Precio</p>
+              <p class="font-extrabold text-slate-800 text-base">${precio}</p>
+            </div>
+            <button onclick="openModal('${sku}')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition-colors">
+              ✏️ Editar
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
       });
-      document.getElementById('kpi-items').textContent = inventario.length;
-      document.getElementById('kpi-stock').textContent = `${totalStock} u.`;
-      document.getElementById('kpi-valor').textContent = `S/ ${totalValor.toFixed(2)}`;
     }
 
-    function agregarProducto(e) {
+    // Abrir ventana emergente con los datos del ítem seleccionado
+    function openModal(sku) {
+      const item = inventoryData.find(i => String(i["SKU / ID"]).trim() === String(sku).trim());
+      if (!item) return;
+
+      isEditing = true;
+      document.getElementById("editSku").value = item["SKU / ID"] || "";
+      document.getElementById("editNombre").value = item["Nombre del Producto"] || "";
+      document.getElementById("editCategoria").value = item["Categoría"] || "";
+      document.getElementById("editPrecio").value = item["Precio Venta (PEN)"] || "";
+      document.getElementById("editStock").value = item["Stock Actual"] !== undefined ? item["Stock Actual"] : 1;
+      document.getElementById("editEstado").value = item["Estado"] || "Disponible";
+
+      document.getElementById("modalTitle").innerText = `Editar SKU: ${sku}`;
+      document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("editModal").classList.add("hidden");
+      isEditing = false;
+    }
+
+    // Enviar datos modificados a Google Sheets
+    async function saveItem(e) {
       e.preventDefault();
-      const nuevo = {
-        accion: 'crear',
-        sku: document.getElementById('newSku').value,
-        categoria: document.getElementById('newCategoria').value,
-        nombre: document.getElementById('newNombre').value,
-        precio: parseFloat(document.getElementById('newPrecio').value),
-        stock: parseInt(document.getElementById('newStock').value)
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.innerText = "Guardando en Sheets...";
+      saveBtn.disabled = true;
+
+      const payload = {
+        "SKU / ID": document.getElementById("editSku").value,
+        "Nombre del Producto": document.getElementById("editNombre").value,
+        "Categoría": document.getElementById("editCategoria").value,
+        "Precio Venta (PEN)": document.getElementById("editPrecio").value,
+        "Stock Actual": document.getElementById("editStock").value,
+        "Estado": document.getElementById("editEstado").value
       };
 
-      inventario.push({
-        sku: nuevo.sku,
-        categoria: nuevo.categoria,
-        nombre: nuevo.nombre,
-        precio: nuevo.precio,
-        stock: nuevo.stock
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        closeModal();
+        saveBtn.innerText = "Guardar en Sheets";
+        saveBtn.disabled = false;
+        
+        // Cargar inmediatamente los datos actualizados
+        await loadInventory(true);
+      } catch (err) {
+        alert("Ocurrió un error al intentar guardar los cambios.");
+        console.error(err);
+        saveBtn.innerText = "Guardar en Sheets";
+        saveBtn.disabled = false;
+      }
+    }
+
+    // Filtrar en tiempo real por buscador
+    function filterItems() {
+      const term = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = inventoryData.filter(i => {
+        const nom = (i["Nombre del Producto"] || "").toLowerCase();
+        const sku = (i["SKU / ID"] || "").toLowerCase();
+        const cat = (i["Categoría"] || "").toLowerCase();
+        return nom.includes(term) || sku.includes(term) || cat.includes(term);
       });
-
-      renderTabla();
-      actualizarKPIs();
-      enviarAGoogleSheets(nuevo);
-      document.getElementById('formNuevoProducto').reset();
+      renderCards(filtered);
     }
 
-    function guardarNombre(sku, nuevoNombre) {
-      const item = inventario.find(i => i.sku === sku);
-      if (item) {
-        item.nombre = nuevoNombre;
-        enviarAGoogleSheets({ accion: 'editar', sku: sku, nombre: nuevoNombre });
-      }
-    }
+    // --- INICIALIZACIÓN Y AUTO-SINCRONIZACIÓN ---
+    loadInventory();
 
-    function registrarVenta(sku) {
-      const item = inventario.find(i => i.sku === sku);
-      if (item && item.stock > 0) {
-        item.stock -= 1;
-        renderTabla();
-        actualizarKPIs();
-        enviarAGoogleSheets({ accion: 'venta', sku: sku, nuevoStock: item.stock });
-      } else {
-        showToast('Sin stock suficiente');
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', cargarDatos);
+    // Consultar cambios de la hoja de cálculo automáticamente cada 10 segundos
+    setInterval(() => {
+      loadInventory();
+    }, 10000);
   </script>
 </body>
 </html>
