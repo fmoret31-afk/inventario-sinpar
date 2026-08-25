@@ -72,7 +72,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: var(--champagne); }
     ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
@@ -80,749 +79,102 @@
     a, button { font-family: inherit; }
     :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-    /* =========================================================
-       SIDEBAR
-       ========================================================= */
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 232px;
-      height: 100vh;
+      position: fixed; top: 0; left: 0; width: 232px; height: 100vh;
       background: var(--ink);
       background-image: radial-gradient(circle at 50% -10%, rgba(169,130,47,0.14), transparent 55%);
-      color: var(--champagne);
-      z-index: 1000;
-      padding: 2.4rem 1.6rem 1.6rem;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid rgba(169,130,47,0.16);
-      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-      overflow-y: auto;
+      color: var(--champagne); z-index: 1000; padding: 2.4rem 1.6rem 1.6rem;
+      display: flex; flex-direction: column; border-right: 1px solid rgba(169,130,47,0.16);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y: auto;
     }
     .sidebar.collapsed { transform: translateX(-100%); }
 
     .sidebar-brand {
-      margin-bottom: 2.8rem;
-      padding-bottom: 1.7rem;
-      border-bottom: 1px solid rgba(169,130,47,0.16);
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
+      margin-bottom: 2.8rem; padding-bottom: 1.7rem; border-bottom: 1px solid rgba(169,130,47,0.16);
+      display: flex; align-items: center; gap: 0.85rem;
     }
     .brand-seal {
-      flex: 0 0 auto;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 1px solid var(--gold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
+      flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; position: relative;
     }
     .brand-seal::before {
-      content: '';
-      position: absolute;
-      inset: 4px;
-      border: 1px solid rgba(169,130,47,0.35);
-      border-radius: 50%;
+      content: ''; position: absolute; inset: 4px; border: 1px solid rgba(169,130,47,0.35); border-radius: 50%;
     }
-    .brand-seal span {
-      font-family: 'Fraunces', serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      color: var(--goldlight);
-    }
-    .sidebar-brand h1 {
-      font-family: 'Fraunces', serif;
-      font-size: 1.45rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      color: var(--ivory);
-      margin: 0;
-      line-height: 1.05;
-    }
+    .brand-seal span { font-family: 'Fraunces', serif; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.05em; color: var(--goldlight); }
+    .sidebar-brand h1 { font-family: 'Fraunces', serif; font-size: 1.45rem; font-weight: 600; letter-spacing: 0.03em; color: var(--ivory); margin: 0; line-height: 1.05; }
     .sidebar-brand h1 span { color: var(--gold); font-style: italic; font-weight: 500; }
-    .sidebar-brand .sub {
-      font-size: 0.56rem;
-      text-transform: uppercase;
-      letter-spacing: 0.22em;
-      color: var(--stone);
-      margin-top: 0.3rem;
-      display: block;
-      font-weight: 400;
-    }
+    .sidebar-brand .sub { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.22em; color: var(--stone); margin-top: 0.3rem; display: block; font-weight: 400; }
 
     .sidebar-nav { flex: 1; margin-top: 0.4rem; }
     .sidebar-nav .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.6rem 0.75rem;
-      border-radius: 2px;
-      color: var(--stone);
-      font-size: 0.78rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: none;
-      background: transparent;
-      width: 100%;
-      text-align: left;
-      position: relative;
-      font-family: 'Inter', sans-serif;
-      letter-spacing: 0.02em;
+      display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0.75rem; border-radius: 2px;
+      color: var(--stone); font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+      border: none; background: transparent; width: 100%; text-align: left; position: relative;
+      font-family: 'Inter', sans-serif; letter-spacing: 0.02em;
     }
-    .sidebar-nav .nav-item i {
-      width: 1.1rem;
-      font-size: 0.85rem;
-      color: rgba(232,221,202,0.4);
-      transition: color 0.2s;
-    }
-    .sidebar-nav .nav-item:hover {
-      color: var(--champagne);
-      background: rgba(169,130,47,0.06);
-    }
+    .sidebar-nav .nav-item i { width: 1.1rem; font-size: 0.85rem; color: rgba(232,221,202,0.4); transition: color 0.2s; }
+    .sidebar-nav .nav-item:hover { color: var(--champagne); background: rgba(169,130,47,0.06); }
     .sidebar-nav .nav-item:hover i { color: var(--gold); }
-    .sidebar-nav .nav-item.active {
-      color: var(--ivory);
-      background: rgba(169,130,47,0.05);
-    }
+    .sidebar-nav .nav-item.active { color: var(--ivory); background: rgba(169,130,47,0.05); }
     .sidebar-nav .nav-item.active i { color: var(--gold); }
-    .sidebar-nav .nav-item.active::before {
-      content: '';
-      position: absolute;
-      left: -1.6rem;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 2px;
-      height: 62%;
-      background: var(--gold);
-    }
-    .sidebar-nav .nav-item .badge-pend {
-      margin-left: auto;
-      background: rgba(169,130,47,0.16);
-      color: var(--goldlight);
-      font-size: 0.58rem;
-      padding: 0.08rem 0.5rem;
-      border-radius: 999px;
-      font-weight: 600;
-      font-family: 'IBM Plex Mono', monospace;
-    }
+    .sidebar-nav .nav-item.active::before { content: ''; position: absolute; left: -1.6rem; top: 50%; transform: translateY(-50%); width: 2px; height: 62%; background: var(--gold); }
+    .sidebar-nav .nav-item .badge-pend { margin-left: auto; background: rgba(169,130,47,0.16); color: var(--goldlight); font-size: 0.58rem; padding: 0.08rem 0.5rem; border-radius: 999px; font-weight: 600; font-family: 'IBM Plex Mono', monospace; }
 
-    .sidebar-footer {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-size: 0.65rem;
-      color: rgba(232,221,202,0.35);
-      border-top: 1px solid rgba(169,130,47,0.12);
-      padding-top: 1.1rem;
-      text-align: center;
-      letter-spacing: 0.04em;
-    }
+    .sidebar-footer { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.65rem; color: rgba(232,221,202,0.35); border-top: 1px solid rgba(169,130,47,0.12); padding-top: 1.1rem; text-align: center; letter-spacing: 0.04em; }
 
-    /* =========================================================
-       MAIN
-       ========================================================= */
-    .main-content {
-      margin-left: 232px;
-      padding: 2.2rem 3rem 3rem;
-      min-height: 100vh;
-      transition: margin 0.35s cubic-bezier(0.4,0,0.2,1);
-      background: var(--ivory);
-    }
+    .main-content { margin-left: 232px; padding: 2.2rem 3rem 3rem; min-height: 100vh; transition: margin 0.35s cubic-bezier(0.4,0,0.2,1); background: var(--ivory); }
     .main-content.expanded { margin-left: 0; }
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 1.4rem;
-      border-bottom: 1px solid var(--line);
-      margin-bottom: 2.2rem;
-    }
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.4rem; border-bottom: 1px solid var(--line); margin-bottom: 2.2rem; }
     .topbar-left { display: flex; align-items: center; gap: 1rem; }
-    .menu-toggle {
-      background: transparent; border: none; color: var(--textsec);
-      font-size: 1.15rem; cursor: pointer; padding: 0.25rem; display: none;
-    }
-    .topbar-title {
-      font-family: 'Fraunces', serif;
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: 0.01em;
-    }
+    .menu-toggle { background: transparent; border: none; color: var(--textsec); font-size: 1.15rem; cursor: pointer; padding: 0.25rem; display: none; }
+    .topbar-title { font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600; color: var(--ink); letter-spacing: 0.01em; }
     .topbar-right { display: flex; align-items: center; gap: 1.1rem; }
 
-    .search-box {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    .search-box i {
-      position: absolute;
-      left: 0.9rem;
-      font-size: 0.75rem;
-      color: var(--stone);
-      pointer-events: none;
-    }
-    .search-box input {
-      width: 220px;
-      padding: 0.42rem 0.9rem 0.42rem 2.1rem;
-      border: 1px solid var(--line-gold);
-      border-radius: 999px;
-      background: var(--paper);
-      font-size: 0.75rem;
-      font-family: 'Inter', sans-serif;
-      color: var(--ink);
-      outline: none;
-      transition: all 0.2s;
-    }
+    .search-box { position: relative; display: flex; align-items: center; }
+    .search-box i { position: absolute; left: 0.9rem; font-size: 0.75rem; color: var(--stone); pointer-events: none; }
+    .search-box input { width: 220px; padding: 0.42rem 0.9rem 0.42rem 2.1rem; border: 1px solid var(--line-gold); border-radius: 999px; background: var(--paper); font-size: 0.75rem; font-family: 'Inter', sans-serif; color: var(--ink); outline: none; transition: all 0.2s; }
     .search-box input::placeholder { color: var(--stone); }
     .search-box input:focus { border-color: var(--gold); width: 260px; box-shadow: 0 0 0 3px rgba(169,130,47,0.08); }
-    .search-box .search-clear {
-      position: absolute;
-      right: 0.6rem;
-      background: transparent;
-      border: none;
-      color: var(--stone);
-      cursor: pointer;
-      font-size: 0.7rem;
-      padding: 0.15rem;
-      display: none;
-    }
-    .search-box .search-clear:hover { color: var(--ink); }
-    .search-box.has-value .search-clear { display: block; }
-    @media (max-width: 768px) {
-      .search-box input { width: 140px; }
-      .search-box input:focus { width: 170px; }
-    }
-    @media (max-width: 560px) {
-      .search-box { order: 3; width: 100%; }
-      .search-box input { width: 100%; }
-      .search-box input:focus { width: 100%; }
-      .topbar-right { flex-wrap: wrap; justify-content: flex-end; }
-    }
-    .sync-status {
-      font-size: 0.68rem; color: var(--textsec);
-      display: flex; align-items: center; gap: 0.5rem;
-      font-family: 'IBM Plex Mono', monospace;
-      letter-spacing: 0.02em;
-    }
+
+    .sync-status { font-size: 0.68rem; color: var(--textsec); display: flex; align-items: center; gap: 0.5rem; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em; }
     .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); display: inline-block; }
     .sync-dot.pulse { animation: pulse 1.6s infinite; }
     .sync-dot.error { background: var(--red); }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
 
-    .pendiente-badge {
-      background: var(--goldpale);
-      color: #7C5D1E;
-      font-size: 0.66rem;
-      font-weight: 600;
-      padding: 0.22rem 0.85rem;
-      border-radius: 999px;
-      display: flex; align-items: center; gap: 0.4rem;
-      border: 1px solid var(--line-gold);
-      font-family: 'IBM Plex Mono', monospace;
-    }
-
-    .btn-refresh {
-      background: transparent;
-      border: 1px solid var(--line-gold);
-      padding: 0.32rem 0.9rem;
-      border-radius: 999px;
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-      color: var(--textsec);
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex; align-items: center; gap: 0.45rem;
-    }
+    .btn-refresh { background: transparent; border: 1px solid var(--line-gold); padding: 0.32rem 0.9rem; border-radius: 999px; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.03em; color: var(--textsec); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.45rem; }
     .btn-refresh:hover { background: var(--goldpale); border-color: var(--gold); color: var(--ink); }
 
     .tab-content { display: none; animation: fadeIn 0.35s ease; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
 
-    /* =========================================================
-       HERO
-       ========================================================= */
-    .hero-wrap {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 3rem;
-      align-items: center;
-      padding: 1rem 0 2.8rem;
-      border-bottom: 1px solid var(--line);
-      margin-bottom: 2.6rem;
-    }
-    .hero-text .eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 0.9rem;
-    }
-    .hero-text .eyebrow::before { content: '— '; }
-    .hero h1 {
-      font-family: 'Fraunces', serif;
-      font-size: 3.6rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      color: var(--ink);
-      margin: 0;
-      line-height: 0.98;
-    }
-    .hero h1 span { color: var(--gold); font-style: italic; font-weight: 500; }
-    .hero .tagline {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-weight: 400;
-      font-size: 1.15rem;
-      color: var(--textsec);
-      margin-top: 1.1rem;
-      max-width: 30ch;
-      line-height: 1.5;
-    }
-
-    /* Vitrine (pieza destacada) — elemento de firma visual */
-    .featured {
-      position: relative;
-      background: var(--paper);
-      border-radius: 2px;
-      padding: 1.6rem;
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-      border: 1px solid var(--line);
-      box-shadow: 0 18px 50px -22px rgba(18,16,20,0.18);
-    }
-    .featured-img {
-      flex: 0 0 168px;
-      height: 168px;
-      border-radius: 1px;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 40%, rgba(169,130,47,0.16), transparent 70%),
-        var(--goldpale);
-      position: relative;
-    }
-    .featured-img::after {
-      content: '';
-      position: absolute; inset: 0; pointer-events: none;
-      background:
-        linear-gradient(90deg, var(--gold) 0 16px, transparent 0) 0 0/20px 2px no-repeat,
-        linear-gradient(90deg, transparent 0, var(--gold) 0 16px) 100% 0/20px 2px no-repeat,
-        linear-gradient(90deg, var(--gold) 0 16px, transparent 0) 0 100%/20px 2px no-repeat,
-        linear-gradient(90deg, transparent 0, var(--gold) 0 16px) 100% 100%/20px 2px no-repeat,
-        linear-gradient(0deg, var(--gold) 0 16px, transparent 0) 0 0/2px 20px no-repeat,
-        linear-gradient(0deg, var(--gold) 0 16px, transparent 0) 100% 0/2px 20px no-repeat,
-        linear-gradient(0deg, transparent 0, var(--gold) 0 16px) 0 100%/2px 20px no-repeat,
-        linear-gradient(0deg, transparent 0, var(--gold) 0 16px) 100% 100%/2px 20px no-repeat;
-      opacity: 0.55;
-    }
-    .featured-img img { width: 100%; height: 100%; object-fit: cover; position: relative; }
-    .featured-info { flex: 1; min-width: 0; }
-    .featured-info .category {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--stone);
-    }
-    .featured-info h3 {
-      font-family: 'Fraunces', serif;
-      font-size: 1.45rem; font-weight: 600; margin: 0.25rem 0 0.35rem; color: var(--ink);
-      line-height: 1.15;
-    }
-    .featured-info .price {
-      font-family: 'Fraunces', serif; font-size: 1.35rem; color: var(--gold); font-weight: 600;
-    }
-    .featured-info .status { font-size: 0.72rem; color: var(--textsec); margin-top: 0.4rem; }
-    .featured-info .status .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 0.4rem; }
-    .dot-available { background: var(--green); }
-    .dot-sold { background: var(--gray); }
-    .dot-pending { background: var(--amber); }
-
-    /* =========================================================
-       KPI STRIP
-       ========================================================= */
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      margin-bottom: 2.6rem;
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 2px;
-    }
-    .kpi-item {
-      padding: 1.15rem 1.5rem;
-      border-left: 1px solid var(--line);
-    }
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 2.6rem; background: var(--paper); border: 1px solid var(--line); border-radius: 2px; }
+    .kpi-item { padding: 1.15rem 1.5rem; border-left: 1px solid var(--line); }
     .kpi-item:first-child { border-left: none; }
-    .kpi-item .label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--stone); font-weight: 500;
-    }
-    .kpi-item .value {
-      font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 600; color: var(--ink); margin-top: 0.15rem;
-    }
+    .kpi-item .label { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--stone); font-weight: 500; }
+    .kpi-item .value { font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 600; color: var(--ink); margin-top: 0.15rem; }
 
-    /* =========================================================
-       CHARTS
-       ========================================================= */
-    .chart-container {
-      background: var(--paper);
-      border-radius: 2px;
-      padding: 1.6rem 1.7rem;
-      border: 1px solid var(--line);
-      margin-bottom: 2rem;
-    }
-    .chart-container .chart-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 1.3rem; flex-wrap: wrap; gap: 0.8rem;
-    }
-    .chart-container .chart-header h4 {
-      font-family: 'Fraunces', serif; font-size: 1.05rem; font-weight: 600; color: var(--ink); margin: 0;
-    }
-    .chart-tabs { display: flex; gap: 1.1rem; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
-    .chart-tab {
-      background: transparent; border: none; border-bottom: 2px solid transparent;
-      padding: 0 0 0.55rem; margin-bottom: -1px;
-      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.03em; color: var(--stone);
-      cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
-      text-transform: uppercase;
-    }
-    .chart-tab:hover { color: var(--ink); }
-    .chart-tab.active { color: var(--ink); border-bottom-color: var(--gold); }
-
-    /* =========================================================
-       COLECCIÓN — tarjetas
-       ========================================================= */
-    .collection-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-    .product-card {
-      background: var(--paper);
-      border-radius: 2px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 10px rgba(18,16,20,0.02);
-    }
-    .product-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 20px 40px -18px rgba(18,16,20,0.2);
-      border-color: var(--line-gold);
-    }
-    .product-card .card-img {
-      width: 100%; aspect-ratio: 1/1;
-      background: radial-gradient(circle at 50% 40%, rgba(169,130,47,0.13), transparent 70%), var(--goldpale);
-      overflow: hidden;
-      position: relative;
-    }
-    .product-card .card-img::after {
-      content: '';
-      position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s;
-      background:
-        linear-gradient(90deg, var(--gold) 0 14px, transparent 0) 0 0/18px 2px no-repeat,
-        linear-gradient(90deg, transparent 0, var(--gold) 0 14px) 100% 0/18px 2px no-repeat,
-        linear-gradient(90deg, var(--gold) 0 14px, transparent 0) 0 100%/18px 2px no-repeat,
-        linear-gradient(90deg, transparent 0, var(--gold) 0 14px) 100% 100%/18px 2px no-repeat,
-        linear-gradient(0deg, var(--gold) 0 14px, transparent 0) 0 0/2px 18px no-repeat,
-        linear-gradient(0deg, var(--gold) 0 14px, transparent 0) 100% 0/2px 18px no-repeat,
-        linear-gradient(0deg, transparent 0, var(--gold) 0 14px) 0 100%/2px 18px no-repeat,
-        linear-gradient(0deg, transparent 0, var(--gold) 0 14px) 100% 100%/2px 18px no-repeat;
-    }
-    .product-card:hover .card-img::after { opacity: 0.6; }
-    .product-card .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; position: relative; }
-    .product-card:hover .card-img img { transform: scale(1.035); }
-    .product-card .card-body { padding: 0.9rem 1.1rem 1.1rem; }
-    .product-card .card-body .name {
-      font-family: 'Fraunces', serif; font-size: 1.02rem; font-weight: 600; color: var(--ink); margin: 0 0 0.1rem;
-      line-height: 1.2;
-    }
-    .name-edit-wrap { position: relative; margin: 0 0 0.1rem; }
-    .name-edit-input {
-      font-family: 'Fraunces', serif; font-size: 1.02rem; font-weight: 600; color: var(--ink);
-      line-height: 1.2; width: 100%; background: transparent; border: none; border-bottom: 1px dashed transparent;
-      padding: 0 1.15rem 0.1rem 0; outline: none; transition: border-color 0.2s; cursor: text;
-    }
-    .name-edit-input:hover, .name-edit-input:focus { border-bottom-color: var(--line-gold); }
-    .name-edit-input:focus { border-bottom-style: solid; border-bottom-color: var(--gold); }
-    .name-edit-wrap .name-edit-icon {
-      position: absolute; right: 0; top: 2px; width: 0.72em; height: 0.72em; color: var(--stone);
-      opacity: 0; transition: opacity 0.2s; pointer-events: none;
-    }
-    .name-edit-wrap:hover .name-edit-icon { opacity: 1; }
-    .product-card .card-body .category {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone);
-    }
-    .product-card .card-body .price {
-      font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 600; color: var(--gold); margin: 0.35rem 0 0.3rem;
-    }
-    .product-card .card-body .status {
-      font-size: 0.68rem; color: var(--textsec); display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem;
-    }
-    .product-card .card-body .actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
-
-    .btn-action {
-      background: transparent;
-      border: 1px solid var(--line-gold);
-      border-radius: 999px;
-      padding: 0.2rem 0.65rem;
-      font-size: 0.62rem;
-      font-weight: 500;
-      color: var(--textsec);
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex; align-items: center; gap: 0.35rem;
-    }
-    .btn-action:hover { background: var(--goldpale); border-color: var(--gold); color: var(--ink); }
-    .btn-action.sell { border-color: var(--ink); color: var(--ink); background: var(--ink); color: var(--ivory); }
-    .btn-action.sell:hover { background: var(--gold); border-color: var(--gold); color: var(--ink); }
-    .btn-action.pay { border-color: var(--stone); color: var(--textsec); }
-    .btn-action.pay:hover { background: rgba(139,131,120,0.08); }
-    .btn-action.undo { border-color: var(--red); color: var(--red); }
-    .btn-action.undo:hover { background: rgba(140,59,59,0.06); }
-    .btn-action.paid { border-color: var(--green); color: var(--green); }
-    .btn-action.paid:hover { background: rgba(60,122,92,0.06); }
-    .btn-action.edit { border-color: var(--gold); color: var(--gold); }
-    .btn-action.edit:hover { background: var(--goldpale); color: var(--ink); }
-
-    .buyer-input {
-      width: 64px;
-      padding: 0.18rem 0.4rem;
-      font-size: 0.62rem;
-      border: 1px solid var(--line-gold);
-      border-radius: 999px;
-      background: var(--paper);
-      transition: all 0.2s;
-      font-family: 'Inter', sans-serif;
-      outline: none;
-      color: var(--ink);
-    }
-    .buyer-input:focus { border-color: var(--gold); }
-    .buyer-input::placeholder { color: var(--stone); }
-
-    /* =========================================================
-       TABLAS
-       ========================================================= */
-    .table-wrapper {
-      background: var(--paper);
-      border-radius: 2px;
-      border: 1px solid var(--line);
-      overflow: hidden;
-      margin-top: 1rem;
-    }
+    .table-wrapper { background: var(--paper); border-radius: 2px; border: 1px solid var(--line); overflow: hidden; margin-top: 1rem; }
     .table-wrapper table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-    .table-wrapper th {
-      background: var(--ivory);
-      color: var(--textsec);
-      font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
-      font-size: 0.6rem; padding: 0.7rem 0.9rem; text-align: left;
-      border-bottom: 1px solid var(--line);
-      font-family: 'IBM Plex Mono', monospace;
-    }
-    .table-wrapper td {
-      padding: 0.65rem 0.9rem;
-      border-bottom: 1px solid rgba(18,16,20,0.05);
-      vertical-align: middle;
-      color: var(--ink);
-    }
+    .table-wrapper th { background: var(--ivory); color: var(--textsec); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.6rem; padding: 0.7rem 0.9rem; text-align: left; border-bottom: 1px solid var(--line); font-family: 'IBM Plex Mono', monospace; }
+    .table-wrapper td { padding: 0.65rem 0.9rem; border-bottom: 1px solid rgba(18,16,20,0.05); vertical-align: middle; color: var(--ink); }
     .table-wrapper tr:hover td { background: var(--goldpale); }
-    .table-wrapper tr:last-child td { border-bottom: none; }
-    #inventoryTableScroll thead th { position: sticky; top: 0; z-index: 2; }
 
-    .img-thumb { width: 42px; height: 42px; object-fit: cover; border-radius: 1px; border: 1px solid var(--line-gold); }
+    .btn-action { background: transparent; border: 1px solid var(--line-gold); border-radius: 999px; padding: 0.2rem 0.65rem; font-size: 0.62rem; font-weight: 500; color: var(--textsec); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
+    .btn-action:hover { background: var(--goldpale); border-color: var(--gold); color: var(--ink); }
+    .btn-action.sell { border-color: var(--ink); background: var(--ink); color: var(--ivory); }
+    .btn-action.sell:hover { background: var(--gold); border-color: var(--gold); color: var(--ink); }
 
-    .status-dot { display: inline-flex; align-items: center; gap: 0.45rem; }
-    .status-dot .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-    .dot-green { background: var(--green); }
-    .dot-amber { background: var(--amber); }
-    .dot-red { background: var(--red); }
-    .dot-gray { background: var(--gray); }
-
-    /* SKU chip como sello de hallmark */
-    .sku-chip {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      color: var(--gold);
-      border: 1px solid var(--line-gold);
-      background: var(--goldpale);
-      padding: 0.1rem 0.5rem;
-      border-radius: 3px;
-      letter-spacing: 0.02em;
-    }
-
-    /* =========================================================
-       MODAL
-       ========================================================= */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(18,16,20,0.55);
-      backdrop-filter: blur(5px);
-      z-index: 2000; align-items: center; justify-content: center; padding: 1rem;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-box {
-      background: var(--paper);
-      max-width: 480px; width: 100%;
-      padding: 2.2rem 2.5rem;
-      border-radius: 2px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.25);
-      position: relative;
-      animation: modalFade 0.3s ease;
-      border-top: 2px solid var(--gold);
-    }
-    @keyframes modalFade { from { opacity: 0; transform: scale(0.98) translateY(10px);} to { opacity: 1; transform: scale(1) translateY(0);} }
-    .modal-close {
-      position: absolute; top: 1.1rem; right: 1.3rem;
-      background: transparent; border: none; font-size: 1.1rem; color: var(--stone); cursor: pointer;
-    }
-    .modal-close:hover { color: var(--ink); }
-    .modal-box h2 {
-      font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin-bottom: 0.3rem;
-    }
-    .modal-box .sub { font-size: 0.82rem; color: var(--textsec); margin-bottom: 1.6rem; }
-    .modal-box label { font-size: 0.68rem; font-weight: 600; color: var(--ink); display: block; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .modal-box input {
-      width: 100%; padding: 0.55rem 0.75rem;
-      border: 1px solid var(--line-gold);
-      border-radius: 2px; font-size: 0.85rem; background: var(--ivory);
-      transition: border 0.2s; font-family: 'Inter', sans-serif; outline: none; color: var(--ink);
-    }
-    .modal-box input:focus { border-color: var(--gold); background: var(--paper); }
-    .modal-box .btn-submit {
-      width: 100%; margin-top: 1.1rem; padding: 0.65rem;
-      background: var(--ink); color: var(--ivory); border: none; border-radius: 2px;
-      font-weight: 600; font-size: 0.82rem; letter-spacing: 0.03em; text-transform: uppercase;
-      cursor: pointer; transition: background 0.2s; font-family: 'Inter', sans-serif;
-    }
-    .modal-box .btn-submit:hover { background: var(--gold); color: var(--ink); }
-
-    /* =========================================================
-       TOAST
-       ========================================================= */
-    #toast {
-      visibility: hidden; position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-      background: var(--ink); color: var(--ivory); padding: 0.85rem 1.9rem; border-radius: 999px;
-      font-size: 0.85rem; box-shadow: 0 10px 40px rgba(0,0,0,0.28);
-      border: 1px solid var(--line-gold); z-index: 3000; opacity: 0;
-      transition: opacity 0.3s, visibility 0.3s; font-family: 'Inter', sans-serif; font-weight: 500; white-space: nowrap;
-    }
+    #toast { visibility: hidden; position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--ivory); padding: 0.85rem 1.9rem; border-radius: 999px; font-size: 0.85rem; box-shadow: 0 10px 40px rgba(0,0,0,0.28); border: 1px solid var(--line-gold); z-index: 3000; opacity: 0; transition: opacity 0.3s, visibility 0.3s; font-family: 'Inter', sans-serif; }
     #toast.show { visibility: visible; opacity: 1; }
-    #toast i { color: var(--gold); margin-right: 0.5rem; }
-
-    /* =========================================================
-       FILTROS
-       ========================================================= */
-    .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 1.5rem; }
-    .filter-btn {
-      background: transparent; border: 1px solid var(--line);
-      border-radius: 999px; padding: 0.22rem 0.85rem; font-size: 0.62rem; font-weight: 500;
-      color: var(--textsec); cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
-    }
-    .filter-btn:hover { border-color: var(--gold); color: var(--ink); }
-    .filter-btn.active { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
-    .filter-select {
-      border: 1px solid var(--line); border-radius: 999px; padding: 0.22rem 0.85rem; font-size: 0.62rem;
-      background: var(--paper); color: var(--ink); font-family: 'Inter', sans-serif; outline: none;
-    }
-    #seguimientoTable .filter-select { width: fit-content; min-width: 130px; }
-
-    /* Encabezados de sección */
-    .section-title {
-      font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 0.15rem; color: var(--ink);
-    }
-    .section-sub { color: var(--textsec); margin: 0 0 1.4rem; font-size: 0.85rem; }
-
-    /* =========================================================
-       RESPONSIVE
-       ========================================================= */
-    @media (max-width: 900px) {
-      .hero-wrap { grid-template-columns: 1fr; gap: 2rem; }
-      .hero h1 { font-size: 2.8rem; }
-    }
-    @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); width: 210px; }
-      .sidebar.open { transform: translateX(0); }
-      .main-content { margin-left: 0; padding: 1.5rem; }
-      .menu-toggle { display: block; }
-      .topbar-title { font-size: 1rem; }
-      .hero h1 { font-size: 2.3rem; }
-      .featured { flex-direction: column; text-align: center; }
-      .featured-img { flex: none; width: 100%; height: 200px; }
-      .collection-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-      .kpis { grid-template-columns: 1fr 1fr; }
-      .kpi-item:nth-child(3) { border-left: none; }
-    }
-    @media (max-width: 480px) {
-      .collection-grid { grid-template-columns: 1fr 1fr; }
-      .kpis { grid-template-columns: 1fr; }
-      .kpi-item { border-left: none !important; border-top: 1px solid var(--line); }
-      .kpi-item:first-child { border-top: none; }
-      .hero h1 { font-size: 1.9rem; }
-    }
   </style>
 </head>
 <body>
 
-  <!-- TOAST -->
-  <div id="toast"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9Z"/><path d="M2 9h20"/><path d="M9.5 3 7.5 9l4.5 12 4.5-12-2-6"/></svg> <span id="toastMessage">Venta registrada</span></div>
+  <div id="toast"><span id="toastMessage">Operación exitosa</span></div>
 
-  <!-- MODAL -->
-  <div class="modal-overlay" id="followUpModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeFollowUp()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-      <h2>Tu pieza está casi lista</h2>
-      <p class="sub">Completa tus datos para preparar cuidadosamente tu pedido.</p>
-      <form id="followUpForm" onsubmit="submitFollowUp(event)">
-        <label>Nombre completo</label>
-        <input type="text" id="fuNombre" placeholder="Isabella Valdez" required>
-        <label style="margin-top:0.8rem;">Correo electrónico</label>
-        <input type="email" id="fuEmail" placeholder="isabella@correo.com" required>
-        <label style="margin-top:0.8rem;">Teléfono</label>
-        <input type="tel" id="fuTelefono" placeholder="+51 987 654 321" required>
-        <label style="margin-top:0.8rem;">Dirección de envío</label>
-        <input type="text" id="fuDireccion" placeholder="Calle, número, ciudad" required>
-        <button type="submit" class="btn-submit">Confirmar pedido</button>
-      </form>
-      <p style="font-size:0.62rem;color:var(--stone);text-align:center;margin-top:0.9rem;">Tus datos serán tratados con total confidencialidad.</p>
-    </div>
-  </div>
-
-  <!-- MODAL EDITAR VENTA -->
-  <div class="modal-overlay" id="editVentaModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="cerrarEditarVenta()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-      <h2>Editar venta</h2>
-      <p class="sub">Corrige los datos de esta venta registrada.</p>
-      <form id="editVentaForm" onsubmit="guardarEdicionVenta(event)">
-        <input type="hidden" id="evSku">
-        <label>Joya</label>
-        <input type="text" id="evNombre" disabled style="opacity:0.6;">
-        <label style="margin-top:0.8rem;">Comprador</label>
-        <input type="text" id="evComprador" placeholder="Nombre del comprador" required>
-        <label style="margin-top:0.8rem;">Precio de venta (S/)</label>
-        <input type="number" id="evPrecio" step="0.01" min="0" required>
-        <label style="margin-top:0.8rem;">Fecha y hora de venta</label>
-        <input type="datetime-local" id="evFecha" required>
-        <button type="submit" class="btn-submit">Guardar cambios</button>
-      </form>
-      <button type="button" onclick="eliminarVenta(document.getElementById('evSku').value, true)" style="width:100%;margin-top:0.6rem;padding:0.6rem;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:2px;font-weight:600;font-size:0.78rem;letter-spacing:0.03em;text-transform:uppercase;cursor:pointer;font-family:'Inter', sans-serif;">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg> Eliminar esta venta
-      </button>
-    </div>
-  </div>
-
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-seal"><span>SP</span></div>
@@ -832,1363 +184,186 @@
       </div>
     </div>
     <nav class="sidebar-nav">
-      <button class="nav-item active" data-tab="inicio" onclick="switchTab('inicio')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9Z"/><path d="M2 9h20"/><path d="M9.5 3 7.5 9l4.5 12 4.5-12-2-6"/></svg> Inicio</button>
-      <button class="nav-item" data-tab="coleccion" onclick="switchTab('coleccion')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="10.5" width="7" height="7" rx="1"/><rect x="13" y="10.5" width="7" height="7" rx="1"/><rect x="8.2" y="3.5" width="7" height="7" rx="1"/></svg> Colección</button>
-      <button class="nav-item" data-tab="ventas" onclick="switchTab('ventas')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M4 19V5"/><path d="M6 15l4-5 3 3 6-8"/></svg> Ventas</button>
-      <button class="nav-item" data-tab="pendientes" onclick="switchTab('pendientes')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg> Pendientes <span class="badge-pend" id="sidebarPendCount">0</span></button>
-      <button class="nav-item" data-tab="seguimiento" onclick="switchTab('seguimiento')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11v8H2z"/><path d="M13 11h4l3 3v2h-7z"/><circle cx="6" cy="18.2" r="1.6"/><circle cx="17" cy="18.2" r="1.6"/></svg> Seguimiento</button>
-      <button class="nav-item" data-tab="analisis" onclick="switchTab('analisis')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4"/><rect x="5.5" y="12" width="3" height="8"/><rect x="11" y="8" width="3" height="12"/><rect x="16.5" y="4" width="3" height="16"/></svg> Análisis</button>
+      <button class="nav-item active" onclick="switchTab('inicio')">Inicio</button>
+      <button class="nav-item" onclick="switchTab('coleccion')">Colección</button>
+      <button class="nav-item" onclick="switchTab('ventas')">Ventas</button>
     </nav>
     <div class="sidebar-footer">Maison SIN PAR</div>
   </aside>
 
-  <!-- MAIN -->
   <div class="main-content" id="mainContent">
-    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" onclick="toggleSidebar()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
         <span class="topbar-title" id="pageTitle">Inicio</span>
       </div>
       <div class="topbar-right">
-        <div class="search-box" id="searchBox">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input type="text" id="searchInput" placeholder="Buscar pieza, SKU o categoría…" oninput="onSearchInput(this.value)">
-          <button class="search-clear" onclick="clearSearch()" title="Limpiar búsqueda"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-        </div>
         <div class="sync-status">
           <span class="sync-dot pulse" id="syncDot"></span>
-          <span id="syncStatus">Sincronizado</span>
+          <span id="syncStatus">Sincronizando con Google Sheets...</span>
         </div>
-        <div id="pendienteTopBadge" class="pendiente-badge hidden">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg> <span id="pendienteTopCount">0</span> pendientes
-        </div>
-        <button class="btn-refresh" onclick="cargarDatos()"><svg id="btn-refresh-icon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 1 0 19 15"/><path d="M20 5v6h-6"/></svg> Actualizar</button>
+        <button class="btn-refresh" onclick="cargarDatos()"><svg id="btn-refresh-icon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11A8 8 0 1 0 19 15"/><path d="M20 5v6h-6"/></svg> Actualizar</button>
       </div>
     </div>
 
-    <!-- CONTENIDO DE TABS -->
     <div id="pageContent">
-
-      <!-- INICIO -->
       <div id="tab-inicio" class="tab-content active">
-        <div class="hero-wrap">
-          <div class="hero-text">
-            <div class="eyebrow">Colección privada</div>
-            <div class="hero">
-              <h1>SIN <span>Par</span></h1>
-              <div class="tagline">Piezas que hablan de tu esencia.</div>
-            </div>
-          </div>
-
-          <!-- Colección destacada (vitrina) -->
-          <div id="featuredContainer" class="featured">
-            <div class="featured-img"><img id="featuredImg" src="" alt="Joya destacada"></div>
-            <div class="featured-info">
-              <div class="category" id="featuredCategory">Categoría</div>
-              <h3 id="featuredName">Nombre de la joya</h3>
-              <div class="price" id="featuredPrice">S/ 0.00</div>
-              <div class="status"><span class="dot dot-available" id="featuredDot"></span><span id="featuredStatus">Disponible</span></div>
-              <button class="btn-action sell" style="margin-top:0.7rem;" onclick="verPiezaDestacada()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg> Ver pieza</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPIs -->
         <div class="kpis">
           <div class="kpi-item"><div class="label">Piezas</div><div class="value" id="kpi-total-items">0</div></div>
-          <div class="kpi-item"><div class="label">Stock</div><div class="value" id="kpi-total-stock">0 u.</div></div>
-          <div class="kpi-item"><div class="label">Valor de colección</div><div class="value" id="kpi-total-valor">S/ 0.00</div></div>
-          <div class="kpi-item"><div class="label">Por cobrar</div><div class="value" id="kpi-pendientes-pago">0</div></div>
+          <div class="kpi-item"><div class="label">Stock Total</div><div class="value" id="kpi-total-stock">0 u.</div></div>
+          <div class="kpi-item"><div class="label">Valor Inventario</div><div class="value" id="kpi-total-valor">S/ 0.00</div></div>
+          <div class="kpi-item"><div class="label">Estado API</div><div class="value" style="font-size:1rem; margin-top:0.5rem;" id="kpi-api-status">Conectado</div></div>
         </div>
 
-        <!-- Análisis rápido -->
-        <div class="chart-container">
-          <div class="chart-header">
-            <h4>Análisis de la colección</h4>
-            <button class="btn-refresh" id="btnToggleGraficos" onclick="toggleGraficosInicio()" title="Mostrar u ocultar los gráficos">
-              <span id="iconToggleGraficos"></span>
-              <span id="txtToggleGraficos">Ocultar gráficos</span>
-            </button>
-          </div>
-          <div id="chartBodyInicio">
-            <div class="chart-tabs">
-              <button class="chart-tab active" data-chart="category" onclick="selectChart('category')">Categorías</button>
-              <button class="chart-tab" data-chart="value" onclick="selectChart('value')">Valor</button>
-              <button class="chart-tab" data-chart="status" onclick="selectChart('status')">Estados</button>
-              <button class="chart-tab" data-chart="stock" onclick="selectChart('stock')">Stock</button>
-              <button class="chart-tab" data-chart="sales" onclick="selectChart('sales')">Ventas</button>
-            </div>
-            <div class="h-64 w-full relative">
-              <canvas id="activeChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tabla resumen (últimas piezas) -->
         <div class="table-wrapper">
-          <div style="padding:0.9rem 1.1rem;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.6rem;">
-            <span id="tablaInicioTitulo" style="font-family:'Fraunces',serif;font-weight:600;">Últimas piezas</span>
-            <div style="display:flex;align-items:center;gap:0.8rem;">
-              <span class="text-xs text-stone" id="rowCount">0 registros</span>
-              <button class="btn-refresh" id="btnVerTodasInicio" onclick="toggleVerTodasInicio()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.1"/><circle cx="4" cy="12" r="1.1"/><circle cx="4" cy="18" r="1.1"/></svg> Ver todos</button>
-            </div>
+          <div style="padding:0.9rem 1.1rem; border-bottom:1px solid var(--line);">
+            <span style="font-family:'Fraunces',serif; font-weight:600;">Inventario en Tiempo Real</span>
           </div>
-          <div style="overflow-x:auto;" id="inventoryTableScroll">
-            <table>
-              <thead><tr><th>Imagen</th><th>SKU</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
-              <tbody id="inventoryTable"><tr><td colspan="7" class="text-center py-6 text-stone">Cargando...</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- COLECCIÓN -->
-      <div id="tab-coleccion" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
-          <div>
-            <h2 class="section-title" style="margin-bottom:0;">Colección</h2>
-            <p class="section-sub" id="coleccionSub" style="margin:0.2rem 0 0;"></p>
-          </div>
-          <div class="filters" style="margin:0;">
-            <button class="filter-btn active" data-filter="activos" onclick="setFilter('activos')">Activos</button>
-            <button class="filter-btn" data-filter="vendidos" onclick="setFilter('vendidos')">Vendidos</button>
-            <button class="filter-btn" data-filter="por-pagar" onclick="setFilter('por-pagar')">Por pagar</button>
-            <button class="filter-btn" data-filter="critico" onclick="setFilter('critico')">Crítico</button>
-            <button class="filter-btn" data-filter="todos" onclick="setFilter('todos')">Todos</button>
-            <select class="filter-select" id="categoriaFilter" onchange="setCategoria(this.value)"><option value="">Todas las categorías</option></select>
-            <button onclick="limpiarFiltros()" class="filter-btn" style="border-color:transparent;">Limpiar</button>
-            <span id="sinImagenCount" class="text-xs text-stone hidden">0 sin imagen</span>
-          </div>
-        </div>
-        <div id="collectionGrid" class="collection-grid"></div>
-      </div>
-
-      <!-- VENTAS -->
-      <div id="tab-ventas" class="tab-content">
-        <h2 class="section-title">Ventas</h2>
-        <p class="section-sub">Movimiento de la colección</p>
-        <div class="table-wrapper">
           <div style="overflow-x:auto;">
             <table>
-              <thead><tr><th>Fecha</th><th>Joya</th><th>Comprador</th><th>Monto</th><th>Acciones</th></tr></thead>
-              <tbody id="ventasTable"><tr><td colspan="5" class="text-center py-6 text-stone">No hay ventas registradas</td></tr></tbody>
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Nombre</th>
+                  <th>Categoría</th>
+                  <th>Precio (S/)</th>
+                  <th>Stock</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTable">
+                <tr><td colspan="6" class="text-center py-6 text-stone">Cargando datos desde la hoja de cálculo...</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
       </div>
-
-      <!-- PENDIENTES -->
-      <div id="tab-pendientes" class="tab-content">
-        <h2 class="section-title">Pendientes</h2>
-        <p class="section-sub">Piezas reservadas o pendientes de pago</p>
-        <div class="table-wrapper">
-          <div style="overflow-x:auto;">
-            <table>
-              <thead><tr><th>Imagen</th><th>Pieza</th><th>Precio</th><th>Proveedor</th><th>Acción</th></tr></thead>
-              <tbody id="pendientesTable"><tr><td colspan="5" class="text-center py-6 text-stone">No hay pendientes</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- SEGUIMIENTO -->
-      <div id="tab-seguimiento" class="tab-content">
-        <h2 class="section-title">Seguimiento</h2>
-        <p class="section-sub">Estado de tus pedidos</p>
-        <div class="table-wrapper">
-          <div style="overflow-x:auto;">
-            <table>
-              <thead><tr><th>Fecha</th><th>Producto</th><th>Comprador</th><th>Email</th><th>Teléfono</th><th>Dirección</th><th>Estado</th><th>Acción</th></tr></thead>
-              <tbody id="seguimientoTable"><tr><td colspan="8" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ANÁLISIS -->
-      <div id="tab-analisis" class="tab-content">
-        <h2 class="section-title">Análisis</h2>
-        <p class="section-sub">Métrica de la colección</p>
-        <div class="chart-container">
-          <div class="chart-header">
-            <h4>Distribución</h4>
-            <div class="chart-tabs">
-              <button class="chart-tab active" data-chart="category" onclick="selectChart('category')">Categorías</button>
-              <button class="chart-tab" data-chart="value" onclick="selectChart('value')">Valor</button>
-              <button class="chart-tab" data-chart="status" onclick="selectChart('status')">Estados</button>
-              <button class="chart-tab" data-chart="stock" onclick="selectChart('stock')">Stock</button>
-              <button class="chart-tab" data-chart="sales" onclick="selectChart('sales')">Ventas</button>
-            </div>
-          </div>
-          <div class="h-64 w-full relative">
-            <canvas id="analisisChart"></canvas>
-          </div>
-        </div>
-        <div class="chart-container" style="margin-top:1.5rem;">
-          <div class="chart-header"><h4>Evolución de ventas (últimos 30 días)</h4></div>
-          <div class="h-64 w-full relative">
-            <canvas id="salesChart"></canvas>
-          </div>
-        </div>
-      </div>
-
     </div>
-
-    <footer style="text-align:center;font-size:0.62rem;color:var(--stone);padding-top:2.2rem;border-top:1px solid var(--line);margin-top:2.2rem;font-family:'IBM Plex Mono',monospace;">
-      SIN PAR · Joyería fina · <span id="lastUpdate"></span>
-    </footer>
   </div>
 
   <script>
-    // =========================================================================
-    // CONFIGURACIÓN (NO MODIFICAR)
-    // =========================================================================
-    const LOGO_URL = "https://drive.google.com/uc?export=download&id=1SjCwcRRzHfzYUH1fpgJeR9Nipqdakynn";
+    // URL del Web App de Google Apps Script vinculado a la Hoja de Cálculo
     const API_URL = "https://script.google.com/macros/s/AKfycbwAVyNP4DO01oo6gVcrha_r1SY4rpX0GMuEBwpgMhiqNPc794HfSMDxvEN6LKW1uBgY/exec";
-    const STORAGE_KEY = 'sinpar_joyeria_estado_v3';
-    const SEGUIMIENTO_KEY = 'sinpar_seguimiento_pedidos';
-    const GRAFICOS_KEY = 'sinpar_ocultar_graficos_inicio';
-
-    const ICON_EYE = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
-    const ICON_EYE_OFF = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.2A11 11 0 0 1 12 5c6.5 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.1 3.9"/><path d="M6.6 6.6C3.8 8.4 1.5 12 1.5 12S5.5 19 12 19a10.8 10.8 0 0 0 5.4-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
-
     let inventario = [];
-    let currentChart = null;
-    let salesChartInstance = null;
-    let activeChartType = 'category';
-    let filtroActivo = 'activos';
-    let categoriaActiva = '';
-    let currentTab = 'inicio';
-    let terminoBusqueda = '';
-    let graficosInicioOcultos = localStorage.getItem(GRAFICOS_KEY) === '1';
 
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
-    let filtroPrevioBusqueda = null;
-    let mostrarTodasInicio = false;
-
-    const mensajesCompra = [
-      "Piezas que hablan de tu esencia.",
-      "Elegancia que permanece.",
-      "Detalles que hablan de ti.",
-      "Una pieza para cada momento.",
-      "Tu estilo. Tu esencia. SIN PAR.",
-      "Elegancia sin comparación."
-    ];
-
-    // =========================================================================
-    // FUNCIONES AUXILIARES
-    // =========================================================================
     function showToast(msg) {
       const t = document.getElementById('toast');
       document.getElementById('toastMessage').textContent = msg;
       t.classList.add('show');
-      clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+      setTimeout(() => t.classList.remove('show'), 3500);
     }
 
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-    }
-
-    function switchTab(tab) {
-      currentTab = tab;
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.getElementById(`tab-${tab}`).classList.add('active');
-      document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-      const titles = {
-        inicio:'Inicio',
-        coleccion:'Colección',
-        ventas:'Ventas',
-        pendientes:'Pendientes',
-        seguimiento:'Seguimiento',
-        analisis:'Análisis'
-      };
-      document.getElementById('pageTitle').textContent = titles[tab] || 'Inicio';
-      if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
-
-      if (tab === 'coleccion') renderColeccion();
-      if (tab === 'ventas') renderVentas();
-      if (tab === 'pendientes') renderPendientes();
-      if (tab === 'seguimiento') renderSeguimiento();
-      if (tab === 'analisis') renderAnalisis();
-      if (tab === 'inicio') renderInicio();
-    }
-
-    function openFollowUp(producto, comprador) {
-      document.getElementById('followUpModal').classList.add('open');
-      document.getElementById('fuNombre').value = comprador || '';
-      document.getElementById('fuNombre').focus();
-      document.getElementById('followUpForm').dataset.producto = producto;
-    }
-
-    function closeFollowUp() {
-      document.getElementById('followUpModal').classList.remove('open');
-      document.getElementById('followUpForm').reset();
-    }
-
-    function submitFollowUp(e) {
-      e.preventDefault();
-      const nombre = document.getElementById('fuNombre').value.trim();
-      const email = document.getElementById('fuEmail').value.trim();
-      const telefono = document.getElementById('fuTelefono').value.trim();
-      const direccion = document.getElementById('fuDireccion').value.trim();
-      const producto = document.getElementById('followUpForm').dataset.producto || 'Producto SIN PAR';
-
-      if (!nombre || !email || !telefono || !direccion) {
-        showToast('⚠️ Completa todos los campos.');
-        return;
-      }
-
-      cargarSeguimientoCompartido().then(seguimiento => {
-        seguimiento.push({
-          id: Date.now(),
-          fecha: new Date().toISOString(),
-          producto: producto,
-          comprador: nombre,
-          email: email,
-          telefono: telefono,
-          direccion: direccion,
-          estado: 'Preparación'
-        });
-        guardarSeguimientoCompartido(seguimiento);
-        if (currentTab === 'seguimiento') renderSeguimiento();
-      });
-      closeFollowUp();
-      showToast('Gracias por elegir SIN PAR. Tu pieza está siendo preparada.');
-    }
-
-    function transformarUrlDrive(url) {
-      if (!url || typeof url !== 'string') return '';
-      if (!url.includes('drive.google.com')) return url;
-      let fileId = '';
-      const m1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      const m2 = url.match(/id=([a-zA-Z0-9_-]+)/);
-      if (m1 && m1[1]) fileId = m1[1];
-      else if (m2 && m2[1]) fileId = m2[1];
-      else if (url.length > 20 && !url.includes('/')) fileId = url;
-      return fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : url;
-    }
-
-    // =========================================================================
-    // SINCRONIZACIÓN COMPARTIDA (multi-dispositivo)
-    // =========================================================================
-    // Todos los cambios (ventas, nombres editados, pendientes de pago, pedidos
-    // en seguimiento) se guardan en un almacenamiento compartido: cualquier
-    // persona que abra este mismo enlace, desde cualquier dispositivo, verá
-    // las mismas actualizaciones. Si el almacenamiento compartido no está
-    // disponible, se usa el almacenamiento local del navegador como respaldo.
-    const HAS_SHARED_STORAGE = (typeof window !== 'undefined') && !!window.storage;
-
-    function marcarSincronizado(ok) {
-      const dot = document.getElementById('syncDot');
-      const status = document.getElementById('syncStatus');
-      if (!dot || !status) return;
-      if (ok) {
-        dot.classList.remove('error'); dot.classList.remove('pulse');
-        status.textContent = HAS_SHARED_STORAGE ? 'Sincronizado' : 'Guardado en este dispositivo';
-      } else {
-        dot.classList.remove('pulse'); dot.classList.add('error');
-        status.textContent = 'Error de sincronización';
-      }
-    }
-
-    async function guardarEstadoCompartido() {
-      const estado = inventario.map(p => ({
-        sku: p.sku,
-        nombre: p.nombre || null,
-        precio: (p.precio === undefined || p.precio === null) ? null : p.precio,
-        vendido: p.vendido || false,
-        porPagar: p.porPagar || false,
-        fechaVenta: p.fechaVenta || null,
-        comprador: p.comprador || null
-      }));
-      const raw = JSON.stringify(estado);
-      localStorage.setItem(STORAGE_KEY, raw);
-      if (!HAS_SHARED_STORAGE) { marcarSincronizado(true); return; }
-      try {
-        await window.storage.set('estado_inventario', raw, true);
-        marcarSincronizado(true);
-      } catch (err) {
-        console.error('No se pudo guardar en el almacenamiento compartido:', err);
-        marcarSincronizado(false);
-      }
-    }
-
-    async function cargarEstadoCompartidoMap() {
-      let raw = null;
-      if (HAS_SHARED_STORAGE) {
-        try {
-          const res = await window.storage.get('estado_inventario', true);
-          raw = res ? res.value : null;
-          if (raw) localStorage.setItem(STORAGE_KEY, raw);
-        } catch (err) {
-          raw = localStorage.getItem(STORAGE_KEY);
-        }
-      } else {
-        raw = localStorage.getItem(STORAGE_KEY);
-      }
-      try {
-        if (!raw) return {};
-        return JSON.parse(raw).reduce((map, e) => { map[e.sku] = e; return map; }, {});
-      } catch { return {}; }
-    }
-
-    async function aplicarEstadoCompartido(items) {
-      const map = await cargarEstadoCompartidoMap();
-      return items.map(p => {
-        const e = map[p.sku];
-        if (!e) return p;
-        return {
-          ...p,
-          nombre: e.nombre || p.nombre,
-          precio: (e.precio === null || e.precio === undefined) ? p.precio : e.precio,
-          vendido: e.vendido || false,
-          porPagar: e.porPagar || false,
-          fechaVenta: e.fechaVenta || null,
-          comprador: e.comprador || null
-        };
-      });
-    }
-
-    // --- Pedidos en seguimiento (compartidos) ---
-    async function cargarSeguimientoCompartido() {
-      let raw = null;
-      if (HAS_SHARED_STORAGE) {
-        try {
-          const res = await window.storage.get('seguimiento_pedidos', true);
-          raw = res ? res.value : null;
-          if (raw) localStorage.setItem(SEGUIMIENTO_KEY, raw);
-        } catch (err) {
-          raw = localStorage.getItem(SEGUIMIENTO_KEY);
-        }
-      } else {
-        raw = localStorage.getItem(SEGUIMIENTO_KEY);
-      }
-      try { return raw ? JSON.parse(raw) : []; } catch { return []; }
-    }
-
-    async function guardarSeguimientoCompartido(pedidos) {
-      const raw = JSON.stringify(pedidos);
-      localStorage.setItem(SEGUIMIENTO_KEY, raw);
-      if (!HAS_SHARED_STORAGE) return;
-      try {
-        await window.storage.set('seguimiento_pedidos', raw, true);
-      } catch (err) {
-        console.error('No se pudo guardar el seguimiento compartido:', err);
-      }
-    }
-
-    // Sincroniza en segundo plano los cambios hechos desde otros dispositivos
-    // sin necesidad de recargar toda la colección desde la hoja de cálculo.
-    async function sincronizarCambiosCompartidos() {
-      if (!inventario.length) return;
-      try {
-        const map = await cargarEstadoCompartidoMap();
-        inventario = inventario.map(p => {
-          const e = map[p.sku];
-          if (!e) return p;
-          return {
-            ...p,
-            nombre: e.nombre || p.nombre,
-            precio: (e.precio === null || e.precio === undefined) ? p.precio : e.precio,
-            vendido: e.vendido || false,
-            porPagar: e.porPagar || false,
-            fechaVenta: e.fechaVenta || null,
-            comprador: e.comprador || null
-          };
-        });
-        actualizarKPIs();
-        actualizarContadorSinImagen();
-
-        // Evita interrumpir al usuario si está escribiendo o con un modal abierto
-        const activo = document.activeElement;
-        const ocupado = activo && (
-          activo.classList.contains('name-edit-input') ||
-          activo.classList.contains('buyer-input') ||
-          !!activo.closest?.('.modal-overlay.open')
-        );
-        if (!ocupado) renderizarTodo();
-      } catch (err) {
-        console.error('No se pudo sincronizar con otros dispositivos:', err);
-      }
-    }
-
-    // =========================================================================
-    // CARGAR DATOS (API)
-    // =========================================================================
+    // Consulta de datos en Google Sheets (GET)
     async function cargarDatos() {
-      const icon = document.getElementById('btn-refresh-icon');
       const dot = document.getElementById('syncDot');
       const status = document.getElementById('syncStatus');
-      if (icon) icon.classList.add('icon-spin');
-      if (status) status.textContent = 'Cargando…';
+      if (status) status.textContent = 'Leyendo Google Sheets…';
       if (dot) { dot.classList.remove('error'); dot.classList.add('pulse'); }
 
       try {
         const resp = await fetch(API_URL);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        if (!resp.ok) throw new Error('Error al conectar con la API');
         const data = await resp.json();
 
-        let items = data.map(item => {
-          const rawImg = item.imagen || item["Imagen"] || '';
-          const imgUrl = transformarUrlDrive(rawImg) || 'https://via.placeholder.com/200/F1E6CE/A9822F?text=SIN+PAR';
-          return {
-            sku: item.sku || item["SKU / ID"] || '',
-            categoria: item.categoria || item["Categoría"] || '',
-            nombre: item.nombre || item["Nombre del Producto"] || '',
-            precio: parseFloat(item.precio || item["Precio Venta (PEN)"] || 0),
-            stockInicial: parseInt(item.stockInicial || item["Stock Inicial"] || 0),
-            stockActual: parseInt(item.stockActual || item["Stock Actual"] || 0),
-            estado: item.estado || item["Estado"] || 'Disponible',
-            proveedor: item.proveedor || item["Proveedor"] || '-',
-            imagen: imgUrl,
-            tieneImagen: !imgUrl.includes('via.placeholder.com'),
-            vendido: false,
-            porPagar: false,
-            fechaVenta: null,
-            comprador: null
-          };
-        });
+        inventario = data.map(item => ({
+          sku: item.sku || item["SKU / ID"] || '',
+          categoria: item.categoria || item["Categoría"] || '',
+          nombre: item.nombre || item["Nombre del Producto"] || '',
+          precio: parseFloat(item.precio || item["Precio Venta (PEN)"] || 0),
+          stockActual: parseInt(item.stockActual || item["Stock Actual"] || 0)
+        }));
 
-        items = await aplicarEstadoCompartido(items);
-        inventario = items;
-
+        renderTabla();
         actualizarKPIs();
-        poblarCategorias();
-        actualizarContadorSinImagen();
-        renderizarTodo();
-
-        document.getElementById('lastUpdate').textContent = `Última actualización: ${new Date().toLocaleString()}`;
-        if (status) status.textContent = 'Sincronizado';
+        if (status) status.textContent = 'Sincronizado con Google Sheets';
         if (dot) dot.classList.remove('pulse');
-
       } catch (err) {
         console.error(err);
-        showToast('⚠️ Error al cargar datos.');
-        if (status) status.textContent = 'Error';
+        showToast('Error de conexión con la hoja de cálculo');
+        if (status) status.textContent = 'Error de Sincronización';
         if (dot) { dot.classList.remove('pulse'); dot.classList.add('error'); }
-      } finally {
-        if (icon) icon.classList.remove('icon-spin');
       }
     }
 
-    // =========================================================================
-    // KPIs
-    // =========================================================================
-    function actualizarKPIs() {
-      let totalStock = 0, totalValor = 0, pendientes = 0;
-      inventario.forEach(p => {
-        const stock = p.stockActual || p.stockInicial || 0;
-        const precio = p.precio || 0;
-        totalStock += stock;
-        totalValor += stock * precio;
-        if (p.porPagar) pendientes++;
-      });
-      document.getElementById('kpi-total-items').textContent = inventario.length;
-      document.getElementById('kpi-total-stock').textContent = `${totalStock} u.`;
-      document.getElementById('kpi-total-valor').textContent = `S/ ${totalValor.toFixed(2)}`;
-      document.getElementById('kpi-pendientes-pago').textContent = pendientes;
-      document.getElementById('pendienteTopCount').textContent = pendientes;
-      document.getElementById('pendienteTopBadge').classList.toggle('hidden', pendientes === 0);
-      document.getElementById('sidebarPendCount').textContent = pendientes;
-    }
-
-    function actualizarContadorSinImagen() {
-      const count = inventario.filter(p => !p.tieneImagen && !p.vendido && !p.porPagar).length;
-      const el = document.getElementById('sinImagenCount');
-      if (count > 0) { el.textContent = `${count} sin imagen`; el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
-    }
-
-    function poblarCategorias() {
-      const select = document.getElementById('categoriaFilter');
-      const cats = [...new Set(inventario.map(p => p.categoria).filter(Boolean))].sort();
-      select.innerHTML = '<option value="">Todas las categorías</option>';
-      cats.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.appendChild(opt); });
-    }
-
-    // =========================================================================
-    // RENDERIZAR TODO
-    // =========================================================================
-    function renderizarTodo() {
-      switch (currentTab) {
-        case 'inicio': renderInicio(); break;
-        case 'coleccion': renderColeccion(); break;
-        case 'ventas': renderVentas(); break;
-        case 'pendientes': renderPendientes(); break;
-        case 'seguimiento': renderSeguimiento(); break;
-        case 'analisis': renderAnalisis(); break;
-        default: renderInicio();
+    // Envío de actualizaciones a Google Sheets (POST)
+    async function actualizarEnHojaCalculo(payload) {
+      const status = document.getElementById('syncStatus');
+      if (status) status.textContent = 'Guardando en Google Sheets…';
+      try {
+        const resp = await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        showToast('Cambios guardados en Google Sheets');
+        if (status) status.textContent = 'Sincronizado';
+      } catch (err) {
+        console.error(err);
+        showToast('Error al intentar guardar los datos');
+        if (status) status.textContent = 'Error al guardar';
       }
     }
 
-    // =========================================================================
-    // INICIO
-    // =========================================================================
-    function aplicarEstadoGraficosInicio() {
-      const body = document.getElementById('chartBodyInicio');
-      const icon = document.getElementById('iconToggleGraficos');
-      const txt = document.getElementById('txtToggleGraficos');
-      if (!body || !icon || !txt) return;
-      if (graficosInicioOcultos) {
-        body.style.display = 'none';
-        icon.innerHTML = ICON_EYE;
-        txt.textContent = 'Mostrar gráficos';
-      } else {
-        body.style.display = '';
-        icon.innerHTML = ICON_EYE_OFF;
-        txt.textContent = 'Ocultar gráficos';
-      }
-    }
-
-    function toggleGraficosInicio() {
-      graficosInicioOcultos = !graficosInicioOcultos;
-      localStorage.setItem(GRAFICOS_KEY, graficosInicioOcultos ? '1' : '0');
-      aplicarEstadoGraficosInicio();
-      if (!graficosInicioOcultos) {
-        renderChart(activeChartType, getDatosFiltrados(), 'activeChart');
-      }
-    }
-
-    function renderInicio() {
-      const data = getDatosFiltrados();
-      // Destacar una pieza aleatoria
-      const disponibles = data.filter(p => !p.vendido && !p.porPagar);
-      if (disponibles.length > 0) {
-        const destacada = disponibles[Math.floor(Math.random() * disponibles.length)];
-        document.getElementById('featuredImg').src = destacada.imagen;
-        document.getElementById('featuredCategory').textContent = destacada.categoria || 'Categoría';
-        document.getElementById('featuredName').textContent = destacada.nombre || 'Nombre';
-        document.getElementById('featuredPrice').textContent = `S/ ${(destacada.precio||0).toFixed(2)}`;
-        const dot = document.getElementById('featuredDot');
-        const statusText = document.getElementById('featuredStatus');
-        const stock = destacada.stockActual || destacada.stockInicial || 0;
-        if (stock < 1) { dot.className = 'dot dot-red'; statusText.textContent = 'Agotado'; }
-        else if (stock < 3) { dot.className = 'dot dot-amber'; statusText.textContent = 'Stock crítico'; }
-        else { dot.className = 'dot dot-green'; statusText.textContent = 'Disponible'; }
-        document.getElementById('featuredContainer').dataset.sku = destacada.sku;
-      }
-      renderTablaResumen(mostrarTodasInicio ? data : data.slice(0, 5));
-      document.getElementById('rowCount').textContent = `${data.length} registros`;
-      document.getElementById('tablaInicioTitulo').textContent = mostrarTodasInicio ? 'Todas las piezas activas' : 'Últimas piezas';
-      const btn = document.getElementById('btnVerTodasInicio');
-      if (btn) {
-        btn.innerHTML = mostrarTodasInicio
-          ? '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg> Ver menos'
-          : `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.1"/><circle cx="4" cy="12" r="1.1"/><circle cx="4" cy="18" r="1.1"/></svg> Ver todos (${data.length})`;
-      }
-      const scrollWrap = document.getElementById('inventoryTableScroll');
-      if (scrollWrap) {
-        scrollWrap.style.maxHeight = mostrarTodasInicio ? '640px' : '';
-        scrollWrap.style.overflowY = mostrarTodasInicio ? 'auto' : '';
-      }
-      if (!graficosInicioOcultos) {
-        renderChart(activeChartType, data, 'activeChart');
-      }
-    }
-
-    function toggleVerTodasInicio() {
-      mostrarTodasInicio = !mostrarTodasInicio;
-      renderInicio();
-    }
-
-    function renderTablaResumen(items) {
+    function renderTabla() {
       const tbody = document.getElementById('inventoryTable');
-      if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-stone">No hay piezas activas</td></tr>`;
+      if (!inventario || inventario.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-stone">No se encontraron registros</td></tr>`;
         return;
       }
-      tbody.innerHTML = items.map(p => {
-        const stock = p.stockActual || p.stockInicial || 0;
-        const estado = p.vendido ? 'Vendido' : p.porPagar ? 'Por pagar' : p.estado;
-        let dotColor = 'dot-green';
-        if (p.vendido) dotColor = 'dot-gray';
-        else if (p.porPagar) dotColor = 'dot-amber';
-        else if (estado.toLowerCase().includes('critico')) dotColor = 'dot-red';
-        const acciones = p.vendido ?
-          `<button class="btn-action undo" onclick="deshacerVenta('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a8 8 0 1 1 1 4"/><path d="M4 17v-6h6"/></svg></button>` :
-          p.porPagar ?
-          `<button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></button>` :
-          `<div class="flex items-center gap-1 flex-wrap">
-            <input type="text" id="buyer_${p.sku}" placeholder="Nombre" class="buyer-input" style="width:50px;">
-            <button class="btn-action sell" onclick="venderProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V4h7l11 11-7 7L3 11Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></button>
-            <button class="btn-action pay" onclick="togglePorPagar('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></button>
-          </div>`;
-        return `<tr>
-          <td><img src="${p.imagen}" class="img-thumb" onerror="this.src='https://via.placeholder.com/40/F1E6CE/A9822F?text=SP'"></td>
-          <td><span class="sku-chip">${p.sku || '-'}</span></td>
-          <td>${p.nombre || 'Sin nombre'}</td>
-          <td class="font-display font-bold" style="color:var(--gold);">S/ ${(p.precio||0).toFixed(2)}</td>
-          <td><span class="font-mono text-sm">${stock}</span></td>
-          <td><span class="status-dot"><span class="dot ${dotColor}"></span>${estado}</span></td>
-          <td>${acciones}</td>
-        </tr>`;
-      }).join('');
-    }
-
-    function verPiezaDestacada() {
-      const sku = document.getElementById('featuredContainer').dataset.sku;
-      if (sku) {
-        // Simular clic en la pieza destacada: cambiar a colección y filtrar por ese SKU? O simplemente mostrar toast.
-        showToast('Detalles de la pieza disponibles en la Colección.');
-        switchTab('coleccion');
-      }
-    }
-
-    // =========================================================================
-    // COLECCIÓN (tarjetas)
-    // =========================================================================
-    function renderColeccion() {
-      const data = getDatosFiltrados();
-      const grid = document.getElementById('collectionGrid');
-      const sub = document.getElementById('coleccionSub');
-      if (sub) {
-        sub.textContent = terminoBusqueda
-          ? `${data.length} resultado${data.length === 1 ? '' : 's'} para "${terminoBusqueda}"`
-          : '';
-      }
-      if (!data || data.length === 0) {
-        grid.innerHTML = `<p class="text-stone text-center col-span-full py-8">${terminoBusqueda ? `Sin resultados para "${terminoBusqueda}".` : 'No hay piezas en esta selección.'}</p>`;
-        return;
-      }
-      grid.innerHTML = data.map(p => {
-        const stock = p.stockActual || p.stockInicial || 0;
-        const estado = p.vendido ? 'Vendido' : p.porPagar ? 'Por pagar' : p.estado;
-        let dotColor = 'dot-green';
-        if (p.vendido) dotColor = 'dot-gray';
-        else if (p.porPagar) dotColor = 'dot-amber';
-        else if (estado.toLowerCase().includes('critico')) dotColor = 'dot-red';
-        const esActivo = !p.vendido && !p.porPagar;
-
-        let acciones = '';
-        if (p.vendido) {
-          acciones = `<button class="btn-action undo" onclick="deshacerVenta('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a8 8 0 1 1 1 4"/><path d="M4 17v-6h6"/></svg> Deshacer</button>`;
-        } else if (p.porPagar) {
-          acciones = `<button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg> Pagar</button>
-                     <button class="btn-action undo" onclick="togglePorPagar('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
-        } else {
-          acciones = `<div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
-            <input type="text" id="buyer_${p.sku}" placeholder="Comprador" class="buyer-input">
-            <button class="btn-action sell" onclick="venderProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V4h7l11 11-7 7L3 11Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></button>
-            <button class="btn-action pay" onclick="togglePorPagar('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></button>
-          </div>`;
-        }
-
-        const nombreSeguro = escapeHtml(p.nombre || '');
-        const nombreHtml = esActivo
-          ? `<div class="name-edit-wrap">
-               <input type="text" class="name-edit-input" value="${nombreSeguro}" placeholder="Nombre del artículo"
-                 onclick="event.stopPropagation()"
-                 onchange="actualizarNombreProducto('${p.sku}', this.value)"
-                 onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}">
-               <svg class="icon name-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.5L15.5 5l3.5 3.5L8.5 19 4 20Z"/><path d="M13.5 6.5l4 4"/></svg>
-             </div>`
-          : `<div class="name">${p.nombre || 'Sin nombre'}</div>`;
-
-        return `<div class="product-card">
-          <div class="card-img"><img src="${p.imagen}" onerror="this.src='https://via.placeholder.com/220/F1E6CE/A9822F?text=SIN+PAR'"></div>
-          <div class="card-body">
-            <div class="category">${p.categoria || 'Categoría'}</div>
-            ${nombreHtml}
-            <div class="price">S/ ${(p.precio||0).toFixed(2)}</div>
-            <div class="status"><span class="dot ${dotColor}"></span>${estado} · ${stock} u.</div>
-            <div class="actions">${acciones}</div>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    function actualizarNombreProducto(sku, valor) {
-      const nombre = (valor || '').trim();
-      if (!nombre) { showToast('⚠️ El nombre no puede estar vacío.'); renderColeccion(); return; }
-      const p = inventario.find(i => i.sku === sku);
-      if (!p) return;
-      if (p.nombre === nombre) return;
-      p.nombre = nombre;
-      guardarEstadoCompartido();
-      renderizarTodo();
-      showToast('✏️ Nombre del artículo actualizado');
-    }
-
-    // =========================================================================
-    // VENTAS
-    // =========================================================================
-    function renderVentas() {
-      const ventas = inventario.filter(p => p.vendido && p.fechaVenta);
-      const tbody = document.getElementById('ventasTable');
-      if (ventas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-stone">No hay ventas registradas</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = ventas.sort((a,b) => new Date(b.fechaVenta) - new Date(a.fechaVenta)).map(p => {
-        const fecha = new Date(p.fechaVenta).toLocaleString();
-        const monto = (p.precio || 0);
-        return `<tr>
-          <td class="text-xs text-stone">${fecha}</td>
-          <td>${p.nombre || p.sku}</td>
-          <td class="font-medium">${p.comprador || 'N/A'}</td>
-          <td class="font-display font-bold" style="color:var(--gold);">S/ ${monto.toFixed(2)}</td>
-          <td>
-            <div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
-              <button class="btn-action edit" onclick="abrirEditarVenta('${p.sku}')" title="Editar venta"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.5L15.5 5l3.5 3.5L8.5 19 4 20Z"/><path d="M13.5 6.5l4 4"/></svg></button>
-              <button class="btn-action undo" onclick="eliminarVenta('${p.sku}')" title="Eliminar venta"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>
-            </div>
-          </td>
-        </tr>`;
-      }).join('');
-    }
-
-    // =========================================================================
-    // EDITAR / ELIMINAR VENTA
-    // =========================================================================
-    function abrirEditarVenta(sku) {
-      const p = inventario.find(i => i.sku === sku);
-      if (!p) return;
-      document.getElementById('evSku').value = p.sku;
-      document.getElementById('evNombre').value = p.nombre || p.sku;
-      document.getElementById('evComprador').value = p.comprador || '';
-      document.getElementById('evPrecio').value = (p.precio || 0).toFixed(2);
-
-      const f = p.fechaVenta ? new Date(p.fechaVenta) : new Date();
-      const pad = n => String(n).padStart(2, '0');
-      const local = `${f.getFullYear()}-${pad(f.getMonth()+1)}-${pad(f.getDate())}T${pad(f.getHours())}:${pad(f.getMinutes())}`;
-      document.getElementById('evFecha').value = local;
-
-      document.getElementById('editVentaModal').classList.add('open');
-    }
-
-    function cerrarEditarVenta() {
-      document.getElementById('editVentaModal').classList.remove('open');
-    }
-
-    function guardarEdicionVenta(e) {
-      e.preventDefault();
-      const sku = document.getElementById('evSku').value;
-      const p = inventario.find(i => i.sku === sku);
-      if (!p) return;
-
-      const comprador = document.getElementById('evComprador').value.trim();
-      const precio = parseFloat(document.getElementById('evPrecio').value);
-      const fecha = document.getElementById('evFecha').value;
-      if (!comprador) { showToast('⚠️ Ingresa el nombre del comprador.'); return; }
-      if (isNaN(precio) || precio < 0) { showToast('⚠️ Ingresa un precio válido.'); return; }
-      if (!fecha) { showToast('⚠️ Ingresa la fecha de venta.'); return; }
-
-      p.comprador = comprador;
-      p.precio = precio;
-      p.fechaVenta = new Date(fecha).toISOString();
-
-      guardarEstadoCompartido();
-      actualizarKPIs();
-      cerrarEditarVenta();
-      renderizarTodo();
-      showToast('✏️ Venta actualizada');
-    }
-
-    function eliminarVenta(sku, fromModal) {
-      if (!confirm('¿Eliminar esta venta? La pieza volverá a estar disponible en la colección. Esta acción no se puede deshacer.')) return;
-      const p = inventario.find(i => i.sku === sku);
-      if (!p) return;
-      p.vendido = false;
-      p.fechaVenta = null;
-      p.comprador = null;
-      guardarEstadoCompartido();
-      actualizarKPIs();
-      if (fromModal) cerrarEditarVenta();
-      renderizarTodo();
-      showToast('🗑️ Venta eliminada');
-    }
-
-    // =========================================================================
-    // PENDIENTES
-    // =========================================================================
-    function renderPendientes() {
-      const pendientes = inventario.filter(p => p.porPagar);
-      const tbody = document.getElementById('pendientesTable');
-      if (pendientes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-stone">No hay pendientes de pago</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = pendientes.map(p => `
+      tbody.innerHTML = inventario.map(p => `
         <tr>
-          <td><img src="${p.imagen}" class="img-thumb" onerror="this.src='https://via.placeholder.com/40/F1E6CE/A9822F?text=SP'"></td>
-          <td>${p.nombre || p.sku}</td>
-          <td class="font-display" style="color:var(--gold);">S/ ${(p.precio||0).toFixed(2)}</td>
-          <td class="text-xs text-stone">${p.proveedor || '-'}</td>
-          <td><button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg> Pagar</button></td>
+          <td><span class="font-mono text-xs">${p.sku}</span></td>
+          <td>
+            <input type="text" class="bg-transparent border-b border-dashed border-stone-400 focus:border-solid focus:border-amber-600 outline-none w-full" 
+                   value="${p.nombre}" onchange="guardarEdicionNombre('${p.sku}', this.value)">
+          </td>
+          <td>${p.categoria}</td>
+          <td class="font-bold text-amber-700">S/ ${p.precio.toFixed(2)}</td>
+          <td>${p.stockActual}</td>
+          <td>
+            <button class="btn-action sell" onclick="registrarVenta('${p.sku}')">Registrar Venta</button>
+          </td>
         </tr>
       `).join('');
     }
 
-    // =========================================================================
-    // SEGUIMIENTO
-    // =========================================================================
-    const ESTADOS_SEGUIMIENTO = ['Preparación', 'Enviado', 'Entregado', 'Cancelado'];
-    function dotSeguimiento(estado) {
-      if (estado === 'Entregado') return 'dot-green';
-      if (estado === 'Cancelado') return 'dot-red';
-      if (estado === 'Enviado') return 'dot-amber';
-      return 'dot-gray';
-    }
-
-    function renderSeguimiento() {
-      const tbody = document.getElementById('seguimientoTable');
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-stone">Cargando…</td></tr>`;
-      cargarSeguimientoCompartido().then(pedidos => {
-        if (currentTab !== 'seguimiento') return;
-        if (pedidos.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr>`;
-          return;
-        }
-        pedidos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-        tbody.innerHTML = pedidos.map(p => {
-          const estado = p.estado || 'Preparación';
-          const opciones = ESTADOS_SEGUIMIENTO.map(e => `<option value="${e}" ${e === estado ? 'selected' : ''}>${e}</option>`).join('');
-          return `
-          <tr>
-            <td class="text-xs text-stone">${new Date(p.fecha).toLocaleString()}</td>
-            <td>${p.producto}</td>
-            <td class="font-medium">${p.comprador}</td>
-            <td class="text-xs">${p.email}</td>
-            <td class="text-xs">${p.telefono}</td>
-            <td class="text-xs">${p.direccion}</td>
-            <td>
-              <span class="status-dot" style="margin-bottom:0.3rem;"><span class="dot ${dotSeguimiento(estado)}"></span>${estado}</span>
-              <select class="filter-select" style="display:block;margin-top:0.3rem;" onchange="actualizarEstadoSeguimiento(${p.id}, this.value)">${opciones}</select>
-            </td>
-            <td><button class="btn-action undo" onclick="eliminarSeguimiento(${p.id})" title="Eliminar registro"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></td>
-          </tr>
-        `;
-        }).join('');
+    function actualizarKPIs() {
+      let totalStock = 0, totalValor = 0;
+      inventario.forEach(p => {
+        totalStock += p.stockActual;
+        totalValor += p.stockActual * p.precio;
       });
+      document.getElementById('kpi-total-items').textContent = inventario.length;
+      document.getElementById('kpi-total-stock').textContent = `${totalStock} u.`;
+      document.getElementById('kpi-total-valor').textContent = `S/ ${totalValor.toFixed(2)}`;
     }
 
-    function actualizarEstadoSeguimiento(id, nuevoEstado) {
-      cargarSeguimientoCompartido().then(pedidos => {
-        const p = pedidos.find(x => x.id === id);
-        if (!p) return;
-        p.estado = nuevoEstado;
-        guardarSeguimientoCompartido(pedidos);
-        renderSeguimiento();
-        showToast(`📦 Estado actualizado a "${nuevoEstado}"`);
-      });
+    function guardarEdicionNombre(sku, nuevoNombre) {
+      const item = inventario.find(i => i.sku === sku);
+      if (item) {
+        item.nombre = nuevoNombre;
+        actualizarEnHojaCalculo({ accion: 'editar', sku: sku, nombre: nuevoNombre });
+      }
     }
 
-    function eliminarSeguimiento(id) {
-      if (!confirm('¿Eliminar este pedido del seguimiento? Esta acción no se puede deshacer.')) return;
-      cargarSeguimientoCompartido().then(pedidos => {
-        pedidos = pedidos.filter(x => x.id !== id);
-        guardarSeguimientoCompartido(pedidos);
-        renderSeguimiento();
-        showToast('🗑️ Registro eliminado');
-      });
-    }
-
-    // =========================================================================
-    // ANÁLISIS
-    // =========================================================================
-    function renderAnalisis() {
-      const data = getDatosFiltrados();
-      renderChart(activeChartType, data, 'analisisChart');
-      // Gráfica de ventas
-      const ventas = inventario.filter(p => p.vendido && p.fechaVenta);
-      const ctx = document.getElementById('salesChart').getContext('2d');
-      if (salesChartInstance) salesChartInstance.destroy();
-
-      if (ventas.length === 0) {
-        salesChartInstance = new Chart(ctx, {
-          type: 'doughnut',
-          data: { labels: ['Sin ventas'], datasets: [{ data: [1], backgroundColor: ['#F1E6CE'] }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '90%' },
-          plugins: [{
-            id: 'noData',
-            beforeDraw: function(chart) {
-              const { width, height, ctx } = chart;
-              ctx.save();
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.font = '14px Fraunces, serif';
-              ctx.fillStyle = '#8B8378';
-              ctx.fillText('No hay ventas registradas', width/2, height/2);
-              ctx.restore();
-            }
-          }]
-        });
+    function registrarVenta(sku) {
+      const item = inventario.find(i => i.sku === sku);
+      if (item && item.stockActual > 0) {
+        item.stockActual -= 1;
+        renderTabla();
+        actualizarKPIs();
+        actualizarEnHojaCalculo({ accion: 'venta', sku: sku, nuevoStock: item.stockActual });
       } else {
-        const mapDia = {};
-        ventas.forEach(p => {
-          const dia = new Date(p.fechaVenta).toISOString().split('T')[0];
-          const valor = (p.precio || 0);
-          mapDia[dia] = (mapDia[dia] || 0) + valor;
-        });
-        const sorted = Object.keys(mapDia).sort().slice(-30);
-        const labels = sorted.map(d => new Date(d+'T00:00:00').toLocaleDateString('es-ES', {day:'2-digit', month:'short'}));
-        const values = sorted.map(d => mapDia[d]);
-
-        salesChartInstance = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label: 'Ventas (S/)',
-              data: values,
-              borderColor: '#A9822F',
-              backgroundColor: 'rgba(169,130,47,0.10)',
-              fill: true,
-              tension: 0.3,
-              pointBackgroundColor: '#A9822F',
-              pointBorderColor: '#fff',
-              pointBorderWidth: 2,
-              pointRadius: 3
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-              y: { beginAtZero: true, grid: { color: '#EFE7D8' }, ticks: { font: { size: 9 } } }
-            },
-            plugins: { legend: { display: false } }
-          }
-        });
+        showToast('Sin stock disponible');
       }
     }
 
-    // =========================================================================
-    // GRÁFICOS (Chart.js)
-    // =========================================================================
-    function renderChart(type, data, canvasId = 'activeChart') {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      if (canvasId === 'activeChart' && currentChart) currentChart.destroy();
-      else if (canvasId === 'analisisChart' && currentChart) currentChart.destroy();
-
-      let config = null;
-      const colores = ['#A9822F', '#8B8378', '#F1E6CE', '#121014', '#D9C79C', '#6E675C'];
-
-      switch (type) {
-        case 'category': {
-          const map = {};
-          data.forEach(p => { const c = p.categoria || 'Sin categoría'; map[c] = (map[c]||0)+1; });
-          const labels = Object.keys(map);
-          const values = Object.values(map);
-          config = {
-            type: 'doughnut',
-            data: { labels, datasets: [{ data: values, backgroundColor: colores.slice(0, labels.length), borderWidth: 1, borderColor: '#fff' }] },
-            options: {
-              responsive: true, maintainAspectRatio: false,
-              plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 10, family: 'Inter' } } },
-                tooltip: { callbacks: { label: function(ctx) {
-                  const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
-                  return `${ctx.label}: ${ctx.parsed} (${((ctx.parsed/total)*100).toFixed(1)}%)`;
-                }}}
-              },
-              cutout: '68%'
-            }
-          };
-          break;
-        }
-        case 'value': {
-          const top = [...data].filter(p => !p.vendido && !p.porPagar).map(p => ({ nombre: p.nombre || p.sku, valor: (p.stockActual||p.stockInicial||0)*(p.precio||0) })).sort((a,b)=>b.valor-a.valor).slice(0,5);
-          config = {
-            type: 'bar',
-            data: {
-              labels: top.map(i => i.nombre.length > 14 ? i.nombre.slice(0,14)+'…' : i.nombre),
-              datasets: [{ label: 'Valor (S/)', data: top.map(i=>i.valor), backgroundColor: ['#A9822F','#D9C79C','#8B8378','#F1E6CE','#121014'], borderRadius: 4 }]
-            },
-            options: {
-              responsive: true, maintainAspectRatio: false,
-              scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#EFE7D8' } } },
-              plugins: { legend: { display: false } }
-            }
-          };
-          break;
-        }
-        case 'status': {
-          const map = {};
-          data.forEach(p => { const e = p.estado || 'Otro'; map[e] = (map[e]||0)+1; });
-          const labels = Object.keys(map);
-          const values = Object.values(map);
-          config = {
-            type: 'doughnut',
-            data: { labels, datasets: [{ data: values, backgroundColor: ['#3C7A5C','#B07A2E','#8C3B3B','#9C978D'], borderWidth: 1, borderColor: '#fff' }] },
-            options: {
-              responsive: true, maintainAspectRatio: false,
-              plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } } },
-              cutout: '68%'
-            }
-          };
-          break;
-        }
-        case 'stock': {
-          const top = [...data].filter(p => !p.vendido && !p.porPagar).sort((a,b) => (b.stockActual||b.stockInicial||0) - (a.stockActual||a.stockInicial||0)).slice(0,8);
-          config = {
-            type: 'bar',
-            data: {
-              labels: top.map(p => (p.nombre||p.sku).length > 14 ? (p.nombre||p.sku).slice(0,14)+'…' : (p.nombre||p.sku)),
-              datasets: [{ label: 'Stock', data: top.map(p => p.stockActual||p.stockInicial||0), backgroundColor: '#A9822F', borderRadius: 4 }]
-            },
-            options: {
-              indexAxis: 'y',
-              responsive: true, maintainAspectRatio: false,
-              scales: { x: { grid: { color: '#EFE7D8' } }, y: { grid: { display: false } } },
-              plugins: { legend: { display: false } }
-            }
-          };
-          break;
-        }
-        case 'sales': {
-          const ventas = inventario.filter(p => p.vendido && p.fechaVenta);
-          if (ventas.length === 0) {
-            config = {
-              type: 'doughnut',
-              data: { labels: ['Sin ventas'], datasets: [{ data: [1], backgroundColor: ['#F1E6CE'] }] },
-              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '90%' },
-              plugins: [{
-                id: 'noData',
-                beforeDraw: function(chart) {
-                  const { width, height, ctx } = chart;
-                  ctx.save();
-                  ctx.textAlign = 'center';
-                  ctx.textBaseline = 'middle';
-                  ctx.font = '14px Fraunces, serif';
-                  ctx.fillStyle = '#8B8378';
-                  ctx.fillText('Sin ventas', width/2, height/2);
-                  ctx.restore();
-                }
-              }]
-            };
-            break;
-          }
-          const mapDia = {};
-          ventas.forEach(p => {
-            const dia = new Date(p.fechaVenta).toISOString().split('T')[0];
-            const valor = (p.precio||0);
-            mapDia[dia] = (mapDia[dia]||0) + valor;
-          });
-          const sorted = Object.keys(mapDia).sort().slice(-30);
-          const labels = sorted.map(d => new Date(d+'T00:00:00').toLocaleDateString('es-ES', {day:'2-digit', month:'short'}));
-          const values = sorted.map(d => mapDia[d]);
-          config = {
-            type: 'line',
-            data: {
-              labels,
-              datasets: [{
-                label: 'Ventas (S/)',
-                data: values,
-                borderColor: '#A9822F',
-                backgroundColor: 'rgba(169,130,47,0.10)',
-                fill: true,
-                tension: 0.3,
-                pointBackgroundColor: '#A9822F',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 3
-              }]
-            },
-            options: {
-              responsive: true, maintainAspectRatio: false,
-              scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { beginAtZero: true, grid: { color: '#EFE7D8' } } },
-              plugins: { legend: { display: false } }
-            }
-          };
-          break;
-        }
-        default: return;
-      }
-
-      const chart = new Chart(ctx, config);
-      if (canvasId === 'activeChart') currentChart = chart;
-      else if (canvasId === 'analisisChart') currentChart = chart;
+    function switchTab(tab) {
+      document.getElementById('pageTitle').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
     }
 
-    function selectChart(type) {
-      activeChartType = type;
-      document.querySelectorAll('.chart-tab').forEach(t => t.classList.toggle('active', t.dataset.chart === type));
-      const data = getDatosFiltrados();
-      renderChart(type, data, 'activeChart');
-      // También actualizar análisis si está visible
-      if (currentTab === 'analisis') {
-        renderChart(type, data, 'analisisChart');
-      }
-    }
-
-    // =========================================================================
-    // FILTROS Y DATOS FILTRADOS
-    // =========================================================================
-    function getDatosFiltrados() {
-      let res = [...inventario];
-      if (categoriaActiva) res = res.filter(p => p.categoria === categoriaActiva);
-      if (terminoBusqueda) {
-        const q = terminoBusqueda.toLowerCase();
-        res = res.filter(p =>
-          (p.nombre || '').toLowerCase().includes(q) ||
-          (p.sku || '').toLowerCase().includes(q) ||
-          (p.categoria || '').toLowerCase().includes(q) ||
-          (p.proveedor || '').toLowerCase().includes(q)
-        );
-        return res;
-      }
-      switch (filtroActivo) {
-        case 'activos': res = res.filter(p => !p.vendido && !p.porPagar); break;
-        case 'vendidos': res = res.filter(p => p.vendido); break;
-        case 'por-pagar': res = res.filter(p => p.porPagar); break;
-        case 'critico': res = res.filter(p => (p.stockActual||p.stockInicial||0) < 2 && !p.vendido && !p.porPagar); break;
-        case 'todos': break;
-        default: res = res.filter(p => !p.vendido && !p.porPagar);
-      }
-      return res;
-    }
-
-    function onSearchInput(valor) {
-      terminoBusqueda = valor.trim();
-      document.getElementById('searchBox').classList.toggle('has-value', terminoBusqueda.length > 0);
-
-      if (terminoBusqueda) {
-        if (filtroPrevioBusqueda === null) filtroPrevioBusqueda = filtroActivo;
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        if (currentTab !== 'coleccion') switchTab('coleccion');
-        else renderColeccion();
-      } else {
-        if (filtroPrevioBusqueda !== null) {
-          filtroActivo = filtroPrevioBusqueda;
-          filtroPrevioBusqueda = null;
-          document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === filtroActivo));
-        }
-        renderColeccion();
-      }
-    }
-
-    function clearSearch() {
-      terminoBusqueda = '';
-      document.getElementById('searchInput').value = '';
-      document.getElementById('searchBox').classList.remove('has-value');
-      if (filtroPrevioBusqueda !== null) {
-        filtroActivo = filtroPrevioBusqueda;
-        filtroPrevioBusqueda = null;
-      }
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === filtroActivo));
-      renderColeccion();
-    }
-
-    function setFilter(tipo) {
-      terminoBusqueda = '';
-      filtroPrevioBusqueda = null;
-      const si = document.getElementById('searchInput');
-      if (si) si.value = '';
-      const sb = document.getElementById('searchBox');
-      if (sb) sb.classList.remove('has-value');
-      filtroActivo = tipo;
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === tipo));
-      renderColeccion();
-    }
-
-    function setCategoria(val) {
-      categoriaActiva = val;
-      renderColeccion();
-    }
-
-    function limpiarFiltros() {
-      categoriaActiva = '';
-      document.getElementById('categoriaFilter').value = '';
-      setFilter('activos');
-    }
-
-    // =========================================================================
-    // ACCIONES (Vender, Por pagar, Pagar, Deshacer)
-    // =========================================================================
-    function venderProducto(sku) {
-      const input = document.getElementById(`buyer_${sku}`);
-      const comprador = input ? input.value.trim() : '';
-      if (!comprador) { showToast('⚠️ Ingresa el nombre del comprador.'); input?.focus(); return; }
-      const p = inventario.find(i => i.sku === sku);
-      if (!p || p.vendido) return;
-
-      const mensaje = mensajesCompra[Math.floor(Math.random() * mensajesCompra.length)];
-
-      p.vendido = true;
-      p.porPagar = false;
-      p.fechaVenta = new Date().toISOString();
-      p.comprador = comprador;
-
-      guardarEstadoCompartido();
-      actualizarKPIs();
-      actualizarContadorSinImagen();
-      renderizarTodo();
-
-      showToast(`✨ ${mensaje}`);
-      openFollowUp(p.nombre || p.sku, comprador);
-    }
-
-    function deshacerVenta(sku) {
-      const p = inventario.find(i => i.sku === sku);
-      if (!p) return;
-      p.vendido = false;
-      p.fechaVenta = null;
-      p.comprador = null;
-      guardarEstadoCompartido();
-      actualizarKPIs();
-      renderizarTodo();
-      showToast('🔄 Venta deshecha');
-    }
-
-    function togglePorPagar(sku) {
-      const p = inventario.find(i => i.sku === sku);
-      if (!p) return;
-      if (p.porPagar) {
-        p.porPagar = false;
-        showToast('🔄 Pendiente cancelado');
-      } else {
-        p.porPagar = true;
-        p.vendido = false;
-        p.fechaVenta = null;
-        p.comprador = null;
-        showToast('⏳ Marcado como por pagar');
-      }
-      guardarEstadoCompartido();
-      actualizarKPIs();
-      renderizarTodo();
-    }
-
-    function pagarProducto(sku) {
-      const p = inventario.find(i => i.sku === sku);
-      if (!p) return;
-      p.porPagar = false;
-      guardarEstadoCompartido();
-      actualizarKPIs();
-      renderizarTodo();
-      showToast('💰 Pagado correctamente');
-    }
-
-    // =========================================================================
-    // INICIALIZACIÓN
-    // =========================================================================
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeFollowUp();
-    });
-
-    // Cerrar sidebar al hacer clic fuera en móvil
-    document.addEventListener('click', function(e) {
-      const sidebar = document.getElementById('sidebar');
-      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-        if (!sidebar.contains(e.target) && !e.target.closest('.menu-toggle')) {
-          sidebar.classList.remove('open');
-        }
-      }
-    });
-
-    cargarDatos();
-    aplicarEstadoGraficosInicio();
-
-    // Revisa cada 20s si hay cambios guardados desde otro dispositivo
-    setInterval(sincronizarCambiosCompartidos, 20000);
+    // Inicialización al cargar la pantalla
+    window.addEventListener('DOMContentLoaded', cargarDatos);
   </script>
 </body>
 </html>
