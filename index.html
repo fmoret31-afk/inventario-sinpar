@@ -623,6 +623,7 @@
     }
     .table-wrapper tr:hover td { background: var(--goldpale); }
     .table-wrapper tr:last-child td { border-bottom: none; }
+    #inventoryTableScroll thead th { position: sticky; top: 0; z-index: 2; }
 
     .img-thumb { width: 42px; height: 42px; object-fit: cover; border-radius: 1px; border: 1px solid var(--line-gold); }
 
@@ -881,11 +882,14 @@
 
         <!-- Tabla resumen (últimas piezas) -->
         <div class="table-wrapper">
-          <div style="padding:0.9rem 1.1rem;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-family:'Fraunces',serif;font-weight:600;">Últimas piezas</span>
-            <span class="text-xs text-stone" id="rowCount">0 registros</span>
+          <div style="padding:0.9rem 1.1rem;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.6rem;">
+            <span id="tablaInicioTitulo" style="font-family:'Fraunces',serif;font-weight:600;">Últimas piezas</span>
+            <div style="display:flex;align-items:center;gap:0.8rem;">
+              <span class="text-xs text-stone" id="rowCount">0 registros</span>
+              <button class="btn-refresh" id="btnVerTodasInicio" onclick="toggleVerTodasInicio()"><i class="fa-solid fa-list"></i> Ver todos</button>
+            </div>
           </div>
-          <div style="overflow-x:auto;">
+          <div style="overflow-x:auto;" id="inventoryTableScroll">
             <table>
               <thead><tr><th>Imagen</th><th>SKU</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
               <tbody id="inventoryTable"><tr><td colspan="7" class="text-center py-6 text-stone">Cargando...</td></tr></tbody>
@@ -1009,6 +1013,7 @@
     let currentTab = 'inicio';
     let terminoBusqueda = '';
     let filtroPrevioBusqueda = null;
+    let mostrarTodasInicio = false;
 
     const mensajesCompra = [
       "Piezas que hablan de tu esencia.",
@@ -1274,9 +1279,26 @@
         else { dot.className = 'dot dot-green'; statusText.textContent = 'Disponible'; }
         document.getElementById('featuredContainer').dataset.sku = destacada.sku;
       }
-      renderTablaResumen(data.slice(0, 5));
+      renderTablaResumen(mostrarTodasInicio ? data : data.slice(0, 5));
       document.getElementById('rowCount').textContent = `${data.length} registros`;
+      document.getElementById('tablaInicioTitulo').textContent = mostrarTodasInicio ? 'Todas las piezas activas' : 'Últimas piezas';
+      const btn = document.getElementById('btnVerTodasInicio');
+      if (btn) {
+        btn.innerHTML = mostrarTodasInicio
+          ? '<i class="fa-solid fa-angle-up"></i> Ver menos'
+          : `<i class="fa-solid fa-list"></i> Ver todos (${data.length})`;
+      }
+      const scrollWrap = document.getElementById('inventoryTableScroll');
+      if (scrollWrap) {
+        scrollWrap.style.maxHeight = mostrarTodasInicio ? '640px' : '';
+        scrollWrap.style.overflowY = mostrarTodasInicio ? 'auto' : '';
+      }
       renderChart(activeChartType, data, 'activeChart');
+    }
+
+    function toggleVerTodasInicio() {
+      mostrarTodasInicio = !mostrarTodasInicio;
+      renderInicio();
     }
 
     function renderTablaResumen(items) {
