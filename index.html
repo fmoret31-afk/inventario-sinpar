@@ -1,184 +1,710 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Inventario - SINPAR Joyas</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .header-title { font-weight: 700; color: #2c3e50; }
-    .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .table img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
-    .badge-stock { font-size: 0.85rem; padding: 0.4em 0.8em; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario SINPAR — Joyas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,680&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B1E2B; --ink-2:#2A2E40; --ink-3:#3A3F52;
+    --pearl:#F4F2EC; --paper:#FFFFFF; --line:#E8E4D9; --line-2:#DFDACB;
+    --gold:#A6813C; --gold-dark:#8A6A2E; --gold-soft:#C9A96A; --gold-bg:#F6EFDD;
+    --emerald:#2F6B4F; --emerald-bg:#E6F0EA;
+    --garnet:#9C3B47; --garnet-bg:#F7E7E8;
+    --rose:#8C6266; --rose-bg:#F3EAE8;
+    --slate:#6B6F7E; --slate-2:#9A9DA8;
+  }
+  html{background:var(--pearl);}
+  body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif; color:var(--ink); background:var(--pearl);}
+  .f-display{font-family:'Fraunces',serif; font-optical-sizing:auto;}
+  .f-data{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+  ::selection{background:var(--gold-soft); color:var(--ink);}
+  *:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  input:focus, select:focus, textarea:focus{outline:none; border-color:var(--gold) !important; box-shadow:0 0 0 3px rgba(166,129,60,0.15);}
+  .thin-scroll::-webkit-scrollbar{height:8px; width:8px;}
+  .thin-scroll::-webkit-scrollbar-track{background:transparent;}
+  .thin-scroll::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:999px;}
+  .select-arrow{
+    -webkit-appearance:none; appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none' stroke='%236B6F7E' stroke-width='1.8'><path d='M5 8l5 5 5-5'/></svg>");
+    background-repeat:no-repeat; background-position:right 12px center;
+  }
+  @keyframes fadeUp{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .fade-up{animation:fadeUp .28s ease both;}
+  .card-hover{transition:box-shadow .25s ease, transform .25s ease, border-color .25s ease;}
+  .card-hover:hover{transform:translateY(-2px); box-shadow:0 14px 30px -16px rgba(27,30,43,0.28); border-color:var(--line-2);}
+  .img-frame img{transition:transform .5s ease;}
+  .card-hover:hover .img-frame img{transform:scale(1.045);}
+  .facet-spin{animation:spin 1.1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
 </head>
-<body>
+<body class="min-h-screen">
 
-<div class="container my-4">
-  <!-- Encabezado -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="header-title mb-0"><i class="fa-solid me-2"></i>Inventario de Joyas</h2>
-      <p class="text-muted mb-0">Gestión de stock, registro de ventas y control de productos</p>
-    </div>
-    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalNuevoProducto">
-      <i class="fa-solid fa-plus me-1"></i> Agregar Producto
-    </button>
-  </div>
+  <div class="max-w-7xl mx-auto p-4 md:p-6">
 
-  <!-- Tabla de Inventario -->
-  <div class="card card-custom p-3 mb-4">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle" id="tablaInventario">
-        <thead class="table-light">
-          <tr>
-            <th>SKU</th>
-            <th>Imagen</th>
-            <th>Producto</th>
-            <th>Categoría</th>
-            <th>Precio Venta</th>
-            <th>Stock Actual</th>
-            <th>Estado</th>
-            <th class="text-end">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="listaProductos">
-          <!-- Ejemplo de fila -->
-          <tr data-sku="JOY-001">
-            <td class="fw-bold">JOY-001</td>
-            <td><img src="https://via.placeholder.com/50" alt="Joy-001"></td>
-            <td>Collar doble caída cruz y virgen</td>
-            <td><span class="badge bg-secondary">Collares</span></td>
-            <td>S/ 78.90</td>
-            <td class="stock-val">1</td>
-            <td><span class="badge bg-success badge-stock">Disponible</span></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirModalVenta('JOY-001', 'Collar doble caída cruz y virgen', 78.90)">
-                <i class="fa-solid fa-cart-shopping"></i> Vender
-              </button>
-              <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(this, 'JOY-001')">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+    <!-- ===== Encabezado tipo "estuche" ===== -->
+    <header class="rounded-2xl shadow-[0_18px_40px_-24px_rgba(27,30,43,0.55)] mb-7 overflow-hidden" style="background:linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);">
+      <div class="p-5 md:p-6 flex flex-col gap-5">
 
-<!-- Modal para Registrar Venta / Salida -->
-<div class="modal fade" id="modalVenta" tabindex="-1" aria-labelledby="modalVentaLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalVentaLabel"><i class="fa-solid fa-cash-register me-2"></i>Registrar Venta</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="formVenta" onsubmit="guardarVenta(event)">
-        <div class="modal-body">
-          <input type="hidden" id="ventaSku">
-          
-          <div class="mb-3">
-            <label class="form-label fw-bold">Producto</label>
-            <input type="text" class="form-field form-control-plaintext text-muted" id="ventaProductoNombre" readonly>
-          </div>
-
-          <div class="row g-2 mb-3">
-            <div class="col-6">
-              <label class="form-label">Precio (S/)</label>
-              <input type="number" step="0.01" class="form-control" id="ventaPrecio" readonly>
-            </div>
-            <div class="col-6">
-              <label class="form-label">Fecha de Venta</label>
-              <input type="date" class="form-control" id="ventaFecha" required>
-            </div>
-          </div>
-
-          <h6 class="border-bottom pb-2 mt-4 text-secondary">Datos del Cliente</h6>
-
-          <div class="mb-3">
-            <label class="form-label">Nombre del Cliente</label>
-            <input type="text" class="form-control" id="clienteNombre" placeholder="Ej: Maria Perez" required>
-          </div>
-
-          <div class="row g-2 mb-3">
-            <div class="col-6">
-              <label class="form-label">Teléfono / WhatsApp</label>
-              <input type="tel" class="form-control" id="clienteTelefono" placeholder="999 999 999" required>
-            </div>
-            <div class="col-6">
-              <label class="form-label">Correo Electrónico</label>
-              <input type="email" class="form-control" id="clienteCorreo" placeholder="cliente@correo.com">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(201,169,106,0.14); border:1px solid rgba(201,169,106,0.35);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.5" stroke-linejoin="round">
+                <path d="M6 3h12l3 5-9 13L3 8z"/>
+                <path d="M3 8h18M9 3l1 5-4 0M15 3l-1 5 4 0M10 8l2 13 2-13"/>
+              </svg>
+            </span>
+            <div>
+              <h1 class="f-display text-[26px] md:text-[30px] leading-none tracking-tight text-white">
+                Inventario <span style="color:var(--gold-soft);">SINPAR</span>
+              </h1>
+              <p class="text-[11px] uppercase tracking-[0.16em] mt-2 flex items-center gap-2" style="color:#B9BCC6;">
+                <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                Sincronizado con Google Sheets
+              </p>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirmar Venta</button>
+
+        <!-- Barra de herramientas -->
+        <div class="flex flex-col lg:flex-row gap-2.5">
+          <div class="relative flex-1 lg:w-1/3">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9DA8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input
+              type="text"
+              id="searchInput"
+              onkeyup="filterItems()"
+              placeholder="Buscar SKU, nombre, comprador…"
+              class="w-full pl-10 pr-3 py-2.5 rounded-xl text-sm text-white placeholder-[#8A8D99] focus:bg-white focus:text-[var(--ink)] transition-colors"
+              style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);"
+            >
+          </div>
+
+          <select
+            id="categoryFilter"
+            onchange="filterItems()"
+            class="select-arrow lg:w-1/4 px-3.5 py-2.5 pr-9 rounded-xl text-sm font-medium text-white cursor-pointer"
+            style="background-color:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);"
+          >
+            <option value="" style="color:#1B1E2B;">Todas las Categorías</option>
+          </select>
+
+          <button onclick="openNewModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors shrink-0" style="background:var(--gold); color:#1B1E2B;" onmouseover="this.style.background='var(--gold-soft)'" onmouseout="this.style.background='var(--gold)'">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Nuevo
+          </button>
+
+          <div class="flex items-center rounded-xl p-1 shrink-0" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);">
+            <button id="btnViewGrid" onclick="switchView('grid')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all" style="background:var(--gold); color:#1B1E2B;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              Tarjetas
+            </button>
+            <button id="btnViewTable" onclick="switchView('table')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all" style="color:#C7CAD3;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
+              Tabla
+            </button>
+          </div>
+
+          <button onclick="loadInventory(true)" title="Recargar manual" class="px-3 py-2.5 rounded-xl shrink-0 transition-colors" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); color:#C7CAD3;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.36M21 4v5h-5"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Estado de carga ===== -->
+    <div id="loading" class="text-center py-20 bg-white rounded-2xl border" style="border-color:var(--line);">
+      <div class="inline-flex w-11 h-11 rounded-full items-center justify-center mb-3" style="border:2px solid var(--line);">
+        <span class="block w-8 h-8 rounded-full facet-spin" style="border:2px solid var(--line); border-top-color:var(--gold);"></span>
+      </div>
+      <p class="text-sm font-medium" style="color:var(--slate);">Cargando catálogo de joyas…</p>
+    </div>
+
+    <!-- ===== Vista 1: Tarjetas ===== -->
+    <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+
+    <!-- ===== Vista 2: Tabla ===== -->
+    <div id="tableView" class="hidden bg-white rounded-2xl border overflow-hidden" style="border-color:var(--line);">
+      <div class="overflow-x-auto thin-scroll max-h-[75vh]">
+        <table class="w-full text-xs text-left border-collapse">
+          <thead class="sticky top-0 z-10" style="background:var(--pearl);">
+            <tr class="border-b" style="border-color:var(--line);">
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">Acción</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">Foto</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">SKU / ID</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">Nombre del Producto</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">Categoría</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">Precio Venta</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider text-center" style="color:var(--slate);">Stock Act.</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">Estado</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">Comprado Por</th>
+              <th class="p-3 font-semibold text-[10px] uppercase tracking-wider" style="color:var(--slate);">Proveedor</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y" style="border-color:var(--line);"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Modal Crear / Editar ===== -->
+  <div id="editModal" class="fixed inset-0 bg-[#1B1E2B]/65 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto thin-scroll shadow-2xl border" style="border-color:var(--line);">
+
+      <div class="flex justify-between items-center px-6 py-4 border-b sticky top-0 bg-white z-10" style="border-color:var(--line);">
+        <h2 class="f-display text-lg text-[var(--ink)]" id="modalTitle">Editar Producto</h2>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--pearl)]" style="color:var(--slate);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="editForm" onsubmit="saveItem(event)" class="p-6">
+
+        <p class="text-[10px] font-bold uppercase tracking-[0.14em] mb-2.5" style="color:var(--gold-dark);">Identificación</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div class="flex flex-col items-center justify-center p-3 rounded-xl border" style="background:var(--pearl); border-color:var(--line);">
+            <div class="w-32 h-32 rounded-lg overflow-hidden bg-white border mb-2" style="border-color:var(--line);">
+              <img id="editImgPreview" src="" class="w-full h-full object-cover" onerror="this.src=gemPlaceholder('Sin foto')">
+            </div>
+            <span class="text-[10px] text-center" style="color:var(--slate-2);">Vista previa</span>
+          </div>
+
+          <div class="md:col-span-2 space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wide mb-1" style="color:var(--slate);">SKU / ID</label>
+                <input type="text" id="editSku" class="f-data w-full border rounded-lg p-2 text-sm" style="border-color:var(--line);" required>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wide mb-1" style="color:var(--slate);">Categoría</label>
+                <input type="text" id="editCategoria" class="w-full border rounded-lg p-2 text-sm" style="border-color:var(--line);">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wide mb-1" style="color:var(--slate);">Nombre del Producto</label>
+              <input type="text" id="editNombre" class="w-full border rounded-lg p-2 text-sm" style="border-color:var(--line);" required>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wide mb-1" style="color:var(--slate);">Enlace Imagen (Google Drive)</label>
+              <input type="url" id="editImagen" oninput="updatePreviewImage(this.value)" class="f-data w-full border rounded-lg p-2 text-xs" style="border-color:var(--line);" placeholder="https://drive.google.com/file/d/...">
+            </div>
+          </div>
+        </div>
+
+        <p class="text-[10px] font-bold uppercase tracking-[0.14em] mb-2.5" style="color:var(--gold-dark);">Precio y estado</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wide mb-1" style="color:var(--slate);">Precio Venta (PEN)</label>
+            <input type="text" id="editPrecio" placeholder="S/ 0.00" class="f-data w-full border rounded-lg p-2 text-sm" style="border-color:var(--line);">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wide mb-1" style="color:var(--slate);">Estado</label>
+            <select id="editEstado" class="select-arrow w-full border rounded-lg p-2 pr-8 text-sm" style="border-color:var(--line);">
+              <option value="Disponible">Disponible</option>
+              <option value="Vendido">Vendido</option>
+              <option value="Pendiente Precio">Pendiente Precio</option>
+              <option value="No se encontró">No se encontró</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wide mb-1" style="color:var(--rose);">Comprado por (Cliente)</label>
+            <input type="text" id="editComprador" placeholder="Nombre del cliente…" class="w-full border rounded-lg p-2 text-sm" style="border-color:#E3D3D3; background:var(--rose-bg);">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wide mb-1" style="color:var(--slate);">Proveedor</label>
+            <input type="text" id="editProveedor" class="w-full border rounded-lg p-2 text-sm" style="border-color:var(--line);">
+          </div>
+        </div>
+
+        <p class="text-[10px] font-bold uppercase tracking-[0.14em] mb-2.5" style="color:var(--gold-dark);">Control de inventario</p>
+        <div class="p-3.5 rounded-xl border mb-6" style="background:var(--pearl); border-color:var(--line);">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <div>
+              <label class="block text-[9px] font-bold uppercase mb-1" style="color:var(--slate-2);">Stock Inic.</label>
+              <input type="number" id="editStockInicial" min="0" class="f-data w-full border rounded-lg p-1.5 text-xs bg-white" style="border-color:var(--line);">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase mb-1" style="color:var(--slate-2);">Entradas</label>
+              <input type="number" id="editEntradas" min="0" class="f-data w-full border rounded-lg p-1.5 text-xs bg-white" style="border-color:var(--line);">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase mb-1" style="color:var(--slate-2);">Salidas</label>
+              <input type="number" id="editSalidas" min="0" class="f-data w-full border rounded-lg p-1.5 text-xs bg-white" style="border-color:var(--line);">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase mb-1" style="color:var(--gold-dark);">Stock Actual</label>
+              <input type="number" id="editStockActual" min="0" class="f-data w-full border rounded-lg p-1.5 text-xs font-bold" style="border-color:var(--gold-soft); background:var(--gold-bg); color:var(--gold-dark);">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase mb-1" style="color:var(--slate-2);">Stock Mín.</label>
+              <input type="number" id="editStockMinimo" min="0" class="f-data w-full border rounded-lg p-1.5 text-xs bg-white" style="border-color:var(--line);">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-4 border-t" style="border-color:var(--line);">
+          <button type="button" id="deleteBtn" onclick="confirmDelete()" class="hidden mr-auto px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5" style="color:var(--garnet); background:var(--garnet-bg);" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/><path d="M10 11v6M14 11v6"/></svg>
+            Eliminar
+          </button>
+          <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm font-semibold transition-colors hover:bg-[var(--pearl)]" style="border-color:var(--line); color:var(--slate);">Cancelar</button>
+          <button type="submit" id="saveBtn" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors" style="background:var(--ink); color:white;" onmouseover="this.style.background='var(--ink-3)'" onmouseout="this.style.background='var(--ink)'">Guardar en Sheets</button>
         </div>
       </form>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // Cargar fecha actual por defecto en el campo de fecha de venta
-  document.getElementById('ventaFecha').valueToDate = new Date().toISOString().substring(0, 10);
-  document.getElementById('ventaFecha').value = new Date().toISOString().substring(0, 10);
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzyabkbwniP58-c-MAt8veLA1qY_sfMmTgcfYj5CpxRNVkamUO8nhdbOuL831-8KQW-/exec";
 
-  // Abrir Modal de Venta con datos dinámicos
-  function abrirModalVenta(sku, nombre, precio) {
-    document.getElementById('ventaSku').value = sku;
-    document.getElementById('ventaProductoNombre').value = sku + ' - ' + nombre;
-    document.getElementById('ventaPrecio').value = precio;
-    
-    let modalVenta = new bootstrap.Modal(document.getElementById('modalVenta'));
-    modalVenta.show();
-  }
+    let inventoryData = [];
+    let isEditing = false;
+    let currentView = "grid";
+    let currentEditSku = null;
 
-  // Guardar datos de venta y actualizar la interfaz
-  function guardarVenta(e) {
-    e.preventDefault();
+    const trashIconSVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/><path d="M10 11v6M14 11v6"/></svg>';
 
-    const datosVenta = {
-      sku: document.getElementById('ventaSku').value,
-      fecha: document.getElementById('ventaFecha').value,
-      cliente: document.getElementById('clienteNombre').value,
-      telefono: document.getElementById('clienteTelefono').value,
-      correo: document.getElementById('clienteCorreo').value,
-      precio: document.getElementById('ventaPrecio').value
-    };
-
-    console.log("Registrando Venta:", datosVenta);
-
-    // TODO: Enviar datos al backend (Google Apps Script / Node.js / Python API)
-    
-    alert('Venta registrada exitosamente para ' + datosVenta.cliente);
-
-    // Cerrar modal y limpiar formulario
-    let modalElement = document.getElementById('modalVenta');
-    let modalInstance = bootstrap.Modal.getInstance(modalElement);
-    modalInstance.hide();
-    document.getElementById('formVenta').reset();
-    document.getElementById('ventaFecha').value = new Date().toISOString().substring(0, 10);
-  }
-
-  // Función para Eliminar un Registro/Producto
-  function eliminarProducto(boton, sku) {
-    if (confirm(`¿Estás seguro de que deseas eliminar la joya con SKU: ${sku}?`)) {
-      // Eliminar fila de la tabla HTML
-      let fila = boton.closest('tr');
-      fila.remove();
-
-      // TODO: Enviar petición de eliminación al backend
-      console.log(`Producto ${sku} eliminado.`);
+    // Marcador de gema (diamante) usado como imagen de respaldo — reemplaza los placeholders genéricos
+    function gemPlaceholder(label) {
+      const safe = (label || "Sin imagen").toString().slice(0, 22);
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300">
+          <rect width="300" height="300" fill="#F4F2EC"/>
+          <rect x="1" y="1" width="298" height="298" fill="none" stroke="#E8E4D9"/>
+          <g transform="translate(150,124)" stroke="#C9A96A" stroke-width="2" fill="none" stroke-linejoin="round">
+            <path d="M-34,-17 L34,-17 L46,5 L0,52 L-46,5 Z"/>
+            <path d="M-34,-17 L0,5 L34,-17"/>
+            <path d="M0,5 L0,52"/>
+            <path d="M-17,-17 L0,5 L17,-17"/>
+          </g>
+          <text x="150" y="205" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#9A9DA8">${safe}</text>
+        </svg>`;
+      return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
     }
-  }
-</script>
 
+    function switchView(view) {
+      currentView = view;
+      const btnGrid = document.getElementById("btnViewGrid");
+      const btnTable = document.getElementById("btnViewTable");
+      const gridView = document.getElementById("gridView");
+      const tableView = document.getElementById("tableView");
+      const activeStyle = "background:var(--gold); color:#1B1E2B;";
+      const inactiveStyle = "color:#C7CAD3;";
+
+      if (view === "grid") {
+        gridView.classList.remove("hidden");
+        tableView.classList.add("hidden");
+        btnGrid.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all";
+        btnGrid.setAttribute("style", activeStyle);
+        btnTable.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all";
+        btnTable.setAttribute("style", inactiveStyle);
+      } else {
+        gridView.classList.add("hidden");
+        tableView.classList.remove("hidden");
+        btnTable.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all";
+        btnTable.setAttribute("style", activeStyle);
+        btnGrid.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all";
+        btnGrid.setAttribute("style", inactiveStyle);
+      }
+      filterItems();
+    }
+
+    async function loadInventory(showStatus = false) {
+      if (isEditing) return;
+
+      try {
+        if (showStatus) {
+          document.getElementById("syncDot").className = "w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-ping";
+        }
+
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        inventoryData = data;
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("syncDot").className = "w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block";
+
+        updateCategoryDropdown();
+        filterItems();
+      } catch (err) {
+        console.error("Error cargando inventario:", err);
+        document.getElementById("syncDot").className = "w-1.5 h-1.5 rounded-full bg-red-400 inline-block";
+      }
+    }
+
+    function updateCategoryDropdown() {
+      const categorySelect = document.getElementById("categoryFilter");
+      const currentSelected = categorySelect.value;
+
+      const categories = [...new Set(
+        inventoryData
+          .map(item => item["Categoría"])
+          .filter(cat => cat && cat.trim() !== "")
+      )].sort();
+
+      categorySelect.innerHTML = `<option value="" style="color:#1B1E2B;">Todas las Categorías (${inventoryData.length})</option>`;
+
+      categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        option.style.color = "#1B1E2B";
+        if (cat === currentSelected) option.selected = true;
+        categorySelect.appendChild(option);
+      });
+    }
+
+    function statusStyle(estado, isOut) {
+      if (isOut && estado !== "Vendido" && estado !== "No se encontró") {
+        return { bg: "var(--garnet-bg)", fg: "var(--garnet)", label: "Sin Stock" };
+      }
+      switch (estado) {
+        case "Vendido": return { bg: "var(--garnet-bg)", fg: "var(--garnet)", label: estado };
+        case "No se encontró": return { bg: "var(--garnet-bg)", fg: "var(--garnet)", label: estado };
+        case "Pendiente Precio": return { bg: "var(--gold-bg)", fg: "var(--gold-dark)", label: estado };
+        default: return { bg: "var(--emerald-bg)", fg: "var(--emerald)", label: estado || "Disponible" };
+      }
+    }
+
+    // Renderizar Tarjetas
+    function renderCards(items) {
+      const grid = document.getElementById("gridView");
+      grid.innerHTML = "";
+
+      if (items.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-14 bg-white rounded-2xl border" style="border-color:var(--line); color:var(--slate-2);">No se encontraron productos.</div>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const sku = item["SKU / ID"] || "-";
+        const nombre = item["Nombre del Producto"] || "Sin nombre";
+        const categoria = item["Categoría"] || "Sin Categoría";
+        const precio = item["Precio Venta (PEN)"] || "-";
+        const estado = item["Estado"] || "Disponible";
+        const comprador = item["Comprado por"] || item["Comprador"] || "";
+        const stockActual = Number(item["Stock Actual"] ?? 1);
+        const imgUrl = item["Imagen_Directa"] || gemPlaceholder(nombre);
+
+        const isOut = stockActual <= 0 || estado === "Vendido" || estado === "No se encontró";
+        const st = statusStyle(estado, isOut);
+
+        const card = document.createElement("div");
+        card.className = "fade-up card-hover bg-white rounded-2xl border p-3.5 flex flex-col justify-between";
+        card.style.borderColor = "var(--line)";
+        card.innerHTML = `
+          <div>
+            <div class="img-frame relative w-full aspect-square mb-3 rounded-xl overflow-hidden" style="background:var(--pearl);">
+              <img src="${imgUrl}" alt="${nombre}" class="w-full h-full object-cover ${isOut ? 'opacity-80 saturate-50' : ''}" onerror="this.src=gemPlaceholder('${nombre.replace(/'/g, "")}')">
+              <span class="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-sm" style="background:${st.bg}; color:${st.fg};">
+                ${st.label}
+              </span>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider" style="color:var(--gold-dark);">${categoria}</span>
+            <h3 class="font-semibold text-sm mt-1 line-clamp-2 leading-snug" style="color:var(--ink);">${nombre}</h3>
+            <p class="f-data text-[11px] mt-1" style="color:var(--slate-2);">${sku}</p>
+
+            ${comprador ? `
+            <p class="mt-2.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5" style="color:var(--rose); background:var(--rose-bg); border-color:#E3D3D3;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+              ${comprador}
+            </p>` : ''}
+          </div>
+
+          <div class="mt-4 pt-3 border-t flex items-center justify-between" style="border-color:var(--line);">
+            <div>
+              <p class="text-[9px] uppercase tracking-wide" style="color:var(--slate-2);">Precio</p>
+              <p class="f-data font-bold text-[15px]" style="color:var(--ink);">${precio}</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="quickDelete('${sku}', '${nombre.replace(/'/g, "\\'")}')" title="Eliminar" class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors" style="color:var(--garnet); background:var(--garnet-bg);" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+                ${trashIconSVG}
+              </button>
+              <button onclick="openModal('${sku}')" class="px-3 py-1.5 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5" style="background:var(--ink);" onmouseover="this.style.background='var(--ink-3)'" onmouseout="this.style.background='var(--ink)'">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                Editar
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Renderizar Tabla
+    function renderTable(items) {
+      const tableBody = document.getElementById("tableBody");
+      tableBody.innerHTML = "";
+
+      if (items.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-10" style="color:var(--slate-2);">No se encontraron productos.</td></tr>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const sku = item["SKU / ID"] || "-";
+        const nombre = item["Nombre del Producto"] || "Sin nombre";
+        const categoria = item["Categoría"] || "-";
+        const precio = item["Precio Venta (PEN)"] || "-";
+        const stockActual = Number(item["Stock Actual"] ?? 1);
+        const estado = item["Estado"] || "Disponible";
+        const comprador = item["Comprado por"] || item["Comprador"] || "-";
+        const proveedor = item["Proveedor"] || "-";
+        const imgUrl = item["Imagen_Directa"] || gemPlaceholder("");
+
+        const isOut = stockActual <= 0 || estado === "Vendido" || estado === "No se encontró";
+        const st = statusStyle(estado, isOut);
+
+        const tr = document.createElement("tr");
+        tr.className = "transition-colors";
+        tr.style.borderColor = "var(--line)";
+        tr.onmouseover = () => tr.style.background = "var(--pearl)";
+        tr.onmouseout = () => tr.style.background = "transparent";
+        tr.innerHTML = `
+          <td class="p-3">
+            <div class="flex items-center gap-1.5">
+              <button onclick="openModal('${sku}')" class="px-2.5 py-1 text-white text-[11px] font-semibold rounded-md transition-colors whitespace-nowrap" style="background:var(--ink);">
+                Editar
+              </button>
+              <button onclick="quickDelete('${sku}', '${nombre.replace(/'/g, "\\'")}')" title="Eliminar" class="w-7 h-7 flex items-center justify-center rounded-md transition-colors shrink-0" style="color:var(--garnet); background:var(--garnet-bg);" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+                ${trashIconSVG}
+              </button>
+            </div>
+          </td>
+          <td class="p-3">
+            <img src="${imgUrl}" class="w-10 h-10 object-cover rounded-lg border ${isOut ? 'opacity-70 saturate-50' : ''}" style="border-color:var(--line);" onerror="this.src=gemPlaceholder('')">
+          </td>
+          <td class="p-3 f-data font-semibold whitespace-nowrap" style="color:var(--ink-3);">${sku}</td>
+          <td class="p-3 font-medium max-w-[200px] truncate" style="color:var(--ink);" title="${nombre}">${nombre}</td>
+          <td class="p-3 whitespace-nowrap" style="color:var(--slate);">${categoria}</td>
+          <td class="p-3 f-data font-bold whitespace-nowrap" style="color:var(--ink);">${precio}</td>
+          <td class="p-3 text-center f-data font-bold" style="color:${isOut ? 'var(--garnet)' : 'var(--gold-dark)'};">${stockActual}</td>
+          <td class="p-3 whitespace-nowrap">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:${st.bg}; color:${st.fg};">${st.label}</span>
+          </td>
+          <td class="p-3 font-medium whitespace-nowrap" style="color:var(--rose);">${comprador}</td>
+          <td class="p-3 whitespace-nowrap" style="color:var(--slate-2);">${proveedor}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // Abrir Modal para crear Nuevo Producto
+    function openNewModal() {
+      isEditing = true;
+      currentEditSku = null;
+      document.getElementById("deleteBtn").classList.add("hidden");
+      document.getElementById("modalTitle").innerText = "Nuevo Producto";
+      document.getElementById("editSku").value = "SKU-" + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById("editSku").readOnly = false;
+      document.getElementById("editNombre").value = "";
+      document.getElementById("editCategoria").value = "";
+      document.getElementById("editImagen").value = "";
+      document.getElementById("editPrecio").value = "S/ 0.00";
+      document.getElementById("editStockInicial").value = 1;
+      document.getElementById("editEntradas").value = 0;
+      document.getElementById("editSalidas").value = 0;
+      document.getElementById("editStockActual").value = 1;
+      document.getElementById("editStockMinimo").value = 1;
+      document.getElementById("editEstado").value = "Disponible";
+      document.getElementById("editComprador").value = "";
+      document.getElementById("editProveedor").value = "";
+      document.getElementById("editImgPreview").src = gemPlaceholder("Nueva pieza");
+
+      document.getElementById("editModal").classList.remove("hidden");
+      document.getElementById("editModal").classList.add("flex");
+    }
+
+    // Abrir Modal para Editar Producto
+    function openModal(sku) {
+      const item = inventoryData.find(i => String(i["SKU / ID"]).trim() === String(sku).trim());
+      if (!item) return;
+
+      isEditing = true;
+      currentEditSku = sku;
+      document.getElementById("deleteBtn").classList.remove("hidden");
+      document.getElementById("modalTitle").innerText = `Editar: ${sku}`;
+      document.getElementById("editSku").value = item["SKU / ID"] || "";
+      document.getElementById("editSku").readOnly = true;
+      document.getElementById("editNombre").value = item["Nombre del Producto"] || "";
+      document.getElementById("editCategoria").value = item["Categoría"] || "";
+      document.getElementById("editImagen").value = item["Imagen"] || "";
+      document.getElementById("editPrecio").value = item["Precio Venta (PEN)"] || "";
+      document.getElementById("editStockInicial").value = item["Stock Inicial"] ?? "";
+      document.getElementById("editEntradas").value = item["Entradas"] ?? "";
+      document.getElementById("editSalidas").value = item["Salidas"] ?? "";
+      document.getElementById("editStockActual").value = item["Stock Actual"] ?? "";
+      document.getElementById("editStockMinimo").value = item["Stock Mínimo"] ?? "";
+      document.getElementById("editEstado").value = item["Estado"] || "Disponible";
+      document.getElementById("editComprador").value = item["Comprado por"] || item["Comprador"] || "";
+      document.getElementById("editProveedor").value = item["Proveedor"] || "";
+
+      document.getElementById("editImgPreview").src = item["Imagen_Directa"] || gemPlaceholder(item["Nombre del Producto"] || "");
+
+      document.getElementById("editModal").classList.remove("hidden");
+      document.getElementById("editModal").classList.add("flex");
+    }
+
+    function closeModal() {
+      document.getElementById("editModal").classList.add("hidden");
+      document.getElementById("editModal").classList.remove("flex");
+      isEditing = false;
+      currentEditSku = null;
+    }
+
+    function updatePreviewImage(url) {
+      if (url.includes("drive.google.com")) {
+        const idMatch = url.match(/\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
+        if (idMatch && idMatch[1]) {
+          url = `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
+        }
+      }
+      document.getElementById("editImgPreview").src = url || gemPlaceholder("Sin foto");
+    }
+
+    // Guardar o Crear Producto en Google Sheets
+    async function saveItem(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.innerText = "Guardando…";
+      saveBtn.disabled = true;
+
+      const payload = {
+        "SKU / ID": document.getElementById("editSku").value,
+        "Imagen": document.getElementById("editImagen").value,
+        "Nombre del Producto": document.getElementById("editNombre").value,
+        "Categoría": document.getElementById("editCategoria").value,
+        "Precio Venta (PEN)": document.getElementById("editPrecio").value,
+        "Stock Inicial": document.getElementById("editStockInicial").value,
+        "Entradas": document.getElementById("editEntradas").value,
+        "Salidas": document.getElementById("editSalidas").value,
+        "Stock Actual": document.getElementById("editStockActual").value,
+        "Stock Mínimo": document.getElementById("editStockMinimo").value,
+        "Estado": document.getElementById("editEstado").value,
+        "Comprado por": document.getElementById("editComprador").value,
+        "Proveedor": document.getElementById("editProveedor").value
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        let result = null;
+        try { result = await res.json(); } catch (parseErr) { /* respuesta no era JSON */ }
+
+        if (!res.ok || (result && result.status === "error")) {
+          throw new Error((result && result.message) || `Error HTTP ${res.status}`);
+        }
+
+        closeModal();
+        saveBtn.innerText = "Guardar en Sheets";
+        saveBtn.disabled = false;
+
+        await loadInventory(true);
+      } catch (err) {
+        alert("No se pudo guardar el producto:\n\n" + (err.message || err));
+        console.error(err);
+        saveBtn.innerText = "Guardar en Sheets";
+        saveBtn.disabled = false;
+      }
+    }
+
+    // Eliminar directamente desde la tarjeta o la tabla (sin abrir el modal)
+    function quickDelete(sku, nombre) {
+      if (confirm(`¿Eliminar "${nombre}" (${sku}) del inventario?\n\nEsta acción no se puede deshacer.`)) {
+        deleteItem(sku);
+      }
+    }
+
+    // Eliminar desde dentro del modal de edición
+    function confirmDelete() {
+      if (!currentEditSku) return;
+      const item = inventoryData.find(i => String(i["SKU / ID"]).trim() === String(currentEditSku).trim());
+      const nombre = item ? (item["Nombre del Producto"] || currentEditSku) : currentEditSku;
+      if (confirm(`¿Eliminar "${nombre}" (${currentEditSku}) del inventario?\n\nEsta acción no se puede deshacer.`)) {
+        deleteItem(currentEditSku);
+      }
+    }
+
+    // Envía la solicitud de eliminación a Google Sheets
+    async function deleteItem(sku) {
+      const deleteBtn = document.getElementById("deleteBtn");
+      const originalHTML = deleteBtn ? deleteBtn.innerHTML : null;
+      if (deleteBtn && !deleteBtn.classList.contains("hidden")) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerText = "Eliminando…";
+      }
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "delete", "SKU / ID": sku })
+        });
+
+        let result = null;
+        try { result = await res.json(); } catch (parseErr) { /* respuesta no era JSON */ }
+
+        if (!res.ok || (result && result.status === "error")) {
+          throw new Error((result && result.message) || `Error HTTP ${res.status}`);
+        }
+
+        // Actualización optimista en memoria mientras se confirma con el servidor
+        inventoryData = inventoryData.filter(i => String(i["SKU / ID"]).trim() !== String(sku).trim());
+        updateCategoryDropdown();
+        filterItems();
+        closeModal();
+
+        await loadInventory(true);
+      } catch (err) {
+        alert("No se pudo eliminar el producto:\n\n" + (err.message || err));
+        console.error(err);
+      } finally {
+        if (deleteBtn && originalHTML !== null) {
+          deleteBtn.disabled = false;
+          deleteBtn.innerHTML = originalHTML;
+        }
+      }
+    }
+
+    // Filtro de texto y categoría
+    function filterItems() {
+      const term = document.getElementById("searchInput").value.toLowerCase();
+      const selectedCategory = document.getElementById("categoryFilter").value;
+
+      const filtered = inventoryData.filter(i => {
+        const nom = (i["Nombre del Producto"] || "").toLowerCase();
+        const sku = (i["SKU / ID"] || "").toLowerCase();
+        const cat = i["Categoría"] || "";
+        const est = (i["Estado"] || "").toLowerCase();
+        const prov = (i["Proveedor"] || "").toLowerCase();
+        const comp = (i["Comprado por"] || i["Comprador"] || "").toLowerCase();
+
+        const matchesSearch = nom.includes(term) || sku.includes(term) || cat.toLowerCase().includes(term) || est.includes(term) || prov.includes(term) || comp.includes(term);
+        const matchesCategory = selectedCategory === "" || cat === selectedCategory;
+
+        return matchesSearch && matchesCategory;
+      });
+
+      if (currentView === "grid") {
+        renderCards(filtered);
+      } else {
+        renderTable(filtered);
+      }
+    }
+
+    loadInventory();
+    setInterval(() => {
+      loadInventory();
+    }, 10000);
+  </script>
 </body>
 </html>
