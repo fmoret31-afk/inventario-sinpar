@@ -1,79 +1,261 @@
-// ID de tu Google Sheet extraído de la URL proporcionada
-const SPREADSHEET_ID = "1TLvj8Xux70RO4lBauB9wWAms3-LqUnJD"; 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIN PAR · Inventario de Joyería</title>
 
-function getSheet() {
-  if (SPREADSHEET_ID) {
-    return SpreadsheetApp.openById(SPREADSHEET_ID).getActiveSheet();
-  }
-  return SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-}
+  <!-- Google Fonts & Tailwind CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 
-function doGet(e) {
-  try {
-    var sheet = getSheet();
-    var data = sheet.getDataRange().getValues();
+  <style>
+    :root {
+      --ink: #121014;
+      --ivory: #F6F1E7;
+      --paper: #FFFFFF;
+      --gold: #A9822F;
+      --goldpale: #F1E6CE;
+      --stone: #8B8378;
+      --textsec: #6E675C;
+      --line: rgba(18,16,20,0.09);
+      --line-gold: rgba(169,130,47,0.28);
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--ivory); color: var(--ink); margin: 0; }
+    .sidebar { position: fixed; top: 0; left: 0; width: 232px; height: 100vh; background: var(--ink); color: var(--ivory); padding: 2rem 1.5rem; }
+    .main-content { margin-left: 232px; padding: 2rem 3rem; min-height: 100vh; }
     
-    // Si la hoja está vacía o solo tiene encabezados
-    if (data.length <= 1) {
-      return ContentService.createTextOutput(JSON.stringify([]))
-        .setMimeType(ContentService.MimeType.JSON);
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .kpi-card { background: var(--paper); padding: 1.2rem; border: 1px solid var(--line); border-radius: 4px; }
+    .kpi-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--stone); text-transform: uppercase; }
+    .kpi-value { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 600; margin-top: 0.2rem; }
+
+    .table-wrapper { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th { background: var(--ivory); color: var(--textsec); font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; text-transform: uppercase; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--line); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(18,16,20,0.05); }
+    tr:hover td { background: var(--goldpale); }
+
+    .btn { background: var(--ink); color: var(--ivory); padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: 0.2s; }
+    .btn:hover { background: var(--gold); }
+    .btn-secondary { background: transparent; border: 1px solid var(--line-gold); color: var(--ink); padding: 0.35rem 0.8rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
+    .btn-secondary:hover { background: var(--goldpale); }
+
+    #toast { visibility: hidden; position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--ivory); padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.8rem; z-index: 3000; opacity: 0; transition: 0.3s; }
+    #toast.show { visibility: visible; opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div id="toast"><span id="toastMsg">Notificación</span></div>
+
+  <aside class="sidebar">
+    <h1 style="font-family:'Fraunces',serif; font-size:1.4rem;">SIN <span style="color:var(--gold)">PAR</span></h1>
+    <p style="font-size:0.6rem; color:var(--stone); letter-spacing:0.1em; text-transform:uppercase;">Joyería Fina</p>
+  </aside>
+
+  <main class="main-content">
+    <!-- Topbar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; padding-bottom:1rem; border-bottom:1px solid var(--line);">
+      <h2 style="font-family:'Fraunces',serif; font-size:1.2rem;">Gestión de Inventario</h2>
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <span id="syncStatus" style="font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--textsec);">Conectando...</span>
+        <button class="btn-secondary" onclick="cargarDatos()">Actualizar</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi-card"><div class="kpi-title">Total Ítems</div><div class="kpi-value" id="kpi-items">0</div></div>
+      <div class="kpi-card"><div class="kpi-title">Stock Total</div><div class="kpi-value" id="kpi-stock">0 u.</div></div>
+      <div class="kpi-card"><div class="kpi-title">Valor del Inventario</div><div class="kpi-value" id="kpi-valor">S/ 0.00</div></div>
+    </div>
+
+    <!-- Formulario Agregar Producto -->
+    <div style="background:var(--paper); padding:1.2rem; border:1px solid var(--line); border-radius:4px; margin-bottom:1.5rem;">
+      <h3 style="font-family:'Fraunces',serif; font-size:0.95rem; margin-bottom:0.8rem;">Registrar Nuevo Producto</h3>
+      <form id="formNuevoProducto" onsubmit="agregarProducto(event)" style="display:grid; grid-template-columns: 1fr 1fr 2fr 1fr 1fr auto; gap:0.6rem; align-items:end;">
+        <div>
+          <label style="font-size:0.65rem; color:var(--stone);">SKU</label>
+          <input type="text" id="newSku" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+        </div>
+        <div>
+          <label style="font-size:0.65rem; color:var(--stone);">Categoría</label>
+          <input type="text" id="newCategoria" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+        </div>
+        <div>
+          <label style="font-size:0.65rem; color:var(--stone);">Nombre del Producto</label>
+          <input type="text" id="newNombre" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+        </div>
+        <div>
+          <label style="font-size:0.65rem; color:var(--stone);">Precio (S/)</label>
+          <input type="number" step="0.01" id="newPrecio" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+        </div>
+        <div>
+          <label style="font-size:0.65rem; color:var(--stone);">Stock Inicial</label>
+          <input type="number" id="newStock" required style="width:100%; border:1px solid var(--line); padding:0.35rem; font-size:0.75rem; border-radius:2px;">
+        </div>
+        <button type="submit" class="btn">Guardar</button>
+      </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Categoría</th>
+            <th>Nombre</th>
+            <th>Precio (S/)</th>
+            <th>Stock</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTable">
+          <tr><td colspan="6" style="text-align:center; color:var(--stone); padding:2rem;">Cargando datos desde Google Sheets...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    // PEGA AQUÍ LA URL QUE OBTENGAS AL DESPLEGAR EN GOOGLE APPS SCRIPT
+    const API_URL = "https://script.google.com/macros/s/TU_DEPLOYMENT_ID_AQUI/exec";
+    let inventario = [];
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    var headers = data[0]; // Lee los encabezados de la fila 1
-    var result = [];
-    
-    for (var i = 1; i < data.length; i++) {
-      var obj = {};
-      for (var j = 0; j < headers.length; j++) {
-        obj[headers[j]] = data[i][j];
+    async function cargarDatos() {
+      document.getElementById('syncStatus').textContent = 'Sincronizando...';
+      try {
+        const resp = await fetch(API_URL);
+        const data = await resp.json();
+
+        inventario = data.map(item => ({
+          sku: item.SKU || item.sku || '',
+          categoria: item.Categoria || item.categoria || '',
+          nombre: item.Nombre || item.nombre || '',
+          precio: parseFloat(item.Precio || item.precio || 0),
+          stock: parseInt(item.Stock || item.stock || 0)
+        }));
+
+        renderTabla();
+        actualizarKPIs();
+        document.getElementById('syncStatus').textContent = 'Sincronizado';
+      } catch (err) {
+        console.error(err);
+        showToast('Error al conectar con Google Sheets');
+        document.getElementById('syncStatus').textContent = 'Error de conexión';
       }
-      result.push(obj);
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doPost(e) {
-  try {
-    if (!e || !e.postData || !e.postData.contents) {
-      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Petición vacía" }))
-        .setMimeType(ContentService.MimeType.JSON);
     }
 
-    var request = JSON.parse(e.postData.contents);
-    var sheet = getSheet();
-    var data = sheet.getDataRange().getValues();
-    
-    if (request.accion === 'crear') {
-      // Agrega una nueva fila al final
-      sheet.appendRow([request.sku, request.categoria, request.nombre, request.precio, request.stock]);
-      return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Editar o registrar venta
-    for (var i = 1; i < data.length; i++) {
-      if (data[i][0] == request.sku) { // Columna A: SKU
-        if (request.accion === 'editar') {
-          sheet.getRange(i + 1, 3).setValue(request.nombre); // Columna C: Nombre
-        } else if (request.accion === 'venta') {
-          sheet.getRange(i + 1, 5).setValue(request.nuevoStock); // Columna E: Stock
-        }
-        break;
+    async function enviarAGoogleSheets(payload) {
+      document.getElementById('syncStatus').textContent = 'Guardando...';
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        showToast('Guardado correctamente');
+        document.getElementById('syncStatus').textContent = 'Sincronizado';
+      } catch (err) {
+        console.error(err);
+        showToast('Error al guardar');
+        document.getElementById('syncStatus').textContent = 'Error al guardar';
       }
     }
-    
-    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
-      .setMimeType(ContentService.MimeType.JSON);
 
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
+    function renderTabla() {
+      const tbody = document.getElementById('inventoryTable');
+      if (inventario.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--stone); padding:2rem;">No hay productos registrados</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = inventario.map(p => `
+        <tr>
+          <td style="font-family:'IBM Plex Mono',monospace; font-weight:500;">${p.sku}</td>
+          <td>${p.categoria}</td>
+          <td>
+            <input type="text" value="${p.nombre}" 
+                   style="background:transparent; border-bottom:1px dashed var(--stone); outline:none; width:100%;" 
+                   onchange="guardarNombre('${p.sku}', this.value)">
+          </td>
+          <td style="font-weight:600;">S/ ${p.precio.toFixed(2)}</td>
+          <td>${p.stock}</td>
+          <td>
+            <button class="btn" onclick="registrarVenta('${p.sku}')">Vender -1</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function actualizarKPIs() {
+      let totalStock = 0, totalValor = 0;
+      inventario.forEach(p => {
+        totalStock += p.stock;
+        totalValor += p.stock * p.precio;
+      });
+      document.getElementById('kpi-items').textContent = inventario.length;
+      document.getElementById('kpi-stock').textContent = `${totalStock} u.`;
+      document.getElementById('kpi-valor').textContent = `S/ ${totalValor.toFixed(2)}`;
+    }
+
+    function agregarProducto(e) {
+      e.preventDefault();
+      const nuevo = {
+        accion: 'crear',
+        sku: document.getElementById('newSku').value,
+        categoria: document.getElementById('newCategoria').value,
+        nombre: document.getElementById('newNombre').value,
+        precio: parseFloat(document.getElementById('newPrecio').value),
+        stock: parseInt(document.getElementById('newStock').value)
+      };
+
+      inventario.push({
+        sku: nuevo.sku,
+        categoria: nuevo.categoria,
+        nombre: nuevo.nombre,
+        precio: nuevo.precio,
+        stock: nuevo.stock
+      });
+
+      renderTabla();
+      actualizarKPIs();
+      enviarAGoogleSheets(nuevo);
+      document.getElementById('formNuevoProducto').reset();
+    }
+
+    function guardarNombre(sku, nuevoNombre) {
+      const item = inventario.find(i => i.sku === sku);
+      if (item) {
+        item.nombre = nuevoNombre;
+        enviarAGoogleSheets({ accion: 'editar', sku: sku, nombre: nuevoNombre });
+      }
+    }
+
+    function registrarVenta(sku) {
+      const item = inventario.find(i => i.sku === sku);
+      if (item && item.stock > 0) {
+        item.stock -= 1;
+        renderTabla();
+        actualizarKPIs();
+        enviarAGoogleSheets({ accion: 'venta', sku: sku, nuevoStock: item.stock });
+      } else {
+        showToast('Sin stock suficiente');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', cargarDatos);
+  </script>
+</body>
+</html>
