@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"/>
-  <title>SIN PAR · Sistema de Inventario</title>
+  <title>SIN PAR · Joyería fina</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,14 +17,20 @@
       theme: {
         extend: {
           colors: {
-            ink:    { 900:'#0B1526', 800:'#12203D', 700:'#1B2C4D', 600:'#253A61' },
-            gold:   { 600:'#8A6B3F', 500:'#B08D57', 400:'#C9A876', 300:'#DFC998' },
-            paper:  { 50:'#FAF8F4', 100:'#F2EFE8', 200:'#E9E3D6' },
-            garnet: { 600:'#8C2E22', 100:'#F6E3DE' },
-            citrine:{ 700:'#8A5A17', 100:'#F5EBD9' }
+            ink: '#121014',
+            inksoft: '#221F24',
+            ivory: '#F6F1E7',
+            white: '#FFFFFF',
+            champagne: '#F1E6CE',
+            gold: '#A9822F',
+            goldlight: '#D9C79C',
+            stone: '#8B8378',
+            textsec: '#6E675C',
+            wine: '#6C2A32',
           },
           fontFamily: {
             display: ['Fraunces', 'serif'],
+            sans: ['Inter', 'sans-serif'],
             mono: ['"IBM Plex Mono"', 'monospace']
           }
         }
@@ -39,544 +45,1066 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
+    :root {
+      --ink: #121014;
+      --inksoft: #221F24;
+      --ivory: #F6F1E7;
+      --paper: #FFFFFF;
+      --gold: #A9822F;
+      --goldlight: #D9C79C;
+      --goldpale: #F1E6CE;
+      --stone: #8B8378;
+      --textsec: #6E675C;
+      --line: rgba(18,16,20,0.09);
+      --line-gold: rgba(169,130,47,0.28);
+      --green: #3C7A5C;
+      --amber: #B07A2E;
+      --red: #8C3B3B;
+      --gray: #9C978D;
+    }
     * { box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background: #F8F5F0;
-      color: #0B1526;
+      background: var(--ivory);
+      color: var(--ink);
+      margin: 0;
+      padding: 0;
       -webkit-font-smoothing: antialiased;
     }
 
-    .kpi-card, .panel-card {
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 12px rgba(11,21,38,0.06);
-    }
-    .kpi-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 28px -8px rgba(11,21,38,0.12);
-    }
-    .panel-card {
-      box-shadow: 0 2px 8px rgba(11,21,38,0.04);
-    }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--champagne); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
 
-    .table-row-hover:hover {
-      background-color: #FAF3E4;
-      transition: background 0.15s ease;
-    }
+    a, button { font-family: inherit; }
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-    .badge {
-      font-weight: 600;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.65rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      white-space: nowrap;
+    /* =========================================================
+       SIDEBAR
+       ========================================================= */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 232px;
+      height: 100vh;
+      background: var(--ink);
+      background-image: radial-gradient(circle at 50% -10%, rgba(169,130,47,0.14), transparent 55%);
+      color: var(--champagne);
+      z-index: 1000;
+      padding: 2.4rem 1.6rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(169,130,47,0.16);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto;
     }
-    .badge-disponible { background: #E4EFE7; color: #1F4D33; border: 1px solid #C6DBC9; }
-    .badge-pendiente  { background: #F5EBD9; color: #8A5A17; border: 1px solid #E7D2A8; }
-    .badge-critico    { background: #F6E3DE; color: #8C2E22; border: 1px solid #E8C3B6; }
-    .badge-otro       { background: #ECEEF1; color: #475569; border: 1px solid #DADFE6; }
+    .sidebar.collapsed { transform: translateX(-100%); }
 
-    .loader {
-      border: 3px solid #E9E3D6;
-      border-top: 3px solid #B08D57;
+    .sidebar-brand {
+      margin-bottom: 2.8rem;
+      padding-bottom: 1.7rem;
+      border-bottom: 1px solid rgba(169,130,47,0.16);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+    .brand-seal {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #F2EFE8; border-radius: 8px; }
-    ::-webkit-scrollbar-thumb { background: #D9C7A3; border-radius: 8px; }
-    ::-webkit-scrollbar-thumb:hover { background: #B08D57; }
-
-    .gold-rule {
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #B08D57 20%, #DFC998 50%, #B08D57 80%, transparent);
-      opacity: 0.6;
-    }
-
-    .eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: #8A6B3F;
-      font-weight: 600;
-    }
-
-    .sync-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 9999px;
-      background: #3EAE68;
-      box-shadow: 0 0 0 3px rgba(62,174,104,0.2);
-    }
-    .sync-dot.error { background: #C0463A; box-shadow: 0 0 0 3px rgba(192,70,58,0.2); }
-    .sync-dot.pulse { animation: pulse-dot 1.6s ease-in-out infinite; }
-    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    .logo-container {
-      width: 48px;
-      height: 48px;
-      background: white;
-      border-radius: 50%;
+      border: 1px solid var(--gold);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(176,141,87,0.25);
-      overflow: hidden;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      flex-shrink: 0;
-      border: 2px solid #B08D57;
+      position: relative;
     }
-    .logo-container:hover {
-      transform: scale(1.06);
-      box-shadow: 0 4px 16px rgba(176,141,87,0.35);
-    }
-    .logo-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .brand-seal::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 1px solid rgba(169,130,47,0.35);
       border-radius: 50%;
     }
-    .logo-container .logo-fallback {
-      font-size: 1.5rem;
-      color: #B08D57;
+    .brand-seal span {
+      font-family: 'Fraunces', serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--goldlight);
     }
-
-    .filter-btn {
-      background: white;
-      border: 1px solid #E9E3D6;
-      color: #5B6472;
-      font-size: 0.7rem;
+    .sidebar-brand h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.45rem;
       font-weight: 600;
-      padding: 0.35rem 1rem;
-      border-radius: 9999px;
-      transition: all 0.15s;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.03em;
+      color: var(--ivory);
+      margin: 0;
+      line-height: 1.05;
+    }
+    .sidebar-brand h1 span { color: var(--gold); font-style: italic; font-weight: 500; }
+    .sidebar-brand .sub {
+      font-size: 0.56rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-      -webkit-tap-highlight-color: transparent;
-      min-height: 36px;
-    }
-    .filter-btn:hover {
-      background: #F2EFE8;
-      border-color: #C9A876;
-      transform: translateY(-1px);
-    }
-    .filter-btn.active {
-      background: #0B1526;
-      border-color: #0B1526;
-      color: white;
-      box-shadow: 0 2px 8px rgba(11,21,38,0.20);
-    }
-    .filter-btn.active:hover {
-      background: #12203D;
+      letter-spacing: 0.22em;
+      color: var(--stone);
+      margin-top: 0.3rem;
+      display: block;
+      font-weight: 400;
     }
 
-    .table-filter-input {
-      width: 100%;
-      padding: 0.2rem 0.4rem;
-      font-size: 0.65rem;
-      border: 1px solid #DADFE6;
-      border-radius: 6px;
-      background: white;
-      transition: border 0.2s;
-      font-family: 'Inter', sans-serif;
-      min-height: 28px;
-    }
-    .table-filter-input:focus {
-      border-color: #B08D57;
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(176,141,87,0.2);
-    }
-    .table-filter-input::placeholder {
-      color: #B0B8C4;
-      font-size: 0.6rem;
-    }
-
-    .table-head {
-      background: #F2EFE8;
-      border-bottom: 2px solid #B08D57;
-      color: #12203D;
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-    }
-    .table-row-alt {
-      background: #FCFBF8;
-    }
-
-    .kpi-border-gold { border-left: 4px solid #B08D57; }
-    .kpi-border-green { border-left: 4px solid #1F4D33; }
-    .kpi-border-amber { border-left: 4px solid #8A6B3F; }
-    .kpi-border-red { border-left: 4px solid #8C2E22; }
-
-    .select-category {
-      background: white;
-      border: 1px solid #E9E3D6;
-      border-radius: 9999px;
-      padding: 0.35rem 1.2rem 0.35rem 1rem;
-      font-size: 0.7rem;
-      color: #12203D;
+    .sidebar-nav { flex: 1; margin-top: 0.4rem; }
+    .sidebar-nav .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 2px;
+      color: var(--stone);
+      font-size: 0.78rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
-      min-height: 36px;
-    }
-    .select-category:focus {
-      border-color: #B08D57;
-      box-shadow: 0 0 0 3px rgba(176,141,87,0.15);
-    }
-
-    /* Pestañas para selector de gráficos */
-    .chart-tab {
-      background: white;
-      border: 1px solid #E9E3D6;
-      color: #5B6472;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.3rem 1rem;
-      border-radius: 9999px;
-      cursor: pointer;
-      transition: all 0.15s;
-      min-height: 34px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .chart-tab:hover {
-      background: #F2EFE8;
-    }
-    .chart-tab.active {
-      background: #0B1526;
-      color: white;
-      border-color: #0B1526;
-    }
-
-    /* Barra de progreso de stock */
-    .stock-bar {
-      height: 6px;
-      border-radius: 9999px;
-      background: #E9E3D6;
-      overflow: hidden;
+      transition: all 0.2s ease;
+      border: none;
+      background: transparent;
       width: 100%;
-      max-width: 80px;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .stock-bar-fill {
-      height: 100%;
-      border-radius: 9999px;
-      transition: width 0.3s ease;
-    }
-    .stock-bar-fill.low { background: #8C2E22; }
-    .stock-bar-fill.medium { background: #B08D57; }
-    .stock-bar-fill.high { background: #1F4D33; }
-
-    .img-wrapper {
+      text-align: left;
       position: relative;
-      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.02em;
     }
-    .no-img-indicator {
+    .sidebar-nav .nav-item i {
+      width: 1.1rem;
+      font-size: 0.85rem;
+      color: rgba(232,221,202,0.4);
+      transition: color 0.2s;
+    }
+    .sidebar-nav .nav-item:hover {
+      color: var(--champagne);
+      background: rgba(169,130,47,0.06);
+    }
+    .sidebar-nav .nav-item:hover i { color: var(--gold); }
+    .sidebar-nav .nav-item.active {
+      color: var(--ivory);
+      background: rgba(169,130,47,0.05);
+    }
+    .sidebar-nav .nav-item.active i { color: var(--gold); }
+    .sidebar-nav .nav-item.active::before {
+      content: '';
       position: absolute;
-      bottom: -4px;
-      right: -4px;
-      background: #8A6B3F;
-      color: white;
-      font-size: 0.45rem;
-      padding: 1px 5px;
-      border-radius: 9999px;
-      font-weight: 700;
-      line-height: 1.3;
-      border: 1.5px solid white;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      left: -1.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2px;
+      height: 62%;
+      background: var(--gold);
     }
-    .img-placeholder {
-      filter: grayscale(0.5) brightness(1.1);
-      border: 1.5px dashed #B08D57;
+    .sidebar-nav .nav-item .badge-pend {
+      margin-left: auto;
+      background: rgba(169,130,47,0.16);
+      color: var(--goldlight);
+      font-size: 0.58rem;
+      padding: 0.08rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-family: 'IBM Plex Mono', monospace;
     }
 
-    @media (max-width: 640px) {
-      .logo-container { width: 40px; height: 40px; }
-      .table-filter-input { font-size: 0.6rem; padding: 0.15rem 0.3rem; }
-      .filter-btn { font-size: 0.6rem; padding: 0.25rem 0.7rem; }
-      .kpi-card { padding: 1rem; }
-      .kpi-card p { font-size: 1.8rem; }
-      .chart-tab { font-size: 0.6rem; padding: 0.2rem 0.6rem; }
+    .sidebar-footer {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 0.65rem;
+      color: rgba(232,221,202,0.35);
+      border-top: 1px solid rgba(169,130,47,0.12);
+      padding-top: 1.1rem;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    /* =========================================================
+       MAIN
+       ========================================================= */
+    .main-content {
+      margin-left: 232px;
+      padding: 2.2rem 3rem 3rem;
+      min-height: 100vh;
+      transition: margin 0.35s cubic-bezier(0.4,0,0.2,1);
+      background: var(--ivory);
+    }
+    .main-content.expanded { margin-left: 0; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.4rem;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 2.2rem;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .menu-toggle {
+      background: transparent; border: none; color: var(--textsec);
+      font-size: 1.15rem; cursor: pointer; padding: 0.25rem; display: none;
+    }
+    .topbar-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: 0.01em;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 1.1rem; }
+    .sync-status {
+      font-size: 0.68rem; color: var(--textsec);
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.02em;
+    }
+    .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); display: inline-block; }
+    .sync-dot.pulse { animation: pulse 1.6s infinite; }
+    .sync-dot.error { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+    .pendiente-badge {
+      background: var(--goldpale);
+      color: #7C5D1E;
+      font-size: 0.66rem;
+      font-weight: 600;
+      padding: 0.22rem 0.85rem;
+      border-radius: 999px;
+      display: flex; align-items: center; gap: 0.4rem;
+      border: 1px solid var(--line-gold);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .btn-refresh {
+      background: transparent;
+      border: 1px solid var(--line-gold);
+      padding: 0.32rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      color: var(--textsec);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 0.45rem;
+    }
+    .btn-refresh:hover { background: var(--goldpale); border-color: var(--gold); color: var(--ink); }
+
+    .tab-content { display: none; animation: fadeIn 0.35s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+    .hero-wrap {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 3rem;
+      align-items: center;
+      padding: 1rem 0 2.8rem;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 2.6rem;
+    }
+    .hero-text .eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.9rem;
+    }
+    .hero-text .eyebrow::before { content: '— '; }
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 3.6rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin: 0;
+      line-height: 0.98;
+    }
+    .hero h1 span { color: var(--gold); font-style: italic; font-weight: 500; }
+    .hero .tagline {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1.15rem;
+      color: var(--textsec);
+      margin-top: 1.1rem;
+      max-width: 30ch;
+      line-height: 1.5;
+    }
+
+    /* Vitrine (pieza destacada) — elemento de firma visual */
+    .featured {
+      position: relative;
+      background: var(--paper);
+      border-radius: 2px;
+      padding: 1.6rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 50px -22px rgba(18,16,20,0.18);
+    }
+    .featured-img {
+      flex: 0 0 168px;
+      height: 168px;
+      border-radius: 1px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(169,130,47,0.16), transparent 70%),
+        var(--goldpale);
+      position: relative;
+    }
+    .featured-img::after {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(90deg, var(--gold) 0 16px, transparent 0) 0 0/20px 2px no-repeat,
+        linear-gradient(90deg, transparent 0, var(--gold) 0 16px) 100% 0/20px 2px no-repeat,
+        linear-gradient(90deg, var(--gold) 0 16px, transparent 0) 0 100%/20px 2px no-repeat,
+        linear-gradient(90deg, transparent 0, var(--gold) 0 16px) 100% 100%/20px 2px no-repeat,
+        linear-gradient(0deg, var(--gold) 0 16px, transparent 0) 0 0/2px 20px no-repeat,
+        linear-gradient(0deg, var(--gold) 0 16px, transparent 0) 100% 0/2px 20px no-repeat,
+        linear-gradient(0deg, transparent 0, var(--gold) 0 16px) 0 100%/2px 20px no-repeat,
+        linear-gradient(0deg, transparent 0, var(--gold) 0 16px) 100% 100%/2px 20px no-repeat;
+      opacity: 0.55;
+    }
+    .featured-img img { width: 100%; height: 100%; object-fit: cover; position: relative; }
+    .featured-info { flex: 1; min-width: 0; }
+    .featured-info .category {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--stone);
+    }
+    .featured-info h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.45rem; font-weight: 600; margin: 0.25rem 0 0.35rem; color: var(--ink);
+      line-height: 1.15;
+    }
+    .featured-info .price {
+      font-family: 'Fraunces', serif; font-size: 1.35rem; color: var(--gold); font-weight: 600;
+    }
+    .featured-info .status { font-size: 0.72rem; color: var(--textsec); margin-top: 0.4rem; }
+    .featured-info .status .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 0.4rem; }
+    .dot-available { background: var(--green); }
+    .dot-sold { background: var(--gray); }
+    .dot-pending { background: var(--amber); }
+
+    /* =========================================================
+       KPI STRIP
+       ========================================================= */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-bottom: 2.6rem;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 2px;
+    }
+    .kpi-item {
+      padding: 1.15rem 1.5rem;
+      border-left: 1px solid var(--line);
+    }
+    .kpi-item:first-child { border-left: none; }
+    .kpi-item .label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--stone); font-weight: 500;
+    }
+    .kpi-item .value {
+      font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 600; color: var(--ink); margin-top: 0.15rem;
+    }
+
+    /* =========================================================
+       CHARTS
+       ========================================================= */
+    .chart-container {
+      background: var(--paper);
+      border-radius: 2px;
+      padding: 1.6rem 1.7rem;
+      border: 1px solid var(--line);
+      margin-bottom: 2rem;
+    }
+    .chart-container .chart-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.3rem; flex-wrap: wrap; gap: 0.8rem;
+    }
+    .chart-container .chart-header h4 {
+      font-family: 'Fraunces', serif; font-size: 1.05rem; font-weight: 600; color: var(--ink); margin: 0;
+    }
+    .chart-tabs { display: flex; gap: 1.1rem; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+    .chart-tab {
+      background: transparent; border: none; border-bottom: 2px solid transparent;
+      padding: 0 0 0.55rem; margin-bottom: -1px;
+      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.03em; color: var(--stone);
+      cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+    }
+    .chart-tab:hover { color: var(--ink); }
+    .chart-tab.active { color: var(--ink); border-bottom-color: var(--gold); }
+
+    /* =========================================================
+       COLECCIÓN — tarjetas
+       ========================================================= */
+    .collection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .product-card {
+      background: var(--paper);
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(18,16,20,0.02);
+    }
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px -18px rgba(18,16,20,0.2);
+      border-color: var(--line-gold);
+    }
+    .product-card .card-img {
+      width: 100%; aspect-ratio: 1/1;
+      background: radial-gradient(circle at 50% 40%, rgba(169,130,47,0.13), transparent 70%), var(--goldpale);
+      overflow: hidden;
+      position: relative;
+    }
+    .product-card .card-img::after {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+      background:
+        linear-gradient(90deg, var(--gold) 0 14px, transparent 0) 0 0/18px 2px no-repeat,
+        linear-gradient(90deg, transparent 0, var(--gold) 0 14px) 100% 0/18px 2px no-repeat,
+        linear-gradient(90deg, var(--gold) 0 14px, transparent 0) 0 100%/18px 2px no-repeat,
+        linear-gradient(90deg, transparent 0, var(--gold) 0 14px) 100% 100%/18px 2px no-repeat,
+        linear-gradient(0deg, var(--gold) 0 14px, transparent 0) 0 0/2px 18px no-repeat,
+        linear-gradient(0deg, var(--gold) 0 14px, transparent 0) 100% 0/2px 18px no-repeat,
+        linear-gradient(0deg, transparent 0, var(--gold) 0 14px) 0 100%/2px 18px no-repeat,
+        linear-gradient(0deg, transparent 0, var(--gold) 0 14px) 100% 100%/2px 18px no-repeat;
+    }
+    .product-card:hover .card-img::after { opacity: 0.6; }
+    .product-card .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; position: relative; }
+    .product-card:hover .card-img img { transform: scale(1.035); }
+    .product-card .card-body { padding: 0.9rem 1.1rem 1.1rem; }
+    .product-card .card-body .name {
+      font-family: 'Fraunces', serif; font-size: 1.02rem; font-weight: 600; color: var(--ink); margin: 0 0 0.1rem;
+      line-height: 1.2;
+    }
+    .product-card .card-body .category {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone);
+    }
+    .product-card .card-body .price {
+      font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 600; color: var(--gold); margin: 0.35rem 0 0.3rem;
+    }
+    .product-card .card-body .status {
+      font-size: 0.68rem; color: var(--textsec); display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem;
+    }
+    .product-card .card-body .actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
+
+    .btn-action {
+      background: transparent;
+      border: 1px solid var(--line-gold);
+      border-radius: 999px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.62rem;
+      font-weight: 500;
+      color: var(--textsec);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+    }
+    .btn-action:hover { background: var(--goldpale); border-color: var(--gold); color: var(--ink); }
+    .btn-action.sell { border-color: var(--ink); color: var(--ink); background: var(--ink); color: var(--ivory); }
+    .btn-action.sell:hover { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+    .btn-action.pay { border-color: var(--stone); color: var(--textsec); }
+    .btn-action.pay:hover { background: rgba(139,131,120,0.08); }
+    .btn-action.undo { border-color: var(--red); color: var(--red); }
+    .btn-action.undo:hover { background: rgba(140,59,59,0.06); }
+    .btn-action.paid { border-color: var(--green); color: var(--green); }
+    .btn-action.paid:hover { background: rgba(60,122,92,0.06); }
+
+    .buyer-input {
+      width: 64px;
+      padding: 0.18rem 0.4rem;
+      font-size: 0.62rem;
+      border: 1px solid var(--line-gold);
+      border-radius: 999px;
+      background: var(--paper);
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      color: var(--ink);
+    }
+    .buyer-input:focus { border-color: var(--gold); }
+    .buyer-input::placeholder { color: var(--stone); }
+
+    /* =========================================================
+       TABLAS
+       ========================================================= */
+    .table-wrapper {
+      background: var(--paper);
+      border-radius: 2px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    .table-wrapper table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .table-wrapper th {
+      background: var(--ivory);
+      color: var(--textsec);
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+      font-size: 0.6rem; padding: 0.7rem 0.9rem; text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .table-wrapper td {
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid rgba(18,16,20,0.05);
+      vertical-align: middle;
+      color: var(--ink);
+    }
+    .table-wrapper tr:hover td { background: var(--goldpale); }
+    .table-wrapper tr:last-child td { border-bottom: none; }
+
+    .img-thumb { width: 42px; height: 42px; object-fit: cover; border-radius: 1px; border: 1px solid var(--line-gold); }
+
+    .status-dot { display: inline-flex; align-items: center; gap: 0.45rem; }
+    .status-dot .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .dot-green { background: var(--green); }
+    .dot-amber { background: var(--amber); }
+    .dot-red { background: var(--red); }
+    .dot-gray { background: var(--gray); }
+
+    /* SKU chip como sello de hallmark */
+    .sku-chip {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--gold);
+      border: 1px solid var(--line-gold);
+      background: var(--goldpale);
+      padding: 0.1rem 0.5rem;
+      border-radius: 3px;
+      letter-spacing: 0.02em;
+    }
+
+    /* =========================================================
+       MODAL
+       ========================================================= */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(18,16,20,0.55);
+      backdrop-filter: blur(5px);
+      z-index: 2000; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--paper);
+      max-width: 480px; width: 100%;
+      padding: 2.2rem 2.5rem;
+      border-radius: 2px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+      position: relative;
+      animation: modalFade 0.3s ease;
+      border-top: 2px solid var(--gold);
+    }
+    @keyframes modalFade { from { opacity: 0; transform: scale(0.98) translateY(10px);} to { opacity: 1; transform: scale(1) translateY(0);} }
+    .modal-close {
+      position: absolute; top: 1.1rem; right: 1.3rem;
+      background: transparent; border: none; font-size: 1.1rem; color: var(--stone); cursor: pointer;
+    }
+    .modal-close:hover { color: var(--ink); }
+    .modal-box h2 {
+      font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin-bottom: 0.3rem;
+    }
+    .modal-box .sub { font-size: 0.82rem; color: var(--textsec); margin-bottom: 1.6rem; }
+    .modal-box label { font-size: 0.68rem; font-weight: 600; color: var(--ink); display: block; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .modal-box input {
+      width: 100%; padding: 0.55rem 0.75rem;
+      border: 1px solid var(--line-gold);
+      border-radius: 2px; font-size: 0.85rem; background: var(--ivory);
+      transition: border 0.2s; font-family: 'Inter', sans-serif; outline: none; color: var(--ink);
+    }
+    .modal-box input:focus { border-color: var(--gold); background: var(--paper); }
+    .modal-box .btn-submit {
+      width: 100%; margin-top: 1.1rem; padding: 0.65rem;
+      background: var(--ink); color: var(--ivory); border: none; border-radius: 2px;
+      font-weight: 600; font-size: 0.82rem; letter-spacing: 0.03em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .modal-box .btn-submit:hover { background: var(--gold); color: var(--ink); }
+
+    /* =========================================================
+       TOAST
+       ========================================================= */
+    #toast {
+      visibility: hidden; position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: var(--ink); color: var(--ivory); padding: 0.85rem 1.9rem; border-radius: 999px;
+      font-size: 0.85rem; box-shadow: 0 10px 40px rgba(0,0,0,0.28);
+      border: 1px solid var(--line-gold); z-index: 3000; opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s; font-family: 'Inter', sans-serif; font-weight: 500; white-space: nowrap;
+    }
+    #toast.show { visibility: visible; opacity: 1; }
+    #toast i { color: var(--gold); margin-right: 0.5rem; }
+
+    /* =========================================================
+       FILTROS
+       ========================================================= */
+    .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 1.5rem; }
+    .filter-btn {
+      background: transparent; border: 1px solid var(--line);
+      border-radius: 999px; padding: 0.22rem 0.85rem; font-size: 0.62rem; font-weight: 500;
+      color: var(--textsec); cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
+    }
+    .filter-btn:hover { border-color: var(--gold); color: var(--ink); }
+    .filter-btn.active { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+    .filter-select {
+      border: 1px solid var(--line); border-radius: 999px; padding: 0.22rem 0.85rem; font-size: 0.62rem;
+      background: var(--paper); color: var(--ink); font-family: 'Inter', sans-serif; outline: none;
+    }
+
+    /* Encabezados de sección */
+    .section-title {
+      font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 0.15rem; color: var(--ink);
+    }
+    .section-sub { color: var(--textsec); margin: 0 0 1.4rem; font-size: 0.85rem; }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+    @media (max-width: 900px) {
+      .hero-wrap { grid-template-columns: 1fr; gap: 2rem; }
+      .hero h1 { font-size: 2.8rem; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); width: 210px; }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 1.5rem; }
+      .menu-toggle { display: block; }
+      .topbar-title { font-size: 1rem; }
+      .hero h1 { font-size: 2.3rem; }
+      .featured { flex-direction: column; text-align: center; }
+      .featured-img { flex: none; width: 100%; height: 200px; }
+      .collection-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+      .kpis { grid-template-columns: 1fr 1fr; }
+      .kpi-item:nth-child(3) { border-left: none; }
+    }
+    @media (max-width: 480px) {
+      .collection-grid { grid-template-columns: 1fr 1fr; }
+      .kpis { grid-template-columns: 1fr; }
+      .kpi-item { border-left: none !important; border-top: 1px solid var(--line); }
+      .kpi-item:first-child { border-top: none; }
+      .hero h1 { font-size: 1.9rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="sticky top-0 z-50 bg-ink-900 text-white shadow-xl">
-    <div class="relative overflow-hidden">
-      <svg class="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="guilloche" width="140" height="70" patternUnits="userSpaceOnUse">
-            <path d="M0,35 C17.5,5 52.5,65 70,35 C87.5,5 122.5,65 140,35" stroke="#DFC998" stroke-width="0.6" fill="none"/>
-            <path d="M0,18 C17.5,-12 52.5,48 70,18 C87.5,-12 122.5,48 140,18" stroke="#DFC998" stroke-width="0.6" fill="none"/>
-            <path d="M0,52 C17.5,22 52.5,82 70,52 C87.5,22 122.5,82 140,52" stroke="#DFC998" stroke-width="0.6" fill="none"/>
-          </pattern>
-          <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0B1526" stop-opacity="0"/>
-            <stop offset="100%" stop-color="#0B1526" stop-opacity="0.9"/>
-          </linearGradient>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#guilloche)"/>
-        <rect width="100%" height="100%" fill="url(#fade)"/>
-      </svg>
+  <!-- TOAST -->
+  <div id="toast"><i class="fa-regular fa-gem"></i> <span id="toastMessage">Venta registrada</span></div>
 
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between">
-        <div class="flex items-center gap-3.5">
-          <div class="logo-container" id="logoContainer">
-            <img id="appLogo" src="" alt="SIN PAR Logo" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa-solid fa-gem logo-fallback\'></i>';">
-          </div>
-          <div>
-            <h1 class="font-display font-semibold text-[1.5rem] tracking-tight text-white leading-none">SIN <span class="text-gold-400">PAR</span></h1>
-            <p class="hidden sm:block font-mono text-[9px] uppercase tracking-[0.2em] text-gold-400/80 font-semibold mt-1">Inventario · Certificación · Control</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-4">
-          <div class="hidden sm:flex items-center gap-2 pr-4 border-r border-white/15">
-            <span id="syncDot" class="sync-dot pulse"></span>
-            <span id="syncStatus" class="font-mono text-[10px] uppercase tracking-wider text-white/50">Sincronizando…</span>
-          </div>
-          <button onclick="cargarDatos()" class="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-gold-300 text-xs font-semibold px-4 py-2 rounded-full border border-gold-500/40 transition min-h-[36px]">
-            <i id="btn-refresh-icon" class="fa-solid fa-rotate-right"></i>
-            <span class="hidden sm:inline">Actualizar</span>
-          </button>
-        </div>
+  <!-- MODAL -->
+  <div class="modal-overlay" id="followUpModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeFollowUp()"><i class="fa-solid fa-xmark"></i></button>
+      <h2>Tu pieza está casi lista</h2>
+      <p class="sub">Completa tus datos para preparar cuidadosamente tu pedido.</p>
+      <form id="followUpForm" onsubmit="submitFollowUp(event)">
+        <label>Nombre completo</label>
+        <input type="text" id="fuNombre" placeholder="Isabella Valdez" required>
+        <label style="margin-top:0.8rem;">Correo electrónico</label>
+        <input type="email" id="fuEmail" placeholder="isabella@correo.com" required>
+        <label style="margin-top:0.8rem;">Teléfono</label>
+        <input type="tel" id="fuTelefono" placeholder="+51 987 654 321" required>
+        <label style="margin-top:0.8rem;">Dirección de envío</label>
+        <input type="text" id="fuDireccion" placeholder="Calle, número, ciudad" required>
+        <button type="submit" class="btn-submit">Confirmar pedido</button>
+      </form>
+      <p style="font-size:0.62rem;color:var(--stone);text-align:center;margin-top:0.9rem;">Tus datos serán tratados con total confidencialidad.</p>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-seal"><span>SP</span></div>
+      <div>
+        <h1>SIN <span>Par</span></h1>
+        <span class="sub">Joyería fina</span>
       </div>
     </div>
-    <div class="gold-rule"></div>
-  </header>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="inicio" onclick="switchTab('inicio')"><i class="fa-regular fa-gem"></i> Inicio</button>
+      <button class="nav-item" data-tab="coleccion" onclick="switchTab('coleccion')"><i class="fa-regular fa-boxes-stacked"></i> Colección</button>
+      <button class="nav-item" data-tab="ventas" onclick="switchTab('ventas')"><i class="fa-regular fa-chart-line"></i> Ventas</button>
+      <button class="nav-item" data-tab="pendientes" onclick="switchTab('pendientes')"><i class="fa-regular fa-clock"></i> Pendientes <span class="badge-pend" id="sidebarPendCount">0</span></button>
+      <button class="nav-item" data-tab="seguimiento" onclick="switchTab('seguimiento')"><i class="fa-regular fa-truck-fast"></i> Seguimiento</button>
+      <button class="nav-item" data-tab="analisis" onclick="switchTab('analisis')"><i class="fa-regular fa-chart-simple"></i> Análisis</button>
+    </nav>
+    <div class="sidebar-footer">Maison SIN PAR</div>
+  </aside>
 
   <!-- MAIN -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <div class="main-content" id="mainContent">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title" id="pageTitle">Inicio</span>
+      </div>
+      <div class="topbar-right">
+        <div class="sync-status">
+          <span class="sync-dot pulse" id="syncDot"></span>
+          <span id="syncStatus">Sincronizado</span>
+        </div>
+        <div id="pendienteTopBadge" class="pendiente-badge hidden">
+          <i class="fa-regular fa-clock"></i> <span id="pendienteTopCount">0</span> pendientes
+        </div>
+        <button class="btn-refresh" onclick="cargarDatos()"><i id="btn-refresh-icon" class="fa-solid fa-rotate-right"></i> Actualizar</button>
+      </div>
+    </div>
 
-    <!-- KPIs -->
-    <section>
-      <div class="flex items-center gap-3 mb-5">
-        <span class="eyebrow">Resumen general</span>
-        <div class="h-px flex-grow bg-gradient-to-r from-gold-400/50 to-transparent"></div>
-      </div>
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <div class="kpi-card bg-white rounded-xl p-5 border border-paper-200 kpi-border-gold">
-          <div class="flex items-center justify-between">
-            <span class="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">Productos</span>
-            <i class="fa-solid fa-gem text-gold-500 text-lg"></i>
-          </div>
-          <p id="kpi-total-items" class="font-display text-3xl font-semibold text-ink-900 mt-3">0</p>
-        </div>
-        <div class="kpi-card bg-white rounded-xl p-5 border border-paper-200 kpi-border-green">
-          <div class="flex items-center justify-between">
-            <span class="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">Stock total</span>
-            <i class="fa-solid fa-boxes-stacked text-emerald-700 text-lg"></i>
-          </div>
-          <p id="kpi-total-stock" class="font-display text-3xl font-semibold text-emerald-700 mt-3">0 u.</p>
-        </div>
-        <div class="kpi-card bg-white rounded-xl p-5 border border-paper-200 kpi-border-amber">
-          <div class="flex items-center justify-between">
-            <span class="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">Valor inventario</span>
-            <i class="fa-solid fa-coins text-gold-600 text-lg"></i>
-          </div>
-          <p id="kpi-total-valor" class="font-display text-3xl font-semibold text-gold-600 mt-3">S/ 0.00</p>
-        </div>
-        <div class="kpi-card bg-white rounded-xl p-5 border border-paper-200 kpi-border-red">
-          <div class="flex items-center justify-between">
-            <span class="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">Stock crítico</span>
-            <i class="fa-solid fa-triangle-exclamation text-garnet-600 text-lg"></i>
-          </div>
-          <p id="kpi-low-stock" class="font-display text-3xl font-semibold text-garnet-600 mt-3">0</p>
-        </div>
-      </div>
-    </section>
+    <!-- CONTENIDO DE TABS -->
+    <div id="pageContent">
 
-    <!-- GRÁFICOS con selector de tipo -->
-    <section id="chartsSection">
-      <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <div class="flex items-center gap-3">
-          <span class="eyebrow">Análisis gráfico</span>
-          <div class="h-px w-12 bg-gradient-to-r from-gold-400/50 to-transparent"></div>
+      <!-- INICIO -->
+      <div id="tab-inicio" class="tab-content active">
+        <div class="hero-wrap">
+          <div class="hero-text">
+            <div class="eyebrow">Colección privada</div>
+            <div class="hero">
+              <h1>SIN <span>Par</span></h1>
+              <div class="tagline">Piezas que hablan de tu esencia.</div>
+            </div>
+          </div>
+
+          <!-- Colección destacada (vitrina) -->
+          <div id="featuredContainer" class="featured">
+            <div class="featured-img"><img id="featuredImg" src="" alt="Joya destacada"></div>
+            <div class="featured-info">
+              <div class="category" id="featuredCategory">Categoría</div>
+              <h3 id="featuredName">Nombre de la joya</h3>
+              <div class="price" id="featuredPrice">S/ 0.00</div>
+              <div class="status"><span class="dot dot-available" id="featuredDot"></span><span id="featuredStatus">Disponible</span></div>
+              <button class="btn-action sell" style="margin-top:0.7rem;" onclick="verPiezaDestacada()"><i class="fa-regular fa-eye"></i> Ver pieza</button>
+            </div>
+          </div>
         </div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <button class="chart-tab active" data-chart="category" onclick="selectChart('category')">
-            <i class="fa-solid fa-chart-pie"></i> Categorías
-          </button>
-          <button class="chart-tab" data-chart="value" onclick="selectChart('value')">
-            <i class="fa-solid fa-chart-bar"></i> Top valor
-          </button>
-          <button class="chart-tab" data-chart="status" onclick="selectChart('status')">
-            <i class="fa-solid fa-chart-simple"></i> Estados
-          </button>
-          <button class="chart-tab" data-chart="stock" onclick="selectChart('stock')">
-            <i class="fa-solid fa-arrow-trend-up"></i> Stock
-          </button>
-          <button onclick="toggleCharts()" class="toggle-charts-btn" id="toggleChartsBtn" style="background:white;border:1px solid #E9E3D6;color:#8A6B3F;font-size:0.7rem;padding:0.3rem 0.9rem;border-radius:9999px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:34px;">
-            <i class="fa-solid fa-chevron-up"></i> Ocultar
-          </button>
+
+        <!-- KPIs -->
+        <div class="kpis">
+          <div class="kpi-item"><div class="label">Piezas</div><div class="value" id="kpi-total-items">0</div></div>
+          <div class="kpi-item"><div class="label">Stock</div><div class="value" id="kpi-total-stock">0 u.</div></div>
+          <div class="kpi-item"><div class="label">Valor de colección</div><div class="value" id="kpi-total-valor">S/ 0.00</div></div>
+          <div class="kpi-item"><div class="label">Por cobrar</div><div class="value" id="kpi-pendientes-pago">0</div></div>
         </div>
-      </div>
-      <div class="charts-grid grid grid-cols-1 gap-6">
-        <div class="panel-card bg-white rounded-xl p-5 border border-paper-200">
-          <div class="h-64 w-full relative" id="chartContainer">
+
+        <!-- Análisis rápido -->
+        <div class="chart-container">
+          <div class="chart-header">
+            <h4>Análisis de la colección</h4>
+            <div class="chart-tabs">
+              <button class="chart-tab active" data-chart="category" onclick="selectChart('category')">Categorías</button>
+              <button class="chart-tab" data-chart="value" onclick="selectChart('value')">Valor</button>
+              <button class="chart-tab" data-chart="status" onclick="selectChart('status')">Estados</button>
+              <button class="chart-tab" data-chart="stock" onclick="selectChart('stock')">Stock</button>
+              <button class="chart-tab" data-chart="sales" onclick="selectChart('sales')">Ventas</button>
+            </div>
+          </div>
+          <div class="h-64 w-full relative">
             <canvas id="activeChart"></canvas>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- FILTROS RÁPIDOS (antes de la tabla) -->
-    <section>
-      <div class="flex items-center gap-3 mb-3">
-        <span class="eyebrow">Filtros de inventario</span>
-        <div class="h-px flex-grow bg-gradient-to-r from-gold-400/50 to-transparent"></div>
-      </div>
-      <div class="bg-white rounded-xl border border-paper-200 p-4 flex flex-wrap items-center gap-3 shadow-sm">
-        <span class="font-mono text-[9px] font-bold uppercase tracking-wider text-slate-400 mr-1">Rápido:</span>
-        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Todos</button>
-        <button class="filter-btn" data-filter="critico" onclick="setFilter('critico')">
-          <i class="fa-solid fa-triangle-exclamation text-garnet-600 mr-1"></i> Crítico
-        </button>
-        <button class="filter-btn" data-filter="sin-imagen" onclick="setFilter('sin-imagen')">
-          <i class="fa-solid fa-image text-gold-600 mr-1"></i> Sin imagen
-        </button>
-        <div class="h-6 w-px bg-paper-200 mx-1"></div>
-        <select id="categoriaFilter" class="select-category" onchange="setCategoria(this.value)">
-          <option value="">Todas las categorías</option>
-        </select>
-        <button onclick="limpiarFiltros()" class="text-slate-400 hover:text-slate-700 text-xs ml-auto flex items-center gap-1 min-h-[36px]">
-          <i class="fa-solid fa-rotate-left"></i> Limpiar
-        </button>
-        <span id="sinImagenCount" class="bg-gold-100 text-gold-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-gold-300 ml-1 hidden">0 sin imagen</span>
-      </div>
-    </section>
-
-    <!-- TABLA con filtros en encabezado y mejoras -->
-    <section>
-      <div class="flex items-center gap-3 mb-4">
-        <span class="eyebrow">Catálogo de inventario</span>
-        <div class="h-px flex-grow bg-gradient-to-r from-gold-400/50 to-transparent"></div>
-        <span class="text-xs text-slate-400 font-mono" id="rowCount">0 registros</span>
-      </div>
-      <div class="bg-white rounded-xl border border-paper-200 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto custom-scrollbar">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="table-head">
-                <th class="p-2.5 align-top">
-                  <span class="block mb-1">Imagen</span>
-                </th>
-                <th class="p-2.5 align-top">
-                  <span class="block mb-1">SKU</span>
-                  <input type="text" class="table-filter-input" placeholder="Filtrar" data-col="sku">
-                </th>
-                <th class="p-2.5 align-top">
-                  <span class="block mb-1">Categoría</span>
-                  <input type="text" class="table-filter-input" placeholder="Filtrar" data-col="categoria">
-                </th>
-                <th class="p-2.5 align-top">
-                  <span class="block mb-1">Nombre</span>
-                  <input type="text" class="table-filter-input" placeholder="Filtrar" data-col="nombre">
-                </th>
-                <th class="p-2.5 align-top text-right">
-                  <span class="block mb-1">Precio</span>
-                </th>
-                <th class="p-2.5 align-top text-center">
-                  <span class="block mb-1">Stock</span>
-                  <span class="text-[0.5rem] text-slate-400">(barra)</span>
-                </th>
-                <th class="p-2.5 align-top text-right">
-                  <span class="block mb-1">Valor total</span>
-                </th>
-                <th class="p-2.5 align-top text-center">
-                  <span class="block mb-1">Estado</span>
-                  <input type="text" class="table-filter-input" placeholder="Filtrar" data-col="estado">
-                </th>
-                <th class="p-2.5 align-top">
-                  <span class="block mb-1">Proveedor</span>
-                  <input type="text" class="table-filter-input" placeholder="Filtrar" data-col="proveedor">
-                </th>
-              </tr>
-            </thead>
-            <tbody id="inventoryTable" class="divide-y divide-paper-200 text-sm">
-              <tr><td colspan="9" class="p-10 text-center text-slate-400">
-                <div class="flex flex-col items-center gap-2">
-                  <div class="loader"></div>
-                  <p class="font-mono text-xs uppercase tracking-wider">Cargando inventario...</p>
-                </div>
-              </td></tr>
-            </tbody>
-          </table>
+        <!-- Tabla resumen (últimas piezas) -->
+        <div class="table-wrapper">
+          <div style="padding:0.9rem 1.1rem;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:'Fraunces',serif;font-weight:600;">Últimas piezas</span>
+            <span class="text-xs text-stone" id="rowCount">0 registros</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Imagen</th><th>SKU</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="inventoryTable"><tr><td colspan="7" class="text-center py-6 text-stone">Cargando...</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </section>
 
-    <footer class="text-center text-[10px] font-mono uppercase tracking-wider text-slate-400 py-4 border-t border-paper-200">
-      SIN PAR <span class="text-gold-500 mx-1.5">·</span> Datos sincronizados desde Google Sheets <span class="text-gold-500 mx-1.5">·</span> <span id="lastUpdate"></span>
+      <!-- COLECCIÓN -->
+      <div id="tab-coleccion" class="tab-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <h2 class="section-title" style="margin-bottom:0;">Colección</h2>
+          </div>
+          <div class="filters" style="margin:0;">
+            <button class="filter-btn active" data-filter="activos" onclick="setFilter('activos')">Activos</button>
+            <button class="filter-btn" data-filter="vendidos" onclick="setFilter('vendidos')">Vendidos</button>
+            <button class="filter-btn" data-filter="por-pagar" onclick="setFilter('por-pagar')">Por pagar</button>
+            <button class="filter-btn" data-filter="critico" onclick="setFilter('critico')">Crítico</button>
+            <button class="filter-btn" data-filter="todos" onclick="setFilter('todos')">Todos</button>
+            <select class="filter-select" id="categoriaFilter" onchange="setCategoria(this.value)"><option value="">Todas las categorías</option></select>
+            <button onclick="limpiarFiltros()" class="filter-btn" style="border-color:transparent;">Limpiar</button>
+            <span id="sinImagenCount" class="text-xs text-stone hidden">0 sin imagen</span>
+          </div>
+        </div>
+        <div id="collectionGrid" class="collection-grid"></div>
+      </div>
+
+      <!-- VENTAS -->
+      <div id="tab-ventas" class="tab-content">
+        <h2 class="section-title">Ventas</h2>
+        <p class="section-sub">Movimiento de la colección</p>
+        <div class="table-wrapper">
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Fecha</th><th>Joya</th><th>Comprador</th><th>Monto</th></tr></thead>
+              <tbody id="ventasTable"><tr><td colspan="4" class="text-center py-6 text-stone">No hay ventas registradas</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PENDIENTES -->
+      <div id="tab-pendientes" class="tab-content">
+        <h2 class="section-title">Pendientes</h2>
+        <p class="section-sub">Piezas reservadas o pendientes de pago</p>
+        <div class="table-wrapper">
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Imagen</th><th>Pieza</th><th>Precio</th><th>Proveedor</th><th>Acción</th></tr></thead>
+              <tbody id="pendientesTable"><tr><td colspan="5" class="text-center py-6 text-stone">No hay pendientes</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEGUIMIENTO -->
+      <div id="tab-seguimiento" class="tab-content">
+        <h2 class="section-title">Seguimiento</h2>
+        <p class="section-sub">Estado de tus pedidos</p>
+        <div class="table-wrapper">
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Fecha</th><th>Producto</th><th>Comprador</th><th>Email</th><th>Teléfono</th><th>Dirección</th><th>Estado</th></tr></thead>
+              <tbody id="seguimientoTable"><tr><td colspan="7" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANÁLISIS -->
+      <div id="tab-analisis" class="tab-content">
+        <h2 class="section-title">Análisis</h2>
+        <p class="section-sub">Métrica de la colección</p>
+        <div class="chart-container">
+          <div class="chart-header">
+            <h4>Distribución</h4>
+            <div class="chart-tabs">
+              <button class="chart-tab active" data-chart="category" onclick="selectChart('category')">Categorías</button>
+              <button class="chart-tab" data-chart="value" onclick="selectChart('value')">Valor</button>
+              <button class="chart-tab" data-chart="status" onclick="selectChart('status')">Estados</button>
+              <button class="chart-tab" data-chart="stock" onclick="selectChart('stock')">Stock</button>
+              <button class="chart-tab" data-chart="sales" onclick="selectChart('sales')">Ventas</button>
+            </div>
+          </div>
+          <div class="h-64 w-full relative">
+            <canvas id="analisisChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-container" style="margin-top:1.5rem;">
+          <div class="chart-header"><h4>Evolución de ventas (últimos 30 días)</h4></div>
+          <div class="h-64 w-full relative">
+            <canvas id="salesChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer style="text-align:center;font-size:0.62rem;color:var(--stone);padding-top:2.2rem;border-top:1px solid var(--line);margin-top:2.2rem;font-family:'IBM Plex Mono',monospace;">
+      SIN PAR · Joyería fina · <span id="lastUpdate"></span>
     </footer>
-  </main>
+  </div>
 
   <script>
     // =========================================================================
-    // ⚙️ CONFIGURACIÓN
+    // CONFIGURACIÓN (NO MODIFICAR)
     // =========================================================================
-    const LOGO_DRIVE_URL = "https://drive.google.com/file/d/1SjCwcRRzHfzYUH1fpgJeR9Nipqdakynn/view?usp=sharing";
+    const LOGO_URL = "https://drive.google.com/uc?export=download&id=1SjCwcRRzHfzYUH1fpgJeR9Nipqdakynn";
     const API_URL = "https://script.google.com/macros/s/AKfycbwAVyNP4DO01oo6gVcrha_r1SY4rpX0GMuEBwpgMhiqNPc794HfSMDxvEN6LKW1uBgY/exec";
+    const STORAGE_KEY = 'sinpar_joyeria_estado_v3';
+    const SEGUIMIENTO_KEY = 'sinpar_seguimiento_pedidos';
 
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.color = '#5B6472';
+    let inventario = [];
+    let currentChart = null;
+    let salesChartInstance = null;
+    let activeChartType = 'category';
+    let filtroActivo = 'activos';
+    let categoriaActiva = '';
+    let currentTab = 'inicio';
+
+    const mensajesCompra = [
+      "Piezas que hablan de tu esencia.",
+      "Elegancia que permanece.",
+      "Detalles que hablan de ti.",
+      "Una pieza para cada momento.",
+      "Tu estilo. Tu esencia. SIN PAR.",
+      "Elegancia sin comparación."
+    ];
+
+    // =========================================================================
+    // FUNCIONES AUXILIARES
+    // =========================================================================
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+      const titles = {
+        inicio:'Inicio',
+        coleccion:'Colección',
+        ventas:'Ventas',
+        pendientes:'Pendientes',
+        seguimiento:'Seguimiento',
+        analisis:'Análisis'
+      };
+      document.getElementById('pageTitle').textContent = titles[tab] || 'Inicio';
+      if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+
+      if (tab === 'coleccion') renderColeccion();
+      if (tab === 'ventas') renderVentas();
+      if (tab === 'pendientes') renderPendientes();
+      if (tab === 'seguimiento') renderSeguimiento();
+      if (tab === 'analisis') renderAnalisis();
+      if (tab === 'inicio') renderInicio();
+    }
+
+    function openFollowUp(producto, comprador) {
+      document.getElementById('followUpModal').classList.add('open');
+      document.getElementById('fuNombre').value = comprador || '';
+      document.getElementById('fuNombre').focus();
+      document.getElementById('followUpForm').dataset.producto = producto;
+    }
+
+    function closeFollowUp() {
+      document.getElementById('followUpModal').classList.remove('open');
+      document.getElementById('followUpForm').reset();
+    }
+
+    function submitFollowUp(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('fuNombre').value.trim();
+      const email = document.getElementById('fuEmail').value.trim();
+      const telefono = document.getElementById('fuTelefono').value.trim();
+      const direccion = document.getElementById('fuDireccion').value.trim();
+      const producto = document.getElementById('followUpForm').dataset.producto || 'Producto SIN PAR';
+
+      if (!nombre || !email || !telefono || !direccion) {
+        showToast('⚠️ Completa todos los campos.');
+        return;
+      }
+
+      const seguimiento = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
+      seguimiento.push({
+        id: Date.now(),
+        fecha: new Date().toISOString(),
+        producto: producto,
+        comprador: nombre,
+        email: email,
+        telefono: telefono,
+        direccion: direccion,
+        estado: 'Preparación'
+      });
+      localStorage.setItem(SEGUIMIENTO_KEY, JSON.stringify(seguimiento));
+      closeFollowUp();
+      showToast('Gracias por elegir SIN PAR. Tu pieza está siendo preparada.');
+      if (currentTab === 'seguimiento') renderSeguimiento();
+    }
 
     function transformarUrlDrive(url) {
       if (!url || typeof url !== 'string') return '';
       if (!url.includes('drive.google.com')) return url;
       let fileId = '';
-      const matchId = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      const matchQuery = url.match(/id=([a-zA-Z0-9_-]+)/);
-      if (matchId && matchId[1]) fileId = matchId[1];
-      else if (matchQuery && matchQuery[1]) fileId = matchQuery[1];
+      const m1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      const m2 = url.match(/id=([a-zA-Z0-9_-]+)/);
+      if (m1 && m1[1]) fileId = m1[1];
+      else if (m2 && m2[1]) fileId = m2[1];
       else if (url.length > 20 && !url.includes('/')) fileId = url;
       return fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : url;
     }
 
-    document.getElementById('appLogo').src = transformarUrlDrive(LOGO_DRIVE_URL);
+    // =========================================================================
+    // LOCAL STORAGE
+    // =========================================================================
+    function guardarEstadoLocal() {
+      const estado = inventario.map(p => ({
+        sku: p.sku,
+        vendido: p.vendido || false,
+        porPagar: p.porPagar || false,
+        fechaVenta: p.fechaVenta || null,
+        comprador: p.comprador || null
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+    }
 
-    let inventario = [];
-    let currentChart = null; // instancia activa de Chart.js
-    let activeChartType = 'category'; // 'category', 'value', 'status', 'stock'
-    let chartsVisible = true;
+    function cargarEstadoLocal() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return {};
+        return JSON.parse(raw).reduce((map, e) => { map[e.sku] = e; return map; }, {});
+      } catch { return {}; }
+    }
 
-    // Estado de filtros
-    let filtroActivo = 'all';
-    let categoriaActiva = '';
-    let filtrosColumna = { sku: '', categoria: '', nombre: '', estado: '', proveedor: '' };
+    function aplicarEstadoLocal(items) {
+      const map = cargarEstadoLocal();
+      return items.map(p => ({
+        ...p,
+        vendido: map[p.sku]?.vendido || false,
+        porPagar: map[p.sku]?.porPagar || false,
+        fechaVenta: map[p.sku]?.fechaVenta || null,
+        comprador: map[p.sku]?.comprador || null
+      }));
+    }
 
     // =========================================================================
-    // CARGAR DATOS
+    // CARGAR DATOS (API)
     // =========================================================================
     async function cargarDatos() {
       const icon = document.getElementById('btn-refresh-icon');
       const dot = document.getElementById('syncDot');
       const status = document.getElementById('syncStatus');
       if (icon) icon.classList.add('fa-spin');
-      if (status) status.textContent = 'Sincronizando…';
+      if (status) status.textContent = 'Cargando…';
       if (dot) { dot.classList.remove('error'); dot.classList.add('pulse'); }
 
       try {
         const resp = await fetch(API_URL);
-        if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await resp.json();
 
-        inventario = data.map(item => {
+        let items = data.map(item => {
           const rawImg = item.imagen || item["Imagen"] || '';
-          const imgUrl = transformarUrlDrive(rawImg) || 'https://via.placeholder.com/80/F2EFE8/8A6B3F?text=Sin+Imagen';
+          const imgUrl = transformarUrlDrive(rawImg) || 'https://via.placeholder.com/200/F1E6CE/A9822F?text=SIN+PAR';
           return {
             sku: item.sku || item["SKU / ID"] || '',
             categoria: item.categoria || item["Categoría"] || '',
@@ -587,30 +1115,30 @@
             estado: item.estado || item["Estado"] || 'Disponible',
             proveedor: item.proveedor || item["Proveedor"] || '-',
             imagen: imgUrl,
-            tieneImagen: !imgUrl.includes('via.placeholder.com')
+            tieneImagen: !imgUrl.includes('via.placeholder.com'),
+            vendido: false,
+            porPagar: false,
+            fechaVenta: null,
+            comprador: null
           };
         });
 
-        actualizarKPIs(inventario);
+        items = aplicarEstadoLocal(items);
+        inventario = items;
+
+        actualizarKPIs();
         poblarCategorias();
         actualizarContadorSinImagen();
-        // Dibujar gráfico inicial (categorías)
-        renderChart('category', inventario);
-        aplicarFiltros();
+        renderizarTodo();
 
-        const stamp = new Date().toLocaleString();
-        document.getElementById('lastUpdate').textContent = `Última actualización: ${stamp}`;
+        document.getElementById('lastUpdate').textContent = `Última actualización: ${new Date().toLocaleString()}`;
         if (status) status.textContent = 'Sincronizado';
         if (dot) dot.classList.remove('pulse');
 
       } catch (err) {
         console.error(err);
-        document.getElementById('inventoryTable').innerHTML = `
-          <tr><td colspan="9" class="p-6 text-center text-garnet-600">
-            <i class="fa-solid fa-circle-exclamation text-2xl block mb-2"></i>
-            Error al cargar datos. Verifica la URL.
-          </td></tr>`;
-        if (status) status.textContent = 'Error de sincronización';
+        showToast('⚠️ Error al cargar datos.');
+        if (status) status.textContent = 'Error';
         if (dot) { dot.classList.remove('pulse'); dot.classList.add('error'); }
       } finally {
         if (icon) icon.classList.remove('fa-spin');
@@ -620,65 +1148,332 @@
     // =========================================================================
     // KPIs
     // =========================================================================
-    function actualizarKPIs(items) {
-      let totalStock = 0, totalValor = 0, criticos = 0;
-      items.forEach(p => {
+    function actualizarKPIs() {
+      let totalStock = 0, totalValor = 0, pendientes = 0;
+      inventario.forEach(p => {
         const stock = p.stockActual || p.stockInicial || 0;
         const precio = p.precio || 0;
         totalStock += stock;
         totalValor += stock * precio;
-        if (stock < 2) criticos++;
+        if (p.porPagar) pendientes++;
       });
-      document.getElementById('kpi-total-items').textContent = items.length;
+      document.getElementById('kpi-total-items').textContent = inventario.length;
       document.getElementById('kpi-total-stock').textContent = `${totalStock} u.`;
       document.getElementById('kpi-total-valor').textContent = `S/ ${totalValor.toFixed(2)}`;
-      document.getElementById('kpi-low-stock').textContent = criticos;
+      document.getElementById('kpi-pendientes-pago').textContent = pendientes;
+      document.getElementById('pendienteTopCount').textContent = pendientes;
+      document.getElementById('pendienteTopBadge').classList.toggle('hidden', pendientes === 0);
+      document.getElementById('sidebarPendCount').textContent = pendientes;
+    }
+
+    function actualizarContadorSinImagen() {
+      const count = inventario.filter(p => !p.tieneImagen && !p.vendido && !p.porPagar).length;
+      const el = document.getElementById('sinImagenCount');
+      if (count > 0) { el.textContent = `${count} sin imagen`; el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
+    }
+
+    function poblarCategorias() {
+      const select = document.getElementById('categoriaFilter');
+      const cats = [...new Set(inventario.map(p => p.categoria).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">Todas las categorías</option>';
+      cats.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.appendChild(opt); });
     }
 
     // =========================================================================
-    // GRÁFICOS - renderizado según tipo
+    // RENDERIZAR TODO
     // =========================================================================
-    function renderChart(type, data) {
-      const ctx = document.getElementById('activeChart').getContext('2d');
-      if (currentChart) currentChart.destroy();
+    function renderizarTodo() {
+      switch (currentTab) {
+        case 'inicio': renderInicio(); break;
+        case 'coleccion': renderColeccion(); break;
+        case 'ventas': renderVentas(); break;
+        case 'pendientes': renderPendientes(); break;
+        case 'seguimiento': renderSeguimiento(); break;
+        case 'analisis': renderAnalisis(); break;
+        default: renderInicio();
+      }
+    }
+
+    // =========================================================================
+    // INICIO
+    // =========================================================================
+    function renderInicio() {
+      const data = getDatosFiltrados();
+      // Destacar una pieza aleatoria
+      const disponibles = data.filter(p => !p.vendido && !p.porPagar);
+      if (disponibles.length > 0) {
+        const destacada = disponibles[Math.floor(Math.random() * disponibles.length)];
+        document.getElementById('featuredImg').src = destacada.imagen;
+        document.getElementById('featuredCategory').textContent = destacada.categoria || 'Categoría';
+        document.getElementById('featuredName').textContent = destacada.nombre || 'Nombre';
+        document.getElementById('featuredPrice').textContent = `S/ ${(destacada.precio||0).toFixed(2)}`;
+        const dot = document.getElementById('featuredDot');
+        const statusText = document.getElementById('featuredStatus');
+        const stock = destacada.stockActual || destacada.stockInicial || 0;
+        if (stock < 1) { dot.className = 'dot dot-red'; statusText.textContent = 'Agotado'; }
+        else if (stock < 3) { dot.className = 'dot dot-amber'; statusText.textContent = 'Stock crítico'; }
+        else { dot.className = 'dot dot-green'; statusText.textContent = 'Disponible'; }
+        document.getElementById('featuredContainer').dataset.sku = destacada.sku;
+      }
+      renderTablaResumen(data.slice(0, 5));
+      document.getElementById('rowCount').textContent = `${data.length} registros`;
+      renderChart(activeChartType, data, 'activeChart');
+    }
+
+    function renderTablaResumen(items) {
+      const tbody = document.getElementById('inventoryTable');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-stone">No hay piezas activas</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = items.map(p => {
+        const stock = p.stockActual || p.stockInicial || 0;
+        const estado = p.vendido ? 'Vendido' : p.porPagar ? 'Por pagar' : p.estado;
+        let dotColor = 'dot-green';
+        if (p.vendido) dotColor = 'dot-gray';
+        else if (p.porPagar) dotColor = 'dot-amber';
+        else if (estado.toLowerCase().includes('critico')) dotColor = 'dot-red';
+        const acciones = p.vendido ?
+          `<button class="btn-action undo" onclick="deshacerVenta('${p.sku}')"><i class="fa-solid fa-rotate-left"></i></button>` :
+          p.porPagar ?
+          `<button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><i class="fa-solid fa-check"></i></button>` :
+          `<div class="flex items-center gap-1 flex-wrap">
+            <input type="text" id="buyer_${p.sku}" placeholder="Nombre" class="buyer-input" style="width:50px;">
+            <button class="btn-action sell" onclick="venderProducto('${p.sku}')"><i class="fa-solid fa-tag"></i></button>
+            <button class="btn-action pay" onclick="togglePorPagar('${p.sku}')"><i class="fa-regular fa-clock"></i></button>
+          </div>`;
+        return `<tr>
+          <td><img src="${p.imagen}" class="img-thumb" onerror="this.src='https://via.placeholder.com/40/F1E6CE/A9822F?text=SP'"></td>
+          <td><span class="sku-chip">${p.sku || '-'}</span></td>
+          <td>${p.nombre || 'Sin nombre'}</td>
+          <td class="font-display font-bold" style="color:var(--gold);">S/ ${(p.precio||0).toFixed(2)}</td>
+          <td><span class="font-mono text-sm">${stock}</span></td>
+          <td><span class="status-dot"><span class="dot ${dotColor}"></span>${estado}</span></td>
+          <td>${acciones}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function verPiezaDestacada() {
+      const sku = document.getElementById('featuredContainer').dataset.sku;
+      if (sku) {
+        // Simular clic en la pieza destacada: cambiar a colección y filtrar por ese SKU? O simplemente mostrar toast.
+        showToast('Detalles de la pieza disponibles en la Colección.');
+        switchTab('coleccion');
+      }
+    }
+
+    // =========================================================================
+    // COLECCIÓN (tarjetas)
+    // =========================================================================
+    function renderColeccion() {
+      const data = getDatosFiltrados();
+      const grid = document.getElementById('collectionGrid');
+      if (!data || data.length === 0) {
+        grid.innerHTML = `<p class="text-stone text-center col-span-full py-8">No hay piezas en esta selección.</p>`;
+        return;
+      }
+      grid.innerHTML = data.map(p => {
+        const stock = p.stockActual || p.stockInicial || 0;
+        const estado = p.vendido ? 'Vendido' : p.porPagar ? 'Por pagar' : p.estado;
+        let dotColor = 'dot-green';
+        if (p.vendido) dotColor = 'dot-gray';
+        else if (p.porPagar) dotColor = 'dot-amber';
+        else if (estado.toLowerCase().includes('critico')) dotColor = 'dot-red';
+
+        let acciones = '';
+        if (p.vendido) {
+          acciones = `<button class="btn-action undo" onclick="deshacerVenta('${p.sku}')"><i class="fa-solid fa-rotate-left"></i> Deshacer</button>`;
+        } else if (p.porPagar) {
+          acciones = `<button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><i class="fa-solid fa-check"></i> Pagar</button>
+                     <button class="btn-action undo" onclick="togglePorPagar('${p.sku}')"><i class="fa-solid fa-times"></i></button>`;
+        } else {
+          acciones = `<div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
+            <input type="text" id="buyer_${p.sku}" placeholder="Comprador" class="buyer-input">
+            <button class="btn-action sell" onclick="venderProducto('${p.sku}')"><i class="fa-solid fa-tag"></i></button>
+            <button class="btn-action pay" onclick="togglePorPagar('${p.sku}')"><i class="fa-regular fa-clock"></i></button>
+          </div>`;
+        }
+
+        return `<div class="product-card">
+          <div class="card-img"><img src="${p.imagen}" onerror="this.src='https://via.placeholder.com/220/F1E6CE/A9822F?text=SIN+PAR'"></div>
+          <div class="card-body">
+            <div class="category">${p.categoria || 'Categoría'}</div>
+            <div class="name">${p.nombre || 'Sin nombre'}</div>
+            <div class="price">S/ ${(p.precio||0).toFixed(2)}</div>
+            <div class="status"><span class="dot ${dotColor}"></span>${estado} · ${stock} u.</div>
+            <div class="actions">${acciones}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // =========================================================================
+    // VENTAS
+    // =========================================================================
+    function renderVentas() {
+      const ventas = inventario.filter(p => p.vendido && p.fechaVenta);
+      const tbody = document.getElementById('ventasTable');
+      if (ventas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-stone">No hay ventas registradas</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = ventas.sort((a,b) => new Date(b.fechaVenta) - new Date(a.fechaVenta)).map(p => {
+        const fecha = new Date(p.fechaVenta).toLocaleString();
+        const monto = (p.stockActual || p.stockInicial || 0) * (p.precio || 0);
+        return `<tr>
+          <td class="text-xs text-stone">${fecha}</td>
+          <td>${p.nombre || p.sku}</td>
+          <td class="font-medium">${p.comprador || 'N/A'}</td>
+          <td class="font-display font-bold" style="color:var(--gold);">S/ ${monto.toFixed(2)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // =========================================================================
+    // PENDIENTES
+    // =========================================================================
+    function renderPendientes() {
+      const pendientes = inventario.filter(p => p.porPagar);
+      const tbody = document.getElementById('pendientesTable');
+      if (pendientes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-stone">No hay pendientes de pago</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = pendientes.map(p => `
+        <tr>
+          <td><img src="${p.imagen}" class="img-thumb" onerror="this.src='https://via.placeholder.com/40/F1E6CE/A9822F?text=SP'"></td>
+          <td>${p.nombre || p.sku}</td>
+          <td class="font-display" style="color:var(--gold);">S/ ${(p.precio||0).toFixed(2)}</td>
+          <td class="text-xs text-stone">${p.proveedor || '-'}</td>
+          <td><button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><i class="fa-solid fa-check"></i> Pagar</button></td>
+        </tr>
+      `).join('');
+    }
+
+    // =========================================================================
+    // SEGUIMIENTO
+    // =========================================================================
+    function renderSeguimiento() {
+      const pedidos = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
+      const tbody = document.getElementById('seguimientoTable');
+      if (pedidos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr>`;
+        return;
+      }
+      pedidos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+      tbody.innerHTML = pedidos.map(p => `
+        <tr>
+          <td class="text-xs text-stone">${new Date(p.fecha).toLocaleString()}</td>
+          <td>${p.producto}</td>
+          <td class="font-medium">${p.comprador}</td>
+          <td class="text-xs">${p.email}</td>
+          <td class="text-xs">${p.telefono}</td>
+          <td class="text-xs">${p.direccion}</td>
+          <td><span class="status-dot"><span class="dot dot-amber"></span>${p.estado || 'Preparación'}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // =========================================================================
+    // ANÁLISIS
+    // =========================================================================
+    function renderAnalisis() {
+      const data = getDatosFiltrados();
+      renderChart(activeChartType, data, 'analisisChart');
+      // Gráfica de ventas
+      const ventas = inventario.filter(p => p.vendido && p.fechaVenta);
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      if (salesChartInstance) salesChartInstance.destroy();
+
+      if (ventas.length === 0) {
+        salesChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: { labels: ['Sin ventas'], datasets: [{ data: [1], backgroundColor: ['#F1E6CE'] }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '90%' },
+          plugins: [{
+            id: 'noData',
+            beforeDraw: function(chart) {
+              const { width, height, ctx } = chart;
+              ctx.save();
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.font = '14px Fraunces, serif';
+              ctx.fillStyle = '#8B8378';
+              ctx.fillText('No hay ventas registradas', width/2, height/2);
+              ctx.restore();
+            }
+          }]
+        });
+      } else {
+        const mapDia = {};
+        ventas.forEach(p => {
+          const dia = new Date(p.fechaVenta).toISOString().split('T')[0];
+          const valor = (p.stockActual || p.stockInicial || 0) * (p.precio || 0);
+          mapDia[dia] = (mapDia[dia] || 0) + valor;
+        });
+        const sorted = Object.keys(mapDia).sort().slice(-30);
+        const labels = sorted.map(d => new Date(d+'T00:00:00').toLocaleDateString('es-ES', {day:'2-digit', month:'short'}));
+        const values = sorted.map(d => mapDia[d]);
+
+        salesChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Ventas (S/)',
+              data: values,
+              borderColor: '#A9822F',
+              backgroundColor: 'rgba(169,130,47,0.10)',
+              fill: true,
+              tension: 0.3,
+              pointBackgroundColor: '#A9822F',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+              y: { beginAtZero: true, grid: { color: '#EFE7D8' }, ticks: { font: { size: 9 } } }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+    }
+
+    // =========================================================================
+    // GRÁFICOS (Chart.js)
+    // =========================================================================
+    function renderChart(type, data, canvasId = 'activeChart') {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if (canvasId === 'activeChart' && currentChart) currentChart.destroy();
+      else if (canvasId === 'analisisChart' && currentChart) currentChart.destroy();
 
       let config = null;
-      const colores = ['#0B1526', '#B08D57', '#2D6A4F', '#8C2E22', '#3E5C76', '#8A5A17', '#6B4E71', '#9B6B43'];
+      const colores = ['#A9822F', '#8B8378', '#F1E6CE', '#121014', '#D9C79C', '#6E675C'];
 
       switch (type) {
         case 'category': {
-          const catMap = {};
-          data.forEach(p => {
-            const cat = p.categoria || 'Sin categoría';
-            catMap[cat] = (catMap[cat] || 0) + 1;
-          });
-          const labels = Object.keys(catMap);
-          const values = Object.values(catMap);
+          const map = {};
+          data.forEach(p => { const c = p.categoria || 'Sin categoría'; map[c] = (map[c]||0)+1; });
+          const labels = Object.keys(map);
+          const values = Object.values(map);
           config = {
             type: 'doughnut',
-            data: {
-              labels: labels,
-              datasets: [{
-                data: values,
-                backgroundColor: colores.slice(0, labels.length),
-                borderWidth: 2,
-                borderColor: '#fff'
-              }]
-            },
+            data: { labels, datasets: [{ data: values, backgroundColor: colores.slice(0, labels.length), borderWidth: 1, borderColor: '#fff' }] },
             options: {
-              responsive: true,
-              maintainAspectRatio: false,
+              responsive: true, maintainAspectRatio: false,
               plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, font: { size: 11, weight: '500' } } },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                      let percentage = ((context.parsed / total) * 100).toFixed(1);
-                      return `${context.label}: ${context.parsed} (${percentage}%)`;
-                    }
-                  }
-                }
+                legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 10, family: 'Inter' } } },
+                tooltip: { callbacks: { label: function(ctx) {
+                  const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+                  return `${ctx.label}: ${ctx.parsed} (${((ctx.parsed/total)*100).toFixed(1)}%)`;
+                }}}
               },
               cutout: '68%'
             }
@@ -686,117 +1481,107 @@
           break;
         }
         case 'value': {
-          const top = [...data]
-            .map(p => ({ nombre: p.nombre || p.sku, valor: (p.stockActual || p.stockInicial || 0) * (p.precio || 0) }))
-            .sort((a, b) => b.valor - a.valor)
-            .slice(0, 5);
+          const top = [...data].filter(p => !p.vendido && !p.porPagar).map(p => ({ nombre: p.nombre || p.sku, valor: (p.stockActual||p.stockInicial||0)*(p.precio||0) })).sort((a,b)=>b.valor-a.valor).slice(0,5);
           config = {
             type: 'bar',
             data: {
-              labels: top.map(i => i.nombre.length > 14 ? i.nombre.slice(0, 14) + '…' : i.nombre),
-              datasets: [{
-                label: 'Valor total (S/)',
-                data: top.map(i => i.valor),
-                backgroundColor: ['#0B1526', '#12203D', '#8A6B3F', '#B08D57', '#C9A876'],
-                borderRadius: 8,
-                borderSkipped: false
-              }]
+              labels: top.map(i => i.nombre.length > 14 ? i.nombre.slice(0,14)+'…' : i.nombre),
+              datasets: [{ label: 'Valor (S/)', data: top.map(i=>i.valor), backgroundColor: ['#A9822F','#D9C79C','#8B8378','#F1E6CE','#121014'], borderRadius: 4 }]
             },
             options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 10, weight: '500' } } },
-                y: { beginAtZero: true, grid: { color: '#F2EFE8' }, ticks: { font: { size: 10 } } }
-              },
-              plugins: {
-                legend: { display: false },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      return `S/ ${context.parsed.y.toFixed(2)}`;
-                    }
-                  }
-                }
-              }
+              responsive: true, maintainAspectRatio: false,
+              scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#EFE7D8' } } },
+              plugins: { legend: { display: false } }
             }
           };
           break;
         }
         case 'status': {
-          const estadoMap = {};
-          data.forEach(p => {
-            const est = p.estado || 'Otro';
-            estadoMap[est] = (estadoMap[est] || 0) + 1;
-          });
-          const labels = Object.keys(estadoMap);
-          const values = Object.values(estadoMap);
-          const coloresEstado = ['#1F4D33', '#8A5A17', '#8C2E22', '#475569'];
+          const map = {};
+          data.forEach(p => { const e = p.estado || 'Otro'; map[e] = (map[e]||0)+1; });
+          const labels = Object.keys(map);
+          const values = Object.values(map);
           config = {
             type: 'doughnut',
-            data: {
-              labels: labels,
-              datasets: [{
-                data: values,
-                backgroundColor: coloresEstado.slice(0, labels.length),
-                borderWidth: 2,
-                borderColor: '#fff'
-              }]
-            },
+            data: { labels, datasets: [{ data: values, backgroundColor: ['#3C7A5C','#B07A2E','#8C3B3B','#9C978D'], borderWidth: 1, borderColor: '#fff' }] },
             options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, font: { size: 11, weight: '500' } } },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                      let percentage = ((context.parsed / total) * 100).toFixed(1);
-                      return `${context.label}: ${context.parsed} (${percentage}%)`;
-                    }
-                  }
-                }
-              },
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } } },
               cutout: '68%'
             }
           };
           break;
         }
         case 'stock': {
-          const topStock = [...data]
-            .sort((a, b) => (b.stockActual || b.stockInicial || 0) - (a.stockActual || a.stockInicial || 0))
-            .slice(0, 8);
+          const top = [...data].filter(p => !p.vendido && !p.porPagar).sort((a,b) => (b.stockActual||b.stockInicial||0) - (a.stockActual||a.stockInicial||0)).slice(0,8);
           config = {
             type: 'bar',
             data: {
-              labels: topStock.map(p => (p.nombre || p.sku).length > 14 ? (p.nombre || p.sku).slice(0, 14) + '…' : (p.nombre || p.sku)),
-              datasets: [{
-                label: 'Stock actual',
-                data: topStock.map(p => p.stockActual || p.stockInicial || 0),
-                backgroundColor: '#B08D57',
-                borderRadius: 6,
-                borderSkipped: false
-              }]
+              labels: top.map(p => (p.nombre||p.sku).length > 14 ? (p.nombre||p.sku).slice(0,14)+'…' : (p.nombre||p.sku)),
+              datasets: [{ label: 'Stock', data: top.map(p => p.stockActual||p.stockInicial||0), backgroundColor: '#A9822F', borderRadius: 4 }]
             },
             options: {
               indexAxis: 'y',
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                x: { grid: { color: '#F2EFE8' }, ticks: { font: { size: 9 } } },
-                y: { grid: { display: false }, ticks: { font: { size: 9, weight: '500' } } }
-              },
-              plugins: {
-                legend: { display: false },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      return `${context.parsed.x} u.`;
-                    }
-                  }
+              responsive: true, maintainAspectRatio: false,
+              scales: { x: { grid: { color: '#EFE7D8' } }, y: { grid: { display: false } } },
+              plugins: { legend: { display: false } }
+            }
+          };
+          break;
+        }
+        case 'sales': {
+          const ventas = inventario.filter(p => p.vendido && p.fechaVenta);
+          if (ventas.length === 0) {
+            config = {
+              type: 'doughnut',
+              data: { labels: ['Sin ventas'], datasets: [{ data: [1], backgroundColor: ['#F1E6CE'] }] },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '90%' },
+              plugins: [{
+                id: 'noData',
+                beforeDraw: function(chart) {
+                  const { width, height, ctx } = chart;
+                  ctx.save();
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.font = '14px Fraunces, serif';
+                  ctx.fillStyle = '#8B8378';
+                  ctx.fillText('Sin ventas', width/2, height/2);
+                  ctx.restore();
                 }
-              }
+              }]
+            };
+            break;
+          }
+          const mapDia = {};
+          ventas.forEach(p => {
+            const dia = new Date(p.fechaVenta).toISOString().split('T')[0];
+            const valor = (p.stockActual||p.stockInicial||0) * (p.precio||0);
+            mapDia[dia] = (mapDia[dia]||0) + valor;
+          });
+          const sorted = Object.keys(mapDia).sort().slice(-30);
+          const labels = sorted.map(d => new Date(d+'T00:00:00').toLocaleDateString('es-ES', {day:'2-digit', month:'short'}));
+          const values = sorted.map(d => mapDia[d]);
+          config = {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Ventas (S/)',
+                data: values,
+                borderColor: '#A9822F',
+                backgroundColor: 'rgba(169,130,47,0.10)',
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#A9822F',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 3
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { beginAtZero: true, grid: { color: '#EFE7D8' } } },
+              plugins: { legend: { display: false } }
             }
           };
           break;
@@ -804,199 +1589,136 @@
         default: return;
       }
 
-      currentChart = new Chart(ctx, config);
+      const chart = new Chart(ctx, config);
+      if (canvasId === 'activeChart') currentChart = chart;
+      else if (canvasId === 'analisisChart') currentChart = chart;
     }
 
-    // =========================================================================
-    // SELECTOR DE GRÁFICO (pestañas)
-    // =========================================================================
     function selectChart(type) {
       activeChartType = type;
-      // Actualizar clases de pestañas
-      document.querySelectorAll('.chart-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.chart === type);
-      });
-      // Renderizar con los datos actuales (filtrados)
+      document.querySelectorAll('.chart-tab').forEach(t => t.classList.toggle('active', t.dataset.chart === type));
       const data = getDatosFiltrados();
-      renderChart(type, data);
+      renderChart(type, data, 'activeChart');
+      // También actualizar análisis si está visible
+      if (currentTab === 'analisis') {
+        renderChart(type, data, 'analisisChart');
+      }
     }
 
     // =========================================================================
-    // Obtener datos filtrados (para gráficos)
+    // FILTROS Y DATOS FILTRADOS
     // =========================================================================
     function getDatosFiltrados() {
-      let resultado = [...inventario];
-      // Aplicar filtros de columna
-      const colFilters = {};
-      document.querySelectorAll('.table-filter-input').forEach(inp => {
-        const col = inp.dataset.col;
-        const val = inp.value.toLowerCase().trim();
-        if (val) colFilters[col] = val;
-      });
-      Object.keys(colFilters).forEach(col => {
-        resultado = resultado.filter(p => {
-          const field = String(p[col] || '').toLowerCase();
-          return field.includes(colFilters[col]);
-        });
-      });
-      // Filtro categoría
-      if (categoriaActiva) {
-        resultado = resultado.filter(p => p.categoria === categoriaActiva);
+      let res = [...inventario];
+      if (categoriaActiva) res = res.filter(p => p.categoria === categoriaActiva);
+      switch (filtroActivo) {
+        case 'activos': res = res.filter(p => !p.vendido && !p.porPagar); break;
+        case 'vendidos': res = res.filter(p => p.vendido); break;
+        case 'por-pagar': res = res.filter(p => p.porPagar); break;
+        case 'critico': res = res.filter(p => (p.stockActual||p.stockInicial||0) < 2 && !p.vendido && !p.porPagar); break;
+        case 'todos': break;
+        default: res = res.filter(p => !p.vendido && !p.porPagar);
       }
-      // Filtro rápido
-      if (filtroActivo === 'critico') {
-        resultado = resultado.filter(p => (p.stockActual || p.stockInicial || 0) < 2);
-      } else if (filtroActivo === 'sin-imagen') {
-        resultado = resultado.filter(p => !p.tieneImagen);
-      }
-      // Búsqueda global (si existe, aunque no hay input, pero por si acaso)
-      return resultado;
+      return res;
     }
 
-    // =========================================================================
-    // POBLAR CATEGORÍAS
-    // =========================================================================
-    function poblarCategorias() {
-      const select = document.getElementById('categoriaFilter');
-      const cats = [...new Set(inventario.map(p => p.categoria).filter(Boolean))].sort();
-      select.innerHTML = '<option value="">Todas las categorías</option>';
-      cats.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c;
-        opt.textContent = c;
-        select.appendChild(opt);
-      });
-    }
-
-    // =========================================================================
-    // CONTADOR SIN IMAGEN
-    // =========================================================================
-    function actualizarContadorSinImagen() {
-      const count = inventario.filter(p => !p.tieneImagen).length;
-      const el = document.getElementById('sinImagenCount');
-      if (count > 0) {
-        el.textContent = `${count} sin imagen`;
-        el.classList.remove('hidden');
-      } else {
-        el.classList.add('hidden');
-      }
-    }
-
-    // =========================================================================
-    // FILTROS
-    // =========================================================================
     function setFilter(tipo) {
       filtroActivo = tipo;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === tipo);
-      });
-      aplicarFiltros();
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === tipo));
+      renderColeccion();
     }
 
     function setCategoria(val) {
       categoriaActiva = val;
-      aplicarFiltros();
+      renderColeccion();
     }
 
     function limpiarFiltros() {
-      document.querySelectorAll('.table-filter-input').forEach(inp => inp.value = '');
-      Object.keys(filtrosColumna).forEach(key => filtrosColumna[key] = '');
       categoriaActiva = '';
       document.getElementById('categoriaFilter').value = '';
-      setFilter('all');
-    }
-
-    function aplicarFiltros() {
-      const resultado = getDatosFiltrados();
-      renderTabla(resultado);
-      document.getElementById('rowCount').textContent = `${resultado.length} registros`;
-      // Actualizar gráfico con los datos filtrados
-      renderChart(activeChartType, resultado);
+      setFilter('activos');
     }
 
     // =========================================================================
-    // TABLA mejorada con barra de stock y valor total
+    // ACCIONES (Vender, Por pagar, Pagar, Deshacer)
     // =========================================================================
-    function renderTabla(items) {
-      const tbody = document.getElementById('inventoryTable');
-      if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400 font-mono text-xs uppercase tracking-wider">No hay coincidencias</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = items.map((p, index) => {
-        const stock = p.stockActual || p.stockInicial || 0;
-        const precio = p.precio || 0;
-        const valorTotal = stock * precio;
-        const estado = p.estado || 'Disponible';
-        const estadoLower = estado.toLowerCase();
+    function venderProducto(sku) {
+      const input = document.getElementById(`buyer_${sku}`);
+      const comprador = input ? input.value.trim() : '';
+      if (!comprador) { showToast('⚠️ Ingresa el nombre del comprador.'); input?.focus(); return; }
+      const p = inventario.find(i => i.sku === sku);
+      if (!p || p.vendido) return;
 
-        let badgeClass = 'badge-otro';
-        if (estadoLower.includes('disponible')) badgeClass = 'badge-disponible';
-        else if (estadoLower.includes('pendiente')) badgeClass = 'badge-pendiente';
-        else if (estadoLower.includes('critico')) badgeClass = 'badge-critico';
+      const mensaje = mensajesCompra[Math.floor(Math.random() * mensajesCompra.length)];
 
-        // Barra de progreso de stock
-        const maxStock = Math.max(...items.map(i => i.stockActual || i.stockInicial || 0), 1);
-        const porcentaje = Math.min((stock / maxStock) * 100, 100);
-        let barClass = 'high';
-        if (stock < 2) barClass = 'low';
-        else if (stock < 5) barClass = 'medium';
+      p.vendido = true;
+      p.porPagar = false;
+      p.fechaVenta = new Date().toISOString();
+      p.comprador = comprador;
 
-        const esPlaceholder = !p.tieneImagen;
-        const imgClass = esPlaceholder ? 'img-placeholder' : '';
-        const noImgBadge = esPlaceholder ? `<span class="no-img-indicator">Sin img</span>` : '';
+      guardarEstadoLocal();
+      actualizarKPIs();
+      actualizarContadorSinImagen();
+      renderizarTodo();
 
-        const rowClass = index % 2 === 0 ? 'table-row-hover' : 'table-row-hover table-row-alt';
-
-        return `<tr class="${rowClass}">
-          <td class="p-2.5">
-            <div class="img-wrapper">
-              <img src="${p.imagen}" class="w-12 h-12 object-cover rounded-lg border border-paper-200 shadow-sm ${imgClass}" onerror="this.src='https://via.placeholder.com/80/F6E3DE/8C2E22?text=Error'">
-              ${noImgBadge}
-            </div>
-          </td>
-          <td class="p-2.5 font-mono text-xs font-bold text-gold-600">${p.sku || '-'}</td>
-          <td class="p-2.5 text-xs text-slate-500 font-medium">${p.categoria || '-'}</td>
-          <td class="p-2.5 font-semibold text-ink-900">${p.nombre || 'Sin nombre'}</td>
-          <td class="p-2.5 text-right font-mono font-bold text-emerald-700">S/ ${precio.toFixed(2)}</td>
-          <td class="p-2.5 text-center">
-            <div class="flex items-center justify-center gap-2">
-              <span class="font-mono font-bold text-sm">${stock}</span>
-              <div class="stock-bar">
-                <div class="stock-bar-fill ${barClass}" style="width: ${porcentaje}%;"></div>
-              </div>
-            </div>
-          </td>
-          <td class="p-2.5 text-right font-mono font-bold text-gold-600">S/ ${valorTotal.toFixed(2)}</td>
-          <td class="p-2.5 text-center"><span class="badge ${badgeClass}">${estado}</span></td>
-          <td class="p-2.5 text-xs text-slate-600 font-medium">${p.proveedor || '-'}</td>
-        </tr>`;
-      }).join('');
+      showToast(`✨ ${mensaje}`);
+      openFollowUp(p.nombre || p.sku, comprador);
     }
 
-    // =========================================================================
-    // OCULTAR/MOSTRAR GRÁFICOS
-    // =========================================================================
-    function toggleCharts() {
-      chartsVisible = !chartsVisible;
-      const section = document.getElementById('chartsSection');
-      const btn = document.getElementById('toggleChartsBtn');
-      const grid = section.querySelector('.charts-grid');
-      if (chartsVisible) {
-        grid.style.display = 'grid';
-        btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Ocultar';
+    function deshacerVenta(sku) {
+      const p = inventario.find(i => i.sku === sku);
+      if (!p) return;
+      p.vendido = false;
+      p.fechaVenta = null;
+      p.comprador = null;
+      guardarEstadoLocal();
+      actualizarKPIs();
+      renderizarTodo();
+      showToast('🔄 Venta deshecha');
+    }
+
+    function togglePorPagar(sku) {
+      const p = inventario.find(i => i.sku === sku);
+      if (!p) return;
+      if (p.porPagar) {
+        p.porPagar = false;
+        showToast('🔄 Pendiente cancelado');
       } else {
-        grid.style.display = 'none';
-        btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Mostrar';
+        p.porPagar = true;
+        p.vendido = false;
+        p.fechaVenta = null;
+        p.comprador = null;
+        showToast('⏳ Marcado como por pagar');
       }
+      guardarEstadoLocal();
+      actualizarKPIs();
+      renderizarTodo();
+    }
+
+    function pagarProducto(sku) {
+      const p = inventario.find(i => i.sku === sku);
+      if (!p) return;
+      p.porPagar = false;
+      guardarEstadoLocal();
+      actualizarKPIs();
+      renderizarTodo();
+      showToast('💰 Pagado correctamente');
     }
 
     // =========================================================================
     // INICIALIZACIÓN
     // =========================================================================
-    document.addEventListener('input', function(e) {
-      if (e.target.classList.contains('table-filter-input')) {
-        aplicarFiltros();
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeFollowUp();
+    });
+
+    // Cerrar sidebar al hacer clic fuera en móvil
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && !e.target.closest('.menu-toggle')) {
+          sidebar.classList.remove('open');
+        }
       }
     });
 
