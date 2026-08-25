@@ -256,6 +256,56 @@
       letter-spacing: 0.01em;
     }
     .topbar-right { display: flex; align-items: center; gap: 1.1rem; }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-box i {
+      position: absolute;
+      left: 0.9rem;
+      font-size: 0.75rem;
+      color: var(--stone);
+      pointer-events: none;
+    }
+    .search-box input {
+      width: 220px;
+      padding: 0.42rem 0.9rem 0.42rem 2.1rem;
+      border: 1px solid var(--line-gold);
+      border-radius: 999px;
+      background: var(--paper);
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-box input::placeholder { color: var(--stone); }
+    .search-box input:focus { border-color: var(--gold); width: 260px; box-shadow: 0 0 0 3px rgba(169,130,47,0.08); }
+    .search-box .search-clear {
+      position: absolute;
+      right: 0.6rem;
+      background: transparent;
+      border: none;
+      color: var(--stone);
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 0.15rem;
+      display: none;
+    }
+    .search-box .search-clear:hover { color: var(--ink); }
+    .search-box.has-value .search-clear { display: block; }
+    @media (max-width: 768px) {
+      .search-box input { width: 140px; }
+      .search-box input:focus { width: 170px; }
+    }
+    @media (max-width: 560px) {
+      .search-box { order: 3; width: 100%; }
+      .search-box input { width: 100%; }
+      .search-box input:focus { width: 100%; }
+      .topbar-right { flex-wrap: wrap; justify-content: flex-end; }
+    }
     .sync-status {
       font-size: 0.68rem; color: var(--textsec);
       display: flex; align-items: center; gap: 0.5rem;
@@ -669,6 +719,7 @@
       border: 1px solid var(--line); border-radius: 999px; padding: 0.22rem 0.85rem; font-size: 0.62rem;
       background: var(--paper); color: var(--ink); font-family: 'Inter', sans-serif; outline: none;
     }
+    #seguimientoTable .filter-select { width: fit-content; min-width: 130px; }
 
     /* Encabezados de sección */
     .section-title {
@@ -760,6 +811,11 @@
         <span class="topbar-title" id="pageTitle">Inicio</span>
       </div>
       <div class="topbar-right">
+        <div class="search-box" id="searchBox">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" placeholder="Buscar pieza, SKU o categoría…" oninput="onSearchInput(this.value)">
+          <button class="search-clear" onclick="clearSearch()" title="Limpiar búsqueda"><i class="fa-solid fa-xmark"></i></button>
+        </div>
         <div class="sync-status">
           <span class="sync-dot pulse" id="syncDot"></span>
           <span id="syncStatus">Sincronizado</span>
@@ -843,6 +899,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
           <div>
             <h2 class="section-title" style="margin-bottom:0;">Colección</h2>
+            <p class="section-sub" id="coleccionSub" style="margin:0.2rem 0 0;"></p>
           </div>
           <div class="filters" style="margin:0;">
             <button class="filter-btn active" data-filter="activos" onclick="setFilter('activos')">Activos</button>
@@ -893,8 +950,8 @@
         <div class="table-wrapper">
           <div style="overflow-x:auto;">
             <table>
-              <thead><tr><th>Fecha</th><th>Producto</th><th>Comprador</th><th>Email</th><th>Teléfono</th><th>Dirección</th><th>Estado</th></tr></thead>
-              <tbody id="seguimientoTable"><tr><td colspan="7" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr></tbody>
+              <thead><tr><th>Fecha</th><th>Producto</th><th>Comprador</th><th>Email</th><th>Teléfono</th><th>Dirección</th><th>Estado</th><th>Acción</th></tr></thead>
+              <tbody id="seguimientoTable"><tr><td colspan="8" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -950,6 +1007,8 @@
     let filtroActivo = 'activos';
     let categoriaActiva = '';
     let currentTab = 'inicio';
+    let terminoBusqueda = '';
+    let filtroPrevioBusqueda = null;
 
     const mensajesCompra = [
       "Piezas que hablan de tu esencia.",
@@ -1269,8 +1328,14 @@
     function renderColeccion() {
       const data = getDatosFiltrados();
       const grid = document.getElementById('collectionGrid');
+      const sub = document.getElementById('coleccionSub');
+      if (sub) {
+        sub.textContent = terminoBusqueda
+          ? `${data.length} resultado${data.length === 1 ? '' : 's'} para "${terminoBusqueda}"`
+          : '';
+      }
       if (!data || data.length === 0) {
-        grid.innerHTML = `<p class="text-stone text-center col-span-full py-8">No hay piezas en esta selección.</p>`;
+        grid.innerHTML = `<p class="text-stone text-center col-span-full py-8">${terminoBusqueda ? `Sin resultados para "${terminoBusqueda}".` : 'No hay piezas en esta selección.'}</p>`;
         return;
       }
       grid.innerHTML = data.map(p => {
@@ -1320,7 +1385,7 @@
       }
       tbody.innerHTML = ventas.sort((a,b) => new Date(b.fechaVenta) - new Date(a.fechaVenta)).map(p => {
         const fecha = new Date(p.fechaVenta).toLocaleString();
-        const monto = (p.stockActual || p.stockInicial || 0) * (p.precio || 0);
+        const monto = (p.precio || 0);
         return `<tr>
           <td class="text-xs text-stone">${fecha}</td>
           <td>${p.nombre || p.sku}</td>
@@ -1354,15 +1419,26 @@
     // =========================================================================
     // SEGUIMIENTO
     // =========================================================================
+    const ESTADOS_SEGUIMIENTO = ['Preparación', 'Enviado', 'Entregado', 'Cancelado'];
+    function dotSeguimiento(estado) {
+      if (estado === 'Entregado') return 'dot-green';
+      if (estado === 'Cancelado') return 'dot-red';
+      if (estado === 'Enviado') return 'dot-amber';
+      return 'dot-gray';
+    }
+
     function renderSeguimiento() {
       const pedidos = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
       const tbody = document.getElementById('seguimientoTable');
       if (pedidos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-stone">No hay pedidos en seguimiento</td></tr>`;
         return;
       }
       pedidos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-      tbody.innerHTML = pedidos.map(p => `
+      tbody.innerHTML = pedidos.map(p => {
+        const estado = p.estado || 'Preparación';
+        const opciones = ESTADOS_SEGUIMIENTO.map(e => `<option value="${e}" ${e === estado ? 'selected' : ''}>${e}</option>`).join('');
+        return `
         <tr>
           <td class="text-xs text-stone">${new Date(p.fecha).toLocaleString()}</td>
           <td>${p.producto}</td>
@@ -1370,9 +1446,33 @@
           <td class="text-xs">${p.email}</td>
           <td class="text-xs">${p.telefono}</td>
           <td class="text-xs">${p.direccion}</td>
-          <td><span class="status-dot"><span class="dot dot-amber"></span>${p.estado || 'Preparación'}</span></td>
+          <td>
+            <span class="status-dot" style="margin-bottom:0.3rem;"><span class="dot ${dotSeguimiento(estado)}"></span>${estado}</span>
+            <select class="filter-select" style="display:block;margin-top:0.3rem;" onchange="actualizarEstadoSeguimiento(${p.id}, this.value)">${opciones}</select>
+          </td>
+          <td><button class="btn-action undo" onclick="eliminarSeguimiento(${p.id})" title="Eliminar registro"><i class="fa-solid fa-trash"></i></button></td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
+    }
+
+    function actualizarEstadoSeguimiento(id, nuevoEstado) {
+      const pedidos = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
+      const p = pedidos.find(x => x.id === id);
+      if (!p) return;
+      p.estado = nuevoEstado;
+      localStorage.setItem(SEGUIMIENTO_KEY, JSON.stringify(pedidos));
+      renderSeguimiento();
+      showToast(`📦 Estado actualizado a "${nuevoEstado}"`);
+    }
+
+    function eliminarSeguimiento(id) {
+      if (!confirm('¿Eliminar este pedido del seguimiento? Esta acción no se puede deshacer.')) return;
+      let pedidos = JSON.parse(localStorage.getItem(SEGUIMIENTO_KEY) || '[]');
+      pedidos = pedidos.filter(x => x.id !== id);
+      localStorage.setItem(SEGUIMIENTO_KEY, JSON.stringify(pedidos));
+      renderSeguimiento();
+      showToast('🗑️ Registro eliminado');
     }
 
     // =========================================================================
@@ -1409,7 +1509,7 @@
         const mapDia = {};
         ventas.forEach(p => {
           const dia = new Date(p.fechaVenta).toISOString().split('T')[0];
-          const valor = (p.stockActual || p.stockInicial || 0) * (p.precio || 0);
+          const valor = (p.precio || 0);
           mapDia[dia] = (mapDia[dia] || 0) + valor;
         });
         const sorted = Object.keys(mapDia).sort().slice(-30);
@@ -1555,7 +1655,7 @@
           const mapDia = {};
           ventas.forEach(p => {
             const dia = new Date(p.fechaVenta).toISOString().split('T')[0];
-            const valor = (p.stockActual||p.stockInicial||0) * (p.precio||0);
+            const valor = (p.precio||0);
             mapDia[dia] = (mapDia[dia]||0) + valor;
           });
           const sorted = Object.keys(mapDia).sort().slice(-30);
@@ -1611,6 +1711,16 @@
     function getDatosFiltrados() {
       let res = [...inventario];
       if (categoriaActiva) res = res.filter(p => p.categoria === categoriaActiva);
+      if (terminoBusqueda) {
+        const q = terminoBusqueda.toLowerCase();
+        res = res.filter(p =>
+          (p.nombre || '').toLowerCase().includes(q) ||
+          (p.sku || '').toLowerCase().includes(q) ||
+          (p.categoria || '').toLowerCase().includes(q) ||
+          (p.proveedor || '').toLowerCase().includes(q)
+        );
+        return res;
+      }
       switch (filtroActivo) {
         case 'activos': res = res.filter(p => !p.vendido && !p.porPagar); break;
         case 'vendidos': res = res.filter(p => p.vendido); break;
@@ -1622,7 +1732,44 @@
       return res;
     }
 
+    function onSearchInput(valor) {
+      terminoBusqueda = valor.trim();
+      document.getElementById('searchBox').classList.toggle('has-value', terminoBusqueda.length > 0);
+
+      if (terminoBusqueda) {
+        if (filtroPrevioBusqueda === null) filtroPrevioBusqueda = filtroActivo;
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        if (currentTab !== 'coleccion') switchTab('coleccion');
+        else renderColeccion();
+      } else {
+        if (filtroPrevioBusqueda !== null) {
+          filtroActivo = filtroPrevioBusqueda;
+          filtroPrevioBusqueda = null;
+          document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === filtroActivo));
+        }
+        renderColeccion();
+      }
+    }
+
+    function clearSearch() {
+      terminoBusqueda = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchBox').classList.remove('has-value');
+      if (filtroPrevioBusqueda !== null) {
+        filtroActivo = filtroPrevioBusqueda;
+        filtroPrevioBusqueda = null;
+      }
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === filtroActivo));
+      renderColeccion();
+    }
+
     function setFilter(tipo) {
+      terminoBusqueda = '';
+      filtroPrevioBusqueda = null;
+      const si = document.getElementById('searchInput');
+      if (si) si.value = '';
+      const sb = document.getElementById('searchBox');
+      if (sb) sb.classList.remove('has-value');
       filtroActivo = tipo;
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === tipo));
       renderColeccion();
