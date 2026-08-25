@@ -38,9 +38,6 @@
     }
   </script>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
@@ -63,6 +60,9 @@
       --gray: #9C978D;
     }
     * { box-sizing: border-box; }
+    .icon { width: 0.95em; height: 0.95em; display: inline-block; vertical-align: -0.14em; flex-shrink: 0; }
+    .icon-spin { animation: icon-spin 0.9s linear infinite; }
+    @keyframes icon-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     body {
       font-family: 'Inter', sans-serif;
       background: var(--ivory);
@@ -547,6 +547,19 @@
       font-family: 'Fraunces', serif; font-size: 1.02rem; font-weight: 600; color: var(--ink); margin: 0 0 0.1rem;
       line-height: 1.2;
     }
+    .name-edit-wrap { position: relative; margin: 0 0 0.1rem; }
+    .name-edit-input {
+      font-family: 'Fraunces', serif; font-size: 1.02rem; font-weight: 600; color: var(--ink);
+      line-height: 1.2; width: 100%; background: transparent; border: none; border-bottom: 1px dashed transparent;
+      padding: 0 1.15rem 0.1rem 0; outline: none; transition: border-color 0.2s; cursor: text;
+    }
+    .name-edit-input:hover, .name-edit-input:focus { border-bottom-color: var(--line-gold); }
+    .name-edit-input:focus { border-bottom-style: solid; border-bottom-color: var(--gold); }
+    .name-edit-wrap .name-edit-icon {
+      position: absolute; right: 0; top: 2px; width: 0.72em; height: 0.72em; color: var(--stone);
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .name-edit-wrap:hover .name-edit-icon { opacity: 1; }
     .product-card .card-body .category {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone);
@@ -580,6 +593,8 @@
     .btn-action.undo:hover { background: rgba(140,59,59,0.06); }
     .btn-action.paid { border-color: var(--green); color: var(--green); }
     .btn-action.paid:hover { background: rgba(60,122,92,0.06); }
+    .btn-action.edit { border-color: var(--gold); color: var(--gold); }
+    .btn-action.edit:hover { background: var(--goldpale); color: var(--ink); }
 
     .buyer-input {
       width: 64px;
@@ -760,12 +775,12 @@
 <body>
 
   <!-- TOAST -->
-  <div id="toast"><i class="fa-regular fa-gem"></i> <span id="toastMessage">Venta registrada</span></div>
+  <div id="toast"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9Z"/><path d="M2 9h20"/><path d="M9.5 3 7.5 9l4.5 12 4.5-12-2-6"/></svg> <span id="toastMessage">Venta registrada</span></div>
 
   <!-- MODAL -->
   <div class="modal-overlay" id="followUpModal">
     <div class="modal-box">
-      <button class="modal-close" onclick="closeFollowUp()"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeFollowUp()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       <h2>Tu pieza está casi lista</h2>
       <p class="sub">Completa tus datos para preparar cuidadosamente tu pedido.</p>
       <form id="followUpForm" onsubmit="submitFollowUp(event)">
@@ -783,6 +798,30 @@
     </div>
   </div>
 
+  <!-- MODAL EDITAR VENTA -->
+  <div class="modal-overlay" id="editVentaModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="cerrarEditarVenta()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <h2>Editar venta</h2>
+      <p class="sub">Corrige los datos de esta venta registrada.</p>
+      <form id="editVentaForm" onsubmit="guardarEdicionVenta(event)">
+        <input type="hidden" id="evSku">
+        <label>Joya</label>
+        <input type="text" id="evNombre" disabled style="opacity:0.6;">
+        <label style="margin-top:0.8rem;">Comprador</label>
+        <input type="text" id="evComprador" placeholder="Nombre del comprador" required>
+        <label style="margin-top:0.8rem;">Precio de venta (S/)</label>
+        <input type="number" id="evPrecio" step="0.01" min="0" required>
+        <label style="margin-top:0.8rem;">Fecha y hora de venta</label>
+        <input type="datetime-local" id="evFecha" required>
+        <button type="submit" class="btn-submit">Guardar cambios</button>
+      </form>
+      <button type="button" onclick="eliminarVenta(document.getElementById('evSku').value, true)" style="width:100%;margin-top:0.6rem;padding:0.6rem;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:2px;font-weight:600;font-size:0.78rem;letter-spacing:0.03em;text-transform:uppercase;cursor:pointer;font-family:'Inter', sans-serif;">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg> Eliminar esta venta
+      </button>
+    </div>
+  </div>
+
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
@@ -793,12 +832,12 @@
       </div>
     </div>
     <nav class="sidebar-nav">
-      <button class="nav-item active" data-tab="inicio" onclick="switchTab('inicio')"><i class="fa-regular fa-gem"></i> Inicio</button>
-      <button class="nav-item" data-tab="coleccion" onclick="switchTab('coleccion')"><i class="fa-regular fa-boxes-stacked"></i> Colección</button>
-      <button class="nav-item" data-tab="ventas" onclick="switchTab('ventas')"><i class="fa-regular fa-chart-line"></i> Ventas</button>
-      <button class="nav-item" data-tab="pendientes" onclick="switchTab('pendientes')"><i class="fa-regular fa-clock"></i> Pendientes <span class="badge-pend" id="sidebarPendCount">0</span></button>
-      <button class="nav-item" data-tab="seguimiento" onclick="switchTab('seguimiento')"><i class="fa-regular fa-truck-fast"></i> Seguimiento</button>
-      <button class="nav-item" data-tab="analisis" onclick="switchTab('analisis')"><i class="fa-regular fa-chart-simple"></i> Análisis</button>
+      <button class="nav-item active" data-tab="inicio" onclick="switchTab('inicio')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9Z"/><path d="M2 9h20"/><path d="M9.5 3 7.5 9l4.5 12 4.5-12-2-6"/></svg> Inicio</button>
+      <button class="nav-item" data-tab="coleccion" onclick="switchTab('coleccion')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="10.5" width="7" height="7" rx="1"/><rect x="13" y="10.5" width="7" height="7" rx="1"/><rect x="8.2" y="3.5" width="7" height="7" rx="1"/></svg> Colección</button>
+      <button class="nav-item" data-tab="ventas" onclick="switchTab('ventas')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M4 19V5"/><path d="M6 15l4-5 3 3 6-8"/></svg> Ventas</button>
+      <button class="nav-item" data-tab="pendientes" onclick="switchTab('pendientes')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg> Pendientes <span class="badge-pend" id="sidebarPendCount">0</span></button>
+      <button class="nav-item" data-tab="seguimiento" onclick="switchTab('seguimiento')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11v8H2z"/><path d="M13 11h4l3 3v2h-7z"/><circle cx="6" cy="18.2" r="1.6"/><circle cx="17" cy="18.2" r="1.6"/></svg> Seguimiento</button>
+      <button class="nav-item" data-tab="analisis" onclick="switchTab('analisis')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4"/><rect x="5.5" y="12" width="3" height="8"/><rect x="11" y="8" width="3" height="12"/><rect x="16.5" y="4" width="3" height="16"/></svg> Análisis</button>
     </nav>
     <div class="sidebar-footer">Maison SIN PAR</div>
   </aside>
@@ -808,23 +847,23 @@
     <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+        <button class="menu-toggle" onclick="toggleSidebar()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
         <span class="topbar-title" id="pageTitle">Inicio</span>
       </div>
       <div class="topbar-right">
         <div class="search-box" id="searchBox">
-          <i class="fa-solid fa-magnifying-glass"></i>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <input type="text" id="searchInput" placeholder="Buscar pieza, SKU o categoría…" oninput="onSearchInput(this.value)">
-          <button class="search-clear" onclick="clearSearch()" title="Limpiar búsqueda"><i class="fa-solid fa-xmark"></i></button>
+          <button class="search-clear" onclick="clearSearch()" title="Limpiar búsqueda"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
         </div>
         <div class="sync-status">
           <span class="sync-dot pulse" id="syncDot"></span>
           <span id="syncStatus">Sincronizado</span>
         </div>
         <div id="pendienteTopBadge" class="pendiente-badge hidden">
-          <i class="fa-regular fa-clock"></i> <span id="pendienteTopCount">0</span> pendientes
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg> <span id="pendienteTopCount">0</span> pendientes
         </div>
-        <button class="btn-refresh" onclick="cargarDatos()"><i id="btn-refresh-icon" class="fa-solid fa-rotate-right"></i> Actualizar</button>
+        <button class="btn-refresh" onclick="cargarDatos()"><svg id="btn-refresh-icon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 1 0 19 15"/><path d="M20 5v6h-6"/></svg> Actualizar</button>
       </div>
     </div>
 
@@ -850,7 +889,7 @@
               <h3 id="featuredName">Nombre de la joya</h3>
               <div class="price" id="featuredPrice">S/ 0.00</div>
               <div class="status"><span class="dot dot-available" id="featuredDot"></span><span id="featuredStatus">Disponible</span></div>
-              <button class="btn-action sell" style="margin-top:0.7rem;" onclick="verPiezaDestacada()"><i class="fa-regular fa-eye"></i> Ver pieza</button>
+              <button class="btn-action sell" style="margin-top:0.7rem;" onclick="verPiezaDestacada()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg> Ver pieza</button>
             </div>
           </div>
         </div>
@@ -867,6 +906,12 @@
         <div class="chart-container">
           <div class="chart-header">
             <h4>Análisis de la colección</h4>
+            <button class="btn-refresh" id="btnToggleGraficos" onclick="toggleGraficosInicio()" title="Mostrar u ocultar los gráficos">
+              <span id="iconToggleGraficos"></span>
+              <span id="txtToggleGraficos">Ocultar gráficos</span>
+            </button>
+          </div>
+          <div id="chartBodyInicio">
             <div class="chart-tabs">
               <button class="chart-tab active" data-chart="category" onclick="selectChart('category')">Categorías</button>
               <button class="chart-tab" data-chart="value" onclick="selectChart('value')">Valor</button>
@@ -874,9 +919,9 @@
               <button class="chart-tab" data-chart="stock" onclick="selectChart('stock')">Stock</button>
               <button class="chart-tab" data-chart="sales" onclick="selectChart('sales')">Ventas</button>
             </div>
-          </div>
-          <div class="h-64 w-full relative">
-            <canvas id="activeChart"></canvas>
+            <div class="h-64 w-full relative">
+              <canvas id="activeChart"></canvas>
+            </div>
           </div>
         </div>
 
@@ -886,7 +931,7 @@
             <span id="tablaInicioTitulo" style="font-family:'Fraunces',serif;font-weight:600;">Últimas piezas</span>
             <div style="display:flex;align-items:center;gap:0.8rem;">
               <span class="text-xs text-stone" id="rowCount">0 registros</span>
-              <button class="btn-refresh" id="btnVerTodasInicio" onclick="toggleVerTodasInicio()"><i class="fa-solid fa-list"></i> Ver todos</button>
+              <button class="btn-refresh" id="btnVerTodasInicio" onclick="toggleVerTodasInicio()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.1"/><circle cx="4" cy="12" r="1.1"/><circle cx="4" cy="18" r="1.1"/></svg> Ver todos</button>
             </div>
           </div>
           <div style="overflow-x:auto;" id="inventoryTableScroll">
@@ -926,8 +971,8 @@
         <div class="table-wrapper">
           <div style="overflow-x:auto;">
             <table>
-              <thead><tr><th>Fecha</th><th>Joya</th><th>Comprador</th><th>Monto</th></tr></thead>
-              <tbody id="ventasTable"><tr><td colspan="4" class="text-center py-6 text-stone">No hay ventas registradas</td></tr></tbody>
+              <thead><tr><th>Fecha</th><th>Joya</th><th>Comprador</th><th>Monto</th><th>Acciones</th></tr></thead>
+              <tbody id="ventasTable"><tr><td colspan="5" class="text-center py-6 text-stone">No hay ventas registradas</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1003,6 +1048,10 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwAVyNP4DO01oo6gVcrha_r1SY4rpX0GMuEBwpgMhiqNPc794HfSMDxvEN6LKW1uBgY/exec";
     const STORAGE_KEY = 'sinpar_joyeria_estado_v3';
     const SEGUIMIENTO_KEY = 'sinpar_seguimiento_pedidos';
+    const GRAFICOS_KEY = 'sinpar_ocultar_graficos_inicio';
+
+    const ICON_EYE = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const ICON_EYE_OFF = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.2A11 11 0 0 1 12 5c6.5 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.1 3.9"/><path d="M6.6 6.6C3.8 8.4 1.5 12 1.5 12S5.5 19 12 19a10.8 10.8 0 0 0 5.4-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
 
     let inventario = [];
     let currentChart = null;
@@ -1012,6 +1061,15 @@
     let categoriaActiva = '';
     let currentTab = 'inicio';
     let terminoBusqueda = '';
+    let graficosInicioOcultos = localStorage.getItem(GRAFICOS_KEY) === '1';
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
     let filtroPrevioBusqueda = null;
     let mostrarTodasInicio = false;
 
@@ -1157,7 +1215,7 @@
       const icon = document.getElementById('btn-refresh-icon');
       const dot = document.getElementById('syncDot');
       const status = document.getElementById('syncStatus');
-      if (icon) icon.classList.add('fa-spin');
+      if (icon) icon.classList.add('icon-spin');
       if (status) status.textContent = 'Cargando…';
       if (dot) { dot.classList.remove('error'); dot.classList.add('pulse'); }
 
@@ -1205,7 +1263,7 @@
         if (status) status.textContent = 'Error';
         if (dot) { dot.classList.remove('pulse'); dot.classList.add('error'); }
       } finally {
-        if (icon) icon.classList.remove('fa-spin');
+        if (icon) icon.classList.remove('icon-spin');
       }
     }
 
@@ -1261,6 +1319,31 @@
     // =========================================================================
     // INICIO
     // =========================================================================
+    function aplicarEstadoGraficosInicio() {
+      const body = document.getElementById('chartBodyInicio');
+      const icon = document.getElementById('iconToggleGraficos');
+      const txt = document.getElementById('txtToggleGraficos');
+      if (!body || !icon || !txt) return;
+      if (graficosInicioOcultos) {
+        body.style.display = 'none';
+        icon.innerHTML = ICON_EYE;
+        txt.textContent = 'Mostrar gráficos';
+      } else {
+        body.style.display = '';
+        icon.innerHTML = ICON_EYE_OFF;
+        txt.textContent = 'Ocultar gráficos';
+      }
+    }
+
+    function toggleGraficosInicio() {
+      graficosInicioOcultos = !graficosInicioOcultos;
+      localStorage.setItem(GRAFICOS_KEY, graficosInicioOcultos ? '1' : '0');
+      aplicarEstadoGraficosInicio();
+      if (!graficosInicioOcultos) {
+        renderChart(activeChartType, getDatosFiltrados(), 'activeChart');
+      }
+    }
+
     function renderInicio() {
       const data = getDatosFiltrados();
       // Destacar una pieza aleatoria
@@ -1285,15 +1368,17 @@
       const btn = document.getElementById('btnVerTodasInicio');
       if (btn) {
         btn.innerHTML = mostrarTodasInicio
-          ? '<i class="fa-solid fa-angle-up"></i> Ver menos'
-          : `<i class="fa-solid fa-list"></i> Ver todos (${data.length})`;
+          ? '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg> Ver menos'
+          : `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.1"/><circle cx="4" cy="12" r="1.1"/><circle cx="4" cy="18" r="1.1"/></svg> Ver todos (${data.length})`;
       }
       const scrollWrap = document.getElementById('inventoryTableScroll');
       if (scrollWrap) {
         scrollWrap.style.maxHeight = mostrarTodasInicio ? '640px' : '';
         scrollWrap.style.overflowY = mostrarTodasInicio ? 'auto' : '';
       }
-      renderChart(activeChartType, data, 'activeChart');
+      if (!graficosInicioOcultos) {
+        renderChart(activeChartType, data, 'activeChart');
+      }
     }
 
     function toggleVerTodasInicio() {
@@ -1315,13 +1400,13 @@
         else if (p.porPagar) dotColor = 'dot-amber';
         else if (estado.toLowerCase().includes('critico')) dotColor = 'dot-red';
         const acciones = p.vendido ?
-          `<button class="btn-action undo" onclick="deshacerVenta('${p.sku}')"><i class="fa-solid fa-rotate-left"></i></button>` :
+          `<button class="btn-action undo" onclick="deshacerVenta('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a8 8 0 1 1 1 4"/><path d="M4 17v-6h6"/></svg></button>` :
           p.porPagar ?
-          `<button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><i class="fa-solid fa-check"></i></button>` :
+          `<button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></button>` :
           `<div class="flex items-center gap-1 flex-wrap">
             <input type="text" id="buyer_${p.sku}" placeholder="Nombre" class="buyer-input" style="width:50px;">
-            <button class="btn-action sell" onclick="venderProducto('${p.sku}')"><i class="fa-solid fa-tag"></i></button>
-            <button class="btn-action pay" onclick="togglePorPagar('${p.sku}')"><i class="fa-regular fa-clock"></i></button>
+            <button class="btn-action sell" onclick="venderProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V4h7l11 11-7 7L3 11Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></button>
+            <button class="btn-action pay" onclick="togglePorPagar('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></button>
           </div>`;
         return `<tr>
           <td><img src="${p.imagen}" class="img-thumb" onerror="this.src='https://via.placeholder.com/40/F1E6CE/A9822F?text=SP'"></td>
@@ -1367,32 +1452,56 @@
         if (p.vendido) dotColor = 'dot-gray';
         else if (p.porPagar) dotColor = 'dot-amber';
         else if (estado.toLowerCase().includes('critico')) dotColor = 'dot-red';
+        const esActivo = !p.vendido && !p.porPagar;
 
         let acciones = '';
         if (p.vendido) {
-          acciones = `<button class="btn-action undo" onclick="deshacerVenta('${p.sku}')"><i class="fa-solid fa-rotate-left"></i> Deshacer</button>`;
+          acciones = `<button class="btn-action undo" onclick="deshacerVenta('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a8 8 0 1 1 1 4"/><path d="M4 17v-6h6"/></svg> Deshacer</button>`;
         } else if (p.porPagar) {
-          acciones = `<button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><i class="fa-solid fa-check"></i> Pagar</button>
-                     <button class="btn-action undo" onclick="togglePorPagar('${p.sku}')"><i class="fa-solid fa-times"></i></button>`;
+          acciones = `<button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg> Pagar</button>
+                     <button class="btn-action undo" onclick="togglePorPagar('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
         } else {
           acciones = `<div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
             <input type="text" id="buyer_${p.sku}" placeholder="Comprador" class="buyer-input">
-            <button class="btn-action sell" onclick="venderProducto('${p.sku}')"><i class="fa-solid fa-tag"></i></button>
-            <button class="btn-action pay" onclick="togglePorPagar('${p.sku}')"><i class="fa-regular fa-clock"></i></button>
+            <button class="btn-action sell" onclick="venderProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V4h7l11 11-7 7L3 11Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></button>
+            <button class="btn-action pay" onclick="togglePorPagar('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></button>
           </div>`;
         }
+
+        const nombreSeguro = escapeHtml(p.nombre || '');
+        const nombreHtml = esActivo
+          ? `<div class="name-edit-wrap">
+               <input type="text" class="name-edit-input" value="${nombreSeguro}" placeholder="Nombre del artículo"
+                 onclick="event.stopPropagation()"
+                 onchange="actualizarNombreProducto('${p.sku}', this.value)"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}">
+               <svg class="icon name-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.5L15.5 5l3.5 3.5L8.5 19 4 20Z"/><path d="M13.5 6.5l4 4"/></svg>
+             </div>`
+          : `<div class="name">${p.nombre || 'Sin nombre'}</div>`;
 
         return `<div class="product-card">
           <div class="card-img"><img src="${p.imagen}" onerror="this.src='https://via.placeholder.com/220/F1E6CE/A9822F?text=SIN+PAR'"></div>
           <div class="card-body">
             <div class="category">${p.categoria || 'Categoría'}</div>
-            <div class="name">${p.nombre || 'Sin nombre'}</div>
+            ${nombreHtml}
             <div class="price">S/ ${(p.precio||0).toFixed(2)}</div>
             <div class="status"><span class="dot ${dotColor}"></span>${estado} · ${stock} u.</div>
             <div class="actions">${acciones}</div>
           </div>
         </div>`;
       }).join('');
+    }
+
+    function actualizarNombreProducto(sku, valor) {
+      const nombre = (valor || '').trim();
+      if (!nombre) { showToast('⚠️ El nombre no puede estar vacío.'); renderColeccion(); return; }
+      const p = inventario.find(i => i.sku === sku);
+      if (!p) return;
+      if (p.nombre === nombre) return;
+      p.nombre = nombre;
+      guardarEstadoLocal();
+      renderizarTodo();
+      showToast('✏️ Nombre del artículo actualizado');
     }
 
     // =========================================================================
@@ -1402,7 +1511,7 @@
       const ventas = inventario.filter(p => p.vendido && p.fechaVenta);
       const tbody = document.getElementById('ventasTable');
       if (ventas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-stone">No hay ventas registradas</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-stone">No hay ventas registradas</td></tr>`;
         return;
       }
       tbody.innerHTML = ventas.sort((a,b) => new Date(b.fechaVenta) - new Date(a.fechaVenta)).map(p => {
@@ -1413,8 +1522,75 @@
           <td>${p.nombre || p.sku}</td>
           <td class="font-medium">${p.comprador || 'N/A'}</td>
           <td class="font-display font-bold" style="color:var(--gold);">S/ ${monto.toFixed(2)}</td>
+          <td>
+            <div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
+              <button class="btn-action edit" onclick="abrirEditarVenta('${p.sku}')" title="Editar venta"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.5L15.5 5l3.5 3.5L8.5 19 4 20Z"/><path d="M13.5 6.5l4 4"/></svg></button>
+              <button class="btn-action undo" onclick="eliminarVenta('${p.sku}')" title="Eliminar venta"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>
+            </div>
+          </td>
         </tr>`;
       }).join('');
+    }
+
+    // =========================================================================
+    // EDITAR / ELIMINAR VENTA
+    // =========================================================================
+    function abrirEditarVenta(sku) {
+      const p = inventario.find(i => i.sku === sku);
+      if (!p) return;
+      document.getElementById('evSku').value = p.sku;
+      document.getElementById('evNombre').value = p.nombre || p.sku;
+      document.getElementById('evComprador').value = p.comprador || '';
+      document.getElementById('evPrecio').value = (p.precio || 0).toFixed(2);
+
+      const f = p.fechaVenta ? new Date(p.fechaVenta) : new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const local = `${f.getFullYear()}-${pad(f.getMonth()+1)}-${pad(f.getDate())}T${pad(f.getHours())}:${pad(f.getMinutes())}`;
+      document.getElementById('evFecha').value = local;
+
+      document.getElementById('editVentaModal').classList.add('open');
+    }
+
+    function cerrarEditarVenta() {
+      document.getElementById('editVentaModal').classList.remove('open');
+    }
+
+    function guardarEdicionVenta(e) {
+      e.preventDefault();
+      const sku = document.getElementById('evSku').value;
+      const p = inventario.find(i => i.sku === sku);
+      if (!p) return;
+
+      const comprador = document.getElementById('evComprador').value.trim();
+      const precio = parseFloat(document.getElementById('evPrecio').value);
+      const fecha = document.getElementById('evFecha').value;
+      if (!comprador) { showToast('⚠️ Ingresa el nombre del comprador.'); return; }
+      if (isNaN(precio) || precio < 0) { showToast('⚠️ Ingresa un precio válido.'); return; }
+      if (!fecha) { showToast('⚠️ Ingresa la fecha de venta.'); return; }
+
+      p.comprador = comprador;
+      p.precio = precio;
+      p.fechaVenta = new Date(fecha).toISOString();
+
+      guardarEstadoLocal();
+      actualizarKPIs();
+      cerrarEditarVenta();
+      renderizarTodo();
+      showToast('✏️ Venta actualizada');
+    }
+
+    function eliminarVenta(sku, fromModal) {
+      if (!confirm('¿Eliminar esta venta? La pieza volverá a estar disponible en la colección. Esta acción no se puede deshacer.')) return;
+      const p = inventario.find(i => i.sku === sku);
+      if (!p) return;
+      p.vendido = false;
+      p.fechaVenta = null;
+      p.comprador = null;
+      guardarEstadoLocal();
+      actualizarKPIs();
+      if (fromModal) cerrarEditarVenta();
+      renderizarTodo();
+      showToast('🗑️ Venta eliminada');
     }
 
     // =========================================================================
@@ -1433,7 +1609,7 @@
           <td>${p.nombre || p.sku}</td>
           <td class="font-display" style="color:var(--gold);">S/ ${(p.precio||0).toFixed(2)}</td>
           <td class="text-xs text-stone">${p.proveedor || '-'}</td>
-          <td><button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><i class="fa-solid fa-check"></i> Pagar</button></td>
+          <td><button class="btn-action paid" onclick="pagarProducto('${p.sku}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg> Pagar</button></td>
         </tr>
       `).join('');
     }
@@ -1472,7 +1648,7 @@
             <span class="status-dot" style="margin-bottom:0.3rem;"><span class="dot ${dotSeguimiento(estado)}"></span>${estado}</span>
             <select class="filter-select" style="display:block;margin-top:0.3rem;" onchange="actualizarEstadoSeguimiento(${p.id}, this.value)">${opciones}</select>
           </td>
-          <td><button class="btn-action undo" onclick="eliminarSeguimiento(${p.id})" title="Eliminar registro"><i class="fa-solid fa-trash"></i></button></td>
+          <td><button class="btn-action undo" onclick="eliminarSeguimiento(${p.id})" title="Eliminar registro"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></td>
         </tr>
       `;
       }).join('');
@@ -1892,6 +2068,8 @@
     });
 
     cargarDatos();
+    aplicarEstadoGraficosInicio();
   </script>
 </body>
 </html>
+
