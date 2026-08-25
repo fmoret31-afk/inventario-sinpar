@@ -10,7 +10,7 @@
 <body class="bg-slate-50 min-h-screen p-4 font-sans text-gray-800">
 
   <div class="max-w-7xl mx-auto">
-    <!-- Encabezado con buscador y estado de sincronización -->
+    <!-- Encabezado con buscador, selector de vista y estado de sincronización -->
     <header class="bg-white rounded-xl shadow-sm p-4 mb-6 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
@@ -22,15 +22,26 @@
         </p>
       </div>
 
-      <div class="w-full md:w-1/2 flex gap-2">
+      <div class="w-full md:w-2/3 flex flex-col sm:flex-row gap-2">
         <input 
           type="text" 
           id="searchInput" 
           onkeyup="filterItems()" 
-          placeholder="Buscar por SKU, nombre o categoría..." 
+          placeholder="Buscar por SKU, nombre, categoría, estado o proveedor..." 
           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         >
-        <button onclick="loadInventory(true)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 text-sm font-semibold" title="Recargar manual">
+        
+        <!-- Botones de Cambio de Vista -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 shrink-0">
+          <button id="btnViewGrid" onclick="switchView('grid')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white shadow-sm transition-all">
+            📱 Tarjetas
+          </button>
+          <button id="btnViewTable" onclick="switchView('table')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all">
+            📊 Tabla Horizontal
+          </button>
+        </div>
+
+        <button onclick="loadInventory(true)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 text-sm font-semibold shrink-0" title="Recargar manual">
           🔄
         </button>
       </div>
@@ -42,14 +53,42 @@
       <p class="text-slate-600 font-medium">Cargando catálogo de joyas...</p>
     </div>
 
-    <!-- Rejilla de Tarjetas -->
-    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    <!-- Vista 1: Rejilla de Tarjetas -->
+    <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+
+    <!-- Vista 2: Tabla Horizontal completa con Scroll -->
+    <div id="tableView" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto max-h-[75vh]">
+        <table class="w-full text-xs text-left border-collapse">
+          <thead class="bg-slate-100 text-slate-700 font-bold uppercase sticky top-0 border-b border-slate-200 z-10">
+            <tr>
+              <th class="p-3">Acción</th>
+              <th class="p-3">Foto</th>
+              <th class="p-3">SKU / ID</th>
+              <th class="p-3">Nombre del Producto</th>
+              <th class="p-3">Categoría</th>
+              <th class="p-3">Precio Venta</th>
+              <th class="p-3 text-center">Stock Inic.</th>
+              <th class="p-3 text-center">Entradas</th>
+              <th class="p-3 text-center">Salidas</th>
+              <th class="p-3 text-center">Stock Act.</th>
+              <th class="p-3 text-center">Stock Mín.</th>
+              <th class="p-3">Estado</th>
+              <th class="p-3">Proveedor</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100">
+            <!-- Filas dinámicas -->
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <!-- Modal de Edición de Producto -->
+  <!-- Modal Completo de Edición de Producto (Todas las columnas) -->
   <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100">
-      <div class="flex justify-between items-center mb-4">
+    <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b">
         <h2 class="text-lg font-bold text-slate-800" id="modalTitle">Editar Producto</h2>
         <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
       </div>
@@ -57,38 +96,78 @@
       <form id="editForm" onsubmit="saveItem(event)">
         <input type="hidden" id="editSku">
 
-        <div class="mb-3">
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre del Producto</label>
-          <input type="text" id="editNombre" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" required>
+        <!-- Vista previa de imagen e inputs de nombre/cat -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div class="flex flex-col items-center justify-center bg-slate-50 p-3 rounded-xl border">
+            <img id="editImgPreview" src="" class="w-32 h-32 object-cover rounded-lg mb-2 bg-white border" onerror="this.src='https://via.placeholder.com/150?text=Sin+Foto'">
+            <span class="text-[10px] text-slate-400 text-center">Modifica la URL de Drive si deseas cambiar la foto</span>
+          </div>
+
+          <div class="md:col-span-2 space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre del Producto</label>
+              <input type="text" id="editNombre" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoría</label>
+              <input type="text" id="editCategoria" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Enlace Imagen (Google Drive)</label>
+              <input type="url" id="editImagen" class="w-full border rounded-lg p-2 text-xs font-mono focus:ring-2 focus:ring-blue-500" placeholder="https://drive.google.com/file/d/...">
+            </div>
+          </div>
         </div>
 
-        <div class="mb-3">
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoría</label>
-          <input type="text" id="editCategoria" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 mb-3">
+        <!-- Precios, Estados y Proveedor -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
           <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Precio Venta (PEN)</label>
             <input type="text" id="editPrecio" placeholder="S/ 0.00" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Stock Actual</label>
-            <input type="number" id="editStock" min="0" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado</label>
+            <select id="editEstado" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+              <option value="Disponible">Disponible</option>
+              <option value="Vendido">Vendido</option>
+              <option value="Pendiente Precio">Pendiente Precio</option>
+              <option value="No se encontró">No se encontró</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Proveedor</label>
+            <input type="text" id="editProveedor" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
           </div>
         </div>
 
-        <div class="mb-5">
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado</label>
-          <select id="editEstado" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
-            <option value="Disponible">Disponible</option>
-            <option value="Vendido">Vendido</option>
-            <option value="Pendiente Precio">Pendiente Precio</option>
-            <option value="No se encontró">No se encontró</option>
-          </select>
+        <!-- Stocks y Entradas / Salidas -->
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-5">
+          <span class="block text-xs font-bold text-slate-700 uppercase mb-2">Control de Inventario</span>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500">Stock Inic.</label>
+              <input type="number" id="editStockInicial" min="0" class="w-full border rounded-lg p-1.5 text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500">Entradas</label>
+              <input type="number" id="editEntradas" min="0" class="w-full border rounded-lg p-1.5 text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500">Salidas</label>
+              <input type="number" id="editSalidas" min="0" class="w-full border rounded-lg p-1.5 text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-blue-600">Stock Actual</label>
+              <input type="number" id="editStockActual" min="0" class="w-full border rounded-lg p-1.5 text-xs bg-blue-50 font-bold text-blue-700">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500">Stock Mín.</label>
+              <input type="number" id="editStockMinimo" min="0" class="w-full border rounded-lg p-1.5 text-xs">
+            </div>
+          </div>
         </div>
 
-        <div class="flex justify-end gap-2">
+        <div class="flex justify-end gap-2 pt-2 border-t">
           <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50">Cancelar</button>
           <button type="submit" id="saveBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Guardar en Sheets</button>
         </div>
@@ -97,15 +176,37 @@
   </div>
 
   <script>
-    // ===== PEGA AQUÍ LA URL COMPLETA DE TU DESPLIEGUE DE APPS SCRIPT =====
     const API_URL = "https://script.google.com/macros/s/AKfycbzyabkbwniP58-c-MAt8veLA1qY_sfMmTgcfYj5CpxRNVkamUO8nhdbOuL831-8KQW-/exec";
 
     let inventoryData = [];
     let isEditing = false;
+    let currentView = "grid"; // 'grid' o 'table'
+
+    // Cambiar entre vista de Tarjetas y Tabla
+    function switchView(view) {
+      currentView = view;
+      const btnGrid = document.getElementById("btnViewGrid");
+      const btnTable = document.getElementById("btnViewTable");
+      const gridView = document.getElementById("gridView");
+      const tableView = document.getElementById("tableView");
+
+      if (view === "grid") {
+        gridView.classList.remove("hidden");
+        tableView.classList.add("hidden");
+        btnGrid.className = "px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white shadow-sm transition-all";
+        btnTable.className = "px-3 py-1.5 rounded-md text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all";
+      } else {
+        gridView.classList.add("hidden");
+        tableView.classList.remove("hidden");
+        btnTable.className = "px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white shadow-sm transition-all";
+        btnGrid.className = "px-3 py-1.5 rounded-md text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all";
+      }
+      filterItems();
+    }
 
     // Cargar datos desde Google Sheets
     async function loadInventory(showStatus = false) {
-      if (isEditing) return; // Si estás editando en el modal, no interrumpir con la recarga
+      if (isEditing) return;
 
       try {
         if (showStatus) {
@@ -119,16 +220,16 @@
         document.getElementById("loading").classList.add("hidden");
         document.getElementById("syncDot").className = "w-2 h-2 rounded-full bg-green-500 inline-block";
 
-        filterItems(); // Renderizar aplicando filtro activo si existe
+        filterItems();
       } catch (err) {
         console.error("Error cargando inventario:", err);
         document.getElementById("syncDot").className = "w-2 h-2 rounded-full bg-red-500 inline-block";
       }
     }
 
-    // Dibujar las tarjetas en pantalla
+    // Renderizar Tarjetas
     function renderCards(items) {
-      const grid = document.getElementById("grid");
+      const grid = document.getElementById("gridView");
       grid.innerHTML = "";
 
       if (items.length === 0) {
@@ -176,7 +277,63 @@
       });
     }
 
-    // Abrir ventana emergente con los datos del ítem seleccionado
+    // Renderizar Tabla Horizontal
+    function renderTable(items) {
+      const tableBody = document.getElementById("tableBody");
+      tableBody.innerHTML = "";
+
+      if (items.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-slate-400">No se encontraron productos.</td></tr>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const sku = item["SKU / ID"] || "-";
+        const nombre = item["Nombre del Producto"] || "Sin nombre";
+        const categoria = item["Categoría"] || "-";
+        const precio = item["Precio Venta (PEN)"] || "-";
+        const stockInicial = item["Stock Inicial"] ?? "-";
+        const entradas = item["Entradas"] ?? "-";
+        const salidas = item["Salidas"] ?? "-";
+        const stockActual = item["Stock Actual"] ?? "-";
+        const stockMinimo = item["Stock Mínimo"] ?? "-";
+        const estado = item["Estado"] || "Disponible";
+        const proveedor = item["Proveedor"] || "-";
+        const imgUrl = item["Imagen_Directa"] || "https://via.placeholder.com/50";
+
+        const statusBg = estado === "Disponible" ? "bg-emerald-100 text-emerald-800" :
+                         estado === "Vendido" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-700";
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+          <td class="p-3">
+            <button onclick="openModal('${sku}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-semibold rounded transition-colors whitespace-nowrap">
+              ✏️ Editar
+            </button>
+          </td>
+          <td class="p-3">
+            <img src="${imgUrl}" class="w-10 h-10 object-cover rounded border bg-slate-100" onerror="this.src='https://via.placeholder.com/50?text=x'">
+          </td>
+          <td class="p-3 font-mono font-bold text-slate-700 whitespace-nowrap">${sku}</td>
+          <td class="p-3 font-semibold text-slate-800 max-w-[200px] truncate" title="${nombre}">${nombre}</td>
+          <td class="p-3 text-slate-600 whitespace-nowrap">${categoria}</td>
+          <td class="p-3 font-bold text-slate-800 whitespace-nowrap">${precio}</td>
+          <td class="p-3 text-center text-slate-600">${stockInicial}</td>
+          <td class="p-3 text-center text-emerald-600 font-semibold">${entradas}</td>
+          <td class="p-3 text-center text-rose-600 font-semibold">${salidas}</td>
+          <td class="p-3 text-center font-bold bg-blue-50/50 text-blue-700">${stockActual}</td>
+          <td class="p-3 text-center text-slate-500">${stockMinimo}</td>
+          <td class="p-3 whitespace-nowrap">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBg}">${estado}</span>
+          </td>
+          <td class="p-3 text-slate-500 whitespace-nowrap">${proveedor}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // Abrir modal de edición con todas las columnas
     function openModal(sku) {
       const item = inventoryData.find(i => String(i["SKU / ID"]).trim() === String(sku).trim());
       if (!item) return;
@@ -185,11 +342,19 @@
       document.getElementById("editSku").value = item["SKU / ID"] || "";
       document.getElementById("editNombre").value = item["Nombre del Producto"] || "";
       document.getElementById("editCategoria").value = item["Categoría"] || "";
+      document.getElementById("editImagen").value = item["Imagen"] || "";
       document.getElementById("editPrecio").value = item["Precio Venta (PEN)"] || "";
-      document.getElementById("editStock").value = item["Stock Actual"] !== undefined ? item["Stock Actual"] : 1;
+      document.getElementById("editStockInicial").value = item["Stock Inicial"] !== undefined ? item["Stock Inicial"] : "";
+      document.getElementById("editEntradas").value = item["Entradas"] !== undefined ? item["Entradas"] : "";
+      document.getElementById("editSalidas").value = item["Salidas"] !== undefined ? item["Salidas"] : "";
+      document.getElementById("editStockActual").value = item["Stock Actual"] !== undefined ? item["Stock Actual"] : "";
+      document.getElementById("editStockMinimo").value = item["Stock Mínimo"] !== undefined ? item["Stock Mínimo"] : "";
       document.getElementById("editEstado").value = item["Estado"] || "Disponible";
+      document.getElementById("editProveedor").value = item["Proveedor"] || "";
 
-      document.getElementById("modalTitle").innerText = `Editar SKU: ${sku}`;
+      document.getElementById("editImgPreview").src = item["Imagen_Directa"] || "https://via.placeholder.com/150";
+
+      document.getElementById("modalTitle").innerText = `Editar Producto: ${sku}`;
       document.getElementById("editModal").classList.remove("hidden");
     }
 
@@ -198,20 +363,26 @@
       isEditing = false;
     }
 
-    // Enviar datos modificados a Google Sheets
+    // Guardar cambios hacia Google Sheets
     async function saveItem(e) {
       e.preventDefault();
       const saveBtn = document.getElementById("saveBtn");
-      saveBtn.innerText = "Guardando en Sheets...";
+      saveBtn.innerText = "Guardando...";
       saveBtn.disabled = true;
 
       const payload = {
         "SKU / ID": document.getElementById("editSku").value,
+        "Imagen": document.getElementById("editImagen").value,
         "Nombre del Producto": document.getElementById("editNombre").value,
         "Categoría": document.getElementById("editCategoria").value,
         "Precio Venta (PEN)": document.getElementById("editPrecio").value,
-        "Stock Actual": document.getElementById("editStock").value,
-        "Estado": document.getElementById("editEstado").value
+        "Stock Inicial": document.getElementById("editStockInicial").value,
+        "Entradas": document.getElementById("editEntradas").value,
+        "Salidas": document.getElementById("editSalidas").value,
+        "Stock Actual": document.getElementById("editStockActual").value,
+        "Stock Mínimo": document.getElementById("editStockMinimo").value,
+        "Estado": document.getElementById("editEstado").value,
+        "Proveedor": document.getElementById("editProveedor").value
       };
 
       try {
@@ -225,7 +396,6 @@
         saveBtn.innerText = "Guardar en Sheets";
         saveBtn.disabled = false;
         
-        // Cargar inmediatamente los datos actualizados
         await loadInventory(true);
       } catch (err) {
         alert("Ocurrió un error al intentar guardar los cambios.");
@@ -235,22 +405,27 @@
       }
     }
 
-    // Filtrar en tiempo real por buscador
+    // Filtrar en tiempo real por el buscador global
     function filterItems() {
       const term = document.getElementById("searchInput").value.toLowerCase();
       const filtered = inventoryData.filter(i => {
         const nom = (i["Nombre del Producto"] || "").toLowerCase();
         const sku = (i["SKU / ID"] || "").toLowerCase();
         const cat = (i["Categoría"] || "").toLowerCase();
-        return nom.includes(term) || sku.includes(term) || cat.includes(term);
+        const est = (i["Estado"] || "").toLowerCase();
+        const prov = (i["Proveedor"] || "").toLowerCase();
+        return nom.includes(term) || sku.includes(term) || cat.includes(term) || est.includes(term) || prov.includes(term);
       });
-      renderCards(filtered);
+
+      if (currentView === "grid") {
+        renderCards(filtered);
+      } else {
+        renderTable(filtered);
+      }
     }
 
-    // --- INICIALIZACIÓN Y AUTO-SINCRONIZACIÓN ---
+    // Inicialización y auto-sincronización cada 10s
     loadInventory();
-
-    // Consultar cambios de la hoja de cálculo automáticamente cada 10 segundos
     setInterval(() => {
       loadInventory();
     }, 10000);
