@@ -1,81 +1,241 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Brillo · Inventario de joyería</title>
-  <style>
-    :root{--ink:#211b15;--paper:#fbf8f3;--gold:#ad7931;--dark:#51371a;--line:#ecdfcc;--muted:#776c60;--red:#ac453d;--green:#27765b}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px system-ui,sans-serif}.wrap{max-width:1380px;margin:auto;padding:26px}.top{color:#fff;background:linear-gradient(135deg,#2d2117,#69471f);border-radius:15px;padding:19px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{font:27px Georgia,serif}.sub{font-size:12px;color:#f1dcb7;margin-top:3px}.live{font-size:12px;padding:7px 11px;border:1px solid #ffffff40;border-radius:99px}.live:before{content:'●';color:#70dda1;margin-right:7px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.metric,.card{background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 8px 22px #5d40100d}.metric{padding:16px}.metric small{display:block;color:var(--muted);margin-bottom:7px}.metric strong{font:25px Georgia,serif}.metric.alert strong{color:var(--red)}.card{overflow:hidden;margin-bottom:20px}.card h2{font:18px Georgia,serif;color:var(--dark);margin:0;padding:16px 19px;border-bottom:1px solid var(--line)}form{padding:19px;display:grid;grid-template-columns:repeat(5,1fr);gap:13px}label{display:grid;gap:5px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}.wide{grid-column:span 2}input,select{padding:10px;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:14px system-ui}input:focus,select:focus{outline:2px solid #edd7ad;border-color:var(--gold)}.actions{display:flex;align-items:end;justify-content:end;gap:9px}button{border:0;border-radius:8px;padding:10px 13px;font-weight:700;cursor:pointer}.primary{color:#fff;background:var(--gold)}.secondary{color:#5d4b36;background:#f3ebdf}.toolbar{padding:13px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}.toolbar input{width:290px}.tablewrap{overflow:auto;max-height:570px}table{width:100%;border-collapse:collapse;min-width:1100px}th{position:sticky;top:0;background:#3f2b17;color:#fdf4e3;font-size:11px;letter-spacing:.05em;text-transform:uppercase;text-align:left;padding:12px}td{padding:10px 12px;border-bottom:1px solid #f2ebdf;vertical-align:middle}.thumbnail{width:42px;height:42px;object-fit:cover;border-radius:7px;background:#f4ecdf}.code,.badge{display:inline-block;border-radius:99px;padding:4px 8px;font-size:12px;font-weight:700}.code{background:#f8edda;color:var(--dark)}.ok{background:#e1f3e9;color:var(--green)}.low{background:#f8edda;color:var(--dark)}.out{background:#f9e3df;color:var(--red)}.action{padding:6px 8px;background:#f8edda;color:var(--dark);margin-right:4px}.delete{background:#f9e3df;color:var(--red)}#notice{display:none;position:fixed;right:18px;bottom:18px;padding:12px 15px;border-radius:9px;color:#fff;box-shadow:0 8px 25px #0003}@media(max-width:850px){.metrics{grid-template-columns:repeat(2,1fr)}form{grid-template-columns:repeat(2,1fr)}.wide{grid-column:span 1}.actions{grid-column:span 2}.wrap{padding:16px}}@media(max-width:500px){.top{align-items:start;flex-direction:column}.toolbar{align-items:stretch;flex-direction:column}.toolbar input{width:100%}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SINPAR · Alta joyería</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#211a10;
+    --paper:#f9f4e8;
+    --panel:#fffdf8;
+    --emerald:#0e2b22;
+    --emerald-2:#163b2e;
+    --gold:#af7f34;
+    --gold-light:#e7c983;
+    --ruby:#9c3b3b;
+    --sage:#3f6b52;
+    --line:#e7dcc3;
+    --muted:#7c7262;
+  }
+  *{box-sizing:border-box}
+  ::selection{background:var(--gold-light);color:var(--ink)}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Manrope,system-ui,sans-serif;
+    background-image:radial-gradient(circle at 1px 1px, #00000009 1px, transparent 0);
+    background-size:22px 22px;
+  }
+  .wrap{max-width:1400px;margin:auto;padding:28px 26px 60px}
+
+  *:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:3px}
+
+  /* ---------- signature: gem-cut corner ---------- */
+  .cut{ clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px); }
+  .cut-sm{ clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;overflow:hidden;color:#f4ecd6;
+    background:
+      radial-gradient(120% 160% at 100% 0%, #1c4634 0%, transparent 55%),
+      linear-gradient(135deg,#0a1e17,var(--emerald) 45%,var(--emerald-2));
+    padding:34px 34px;display:flex;justify-content:space-between;align-items:center;gap:20px;
+  }
+  .hero:before{
+    content:'';position:absolute;inset:0;
+    background-image:repeating-linear-gradient(115deg, #ffffff08 0 1px, transparent 1px 46px);
+    pointer-events:none;
+  }
+  .brandrow{display:flex;align-items:center;gap:16px;position:relative}
+  .mark{width:42px;height:42px;flex:0 0 auto;filter:drop-shadow(0 2px 6px #00000055)}
+  .brand{font:italic 600 40px/1 'Cormorant Garamond',serif;letter-spacing:.02em}
+  .sub{font-size:12.5px;letter-spacing:.06em;color:#cfe3d6;margin-top:5px;text-transform:uppercase}
+  .live{position:relative;font-size:12px;padding:8px 14px;border:1px solid #ffffff33;color:#eaf3ea;white-space:nowrap;background:#ffffff0d}
+  .live:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#7fe0ab;margin-right:8px;box-shadow:0 0 0 3px #7fe0ab26;animation:pulse 2.2s infinite}
+  @keyframes pulse{50%{opacity:.45}}
+
+  /* ---------- metrics ---------- */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}
+  .metric{background:var(--panel);border:1px solid var(--line);padding:18px 20px}
+  .metric small{display:block;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px;font-weight:700}
+  .metric strong{font:600 30px 'Cormorant Garamond',serif;color:var(--emerald)}
+  .metric.alert strong{color:var(--ruby)}
+
+  /* ---------- cards / sections ---------- */
+  .card{background:var(--panel);border:1px solid var(--line);margin-bottom:20px;box-shadow:0 14px 30px -18px #3a2a0f2e}
+  .card > summary, .card .head{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;
+    padding:17px 22px;border-bottom:1px solid var(--line);cursor:pointer;list-style:none;
+  }
+  .card > summary::-webkit-details-marker{display:none}
+  h2{font:600 20px 'Cormorant Garamond',serif;color:var(--emerald);margin:0}
+  .hint{font-size:12px;color:var(--muted)}
+  .plus{font:600 20px 'Cormorant Garamond',serif;color:var(--gold);transition:transform .2s}
+  details[open] .plus{transform:rotate(45deg)}
+
+  form{padding:20px 22px 22px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  label{display:grid;gap:6px;color:var(--muted);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .wide{grid-column:span 2}
+  input,select{padding:11px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);font:14px Manrope,sans-serif}
+  input:focus,select:focus{outline:none;border-color:var(--gold)}
+  input[readonly]{background:#f4efe1;color:var(--emerald);font-family:'IBM Plex Mono',monospace;font-weight:500}
+  .actions{display:flex;align-items:end;justify-content:end;gap:10px}
+  button{border:0;padding:11px 18px;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.02em;transition:transform .12s,box-shadow .12s}
+  button:active{transform:translateY(1px)}
+  .primary{color:#fff9ec;background:linear-gradient(135deg,var(--gold),#8a651f)}
+  .primary:hover{box-shadow:0 6px 16px -6px #af7f3488}
+  .secondary{color:var(--emerald);background:#eef1ea;border:1px solid var(--line)}
+
+  /* ---------- toolbar / pagination ---------- */
+  .toolbar{padding:15px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+  .toolbar input{width:280px;padding:10px 12px;border:1px solid var(--line);background:#fff;font:14px Manrope}
+  .toolbar input:focus{outline:none;border-color:var(--gold)}
+  .pager{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--muted)}
+  .pager button{background:#fff;border:1px solid var(--line);color:var(--emerald);padding:7px 13px;font-size:12px}
+  .pager button:disabled{opacity:.35;cursor:not-allowed}
+  .pager b{color:var(--ink)}
+
+  /* ---------- catalog grid ---------- */
+  .catalog{padding:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:18px}
+  .empty{padding:50px 22px;text-align:center;color:var(--muted);font-size:14px}
+
+  .gem{
+    background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;
+    animation:rise .35s ease both;
+  }
+  .catalog .gem:nth-child(n){animation-delay:calc(var(--i,0) * 18ms)}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .gem:hover{box-shadow:0 16px 28px -16px #3a2a0f40;border-color:#d9c793}
+
+  .thumb{position:relative;aspect-ratio:1/1;background:linear-gradient(135deg,#f2ebd9,#e9dfc6)}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#b9ab84}
+  .thumb .code{position:absolute;left:8px;top:8px;background:#0e2b22e0;color:#f4ecd6;font:11px 'IBM Plex Mono',monospace;padding:4px 8px;letter-spacing:.03em}
+  .thumb .badge{position:absolute;right:8px;top:8px;font-size:10.5px;font-weight:700;padding:4px 9px;text-transform:uppercase;letter-spacing:.03em}
+  .ok{background:#e3f0e6;color:var(--sage)}
+  .low{background:#faedcf;color:#8a651f}
+  .out{background:#f6dede;color:var(--ruby)}
+
+  .gem .body{padding:13px 14px 14px;display:flex;flex-direction:column;gap:5px;flex:1}
+  .gem .cat{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+  .gem .name{font:600 17px 'Cormorant Garamond',serif;color:var(--ink);line-height:1.2}
+  .gem .row2{display:flex;justify-content:space-between;align-items:baseline;margin-top:2px}
+  .gem .price{font:600 16px 'Cormorant Garamond',serif;color:var(--gold)}
+  .gem .stock{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+  .gem .prov{font-size:11px;color:var(--muted);min-height:14px}
+  .gem .acts{display:flex;gap:6px;margin-top:9px}
+  .gem .acts button{flex:1;padding:8px 6px;font-size:11px;background:#f4efe1;color:var(--emerald)}
+  .gem .acts button.sell{background:#e3f0e6;color:var(--sage)}
+  .gem .acts button.del{background:#f6dede;color:var(--ruby)}
+  .gem .acts button:disabled{opacity:.35;cursor:not-allowed}
+
+  #notice{display:none;position:fixed;right:20px;bottom:20px;padding:13px 17px;color:#fff9ec;box-shadow:0 10px 28px #0004;font-size:13px;font-weight:600}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  @media(max-width:900px){
+    .metrics{grid-template-columns:repeat(2,1fr)}
+    form{grid-template-columns:repeat(2,1fr)}
+    .wide{grid-column:span 2}
+    .actions{grid-column:span 2}
+  }
+  @media(max-width:560px){
+    .hero{flex-direction:column;align-items:flex-start}
+    .toolbar{flex-direction:column;align-items:stretch}
+    .toolbar input{width:100%}
+    .wrap{padding:16px}
+  }
+</style>
 </head>
 <body>
 <main class="wrap">
-  <header class="top">
-    <div>
-      <div class="brand">✦ Brillo</div>
-      <div class="sub">Joyería · Inventario y ventas</div>
+
+  <header class="hero cut">
+    <div class="brandrow">
+      <svg class="mark" viewBox="0 0 48 48" fill="none">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="48" y2="48">
+          <stop offset="0" stop-color="#f2debd"/><stop offset="1" stop-color="#a4762c"/>
+        </linearGradient></defs>
+        <path d="M24 3 L41 16 L24 45 L7 16 Z" fill="url(#g)" stroke="#3a2a0f" stroke-width="1"/>
+        <path d="M24 3 L16 16 L24 45" stroke="#3a2a0f" stroke-width=".7"/>
+        <path d="M24 3 L32 16 L24 45" stroke="#3a2a0f" stroke-width=".7"/>
+        <path d="M7 16 L41 16" stroke="#3a2a0f" stroke-width=".7"/>
+      </svg>
+      <div>
+        <div class="brand">SINPAR</div>
+        <div class="sub">Colección y ventas de alta joyería</div>
+      </div>
     </div>
-    <span class="live">Google Sheets conectado</span>
+    <span class="live cut-sm">Google Sheets conectado</span>
   </header>
 
   <section class="metrics">
-    <div class="metric"><small>Productos registrados</small><strong id="products">0</strong></div>
-    <div class="metric"><small>Unidades disponibles</small><strong id="units">0</strong></div>
-    <div class="metric"><small>Valor disponible</small><strong id="total">S/ 0.00</strong></div>
-    <div class="metric alert"><small>Por reponer / vendidos</small><strong id="alerts">0</strong></div>
+    <div class="metric cut-sm"><small>Piezas registradas</small><strong id="products">0</strong></div>
+    <div class="metric cut-sm"><small>Unidades disponibles</small><strong id="units">0</strong></div>
+    <div class="metric cut-sm"><small>Valor disponible</small><strong id="total">S/ 0.00</strong></div>
+    <div class="metric alert cut-sm"><small>Por reponer / vendidas</small><strong id="alerts">0</strong></div>
   </section>
 
-  <section class="card">
-    <h2 id="formTitle">Registrar joya</h2>
+  <details class="card cut">
+    <summary>
+      <div>
+        <h2 id="formTitle">Registrar joya</h2>
+        <div class="hint">Añade una pieza nueva o edita una existente</div>
+      </div>
+      <span class="plus">＋</span>
+    </summary>
 
     <form id="form">
       <input id="row" type="hidden">
-
       <label>ID<input id="id" required placeholder="JOY-172"></label>
       <label>Imagen URL<input id="imagen" placeholder="Enlace de Drive"></label>
       <label>Categoría<input id="categoria" required placeholder="Collares"></label>
-      <label class="wide">Nombre del producto<input id="nombre" required placeholder="Collar dorado"></label>
+      <label class="wide">Nombre de la pieza<input id="nombre" required placeholder="Collar dorado"></label>
       <label>Precio venta (S/)<input id="precio" type="number" min="0" step=".01" required oninput="calc()"></label>
       <label>Stock inicial<input id="inicial" type="number" min="0" required oninput="calc()"></label>
       <label>Stock actual<input id="actual" type="number" min="0" required oninput="calc()"></label>
       <label>Valor actual<input id="valor" readonly></label>
       <label>Estado<input id="estado" placeholder="Disponible"></label>
       <label>Proveedor<input id="proveedor" placeholder="Opcional"></label>
-
       <div class="actions">
         <button type="button" class="secondary" onclick="clearForm()">Limpiar</button>
         <button id="save" class="primary">Guardar joya</button>
       </div>
     </form>
-  </section>
+  </details>
 
-  <section class="card">
+  <section class="card cut">
     <div class="toolbar">
-      <h2>Inventario actual</h2>
+      <h2>Catálogo · 20 joyas por vista</h2>
       <input id="search" placeholder="Buscar producto o categoría">
     </div>
-
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Foto</th><th>ID</th><th>Producto</th><th>Categoría</th><th>Precio</th>
-            <th>Stock</th><th>Valor</th><th>Estado</th><th>Proveedor</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="table">
-          <tr><td colspan="10">Cargando inventario…</td></tr>
-        </tbody>
-      </table>
+    <div class="catalog" id="catalog">
+      <div class="empty">Cargando inventario…</div>
+    </div>
+    <div class="toolbar" style="border-bottom:0;border-top:1px solid var(--line)">
+      <div class="pager">
+        <span id="pageInfo">—</span>
+      </div>
+      <div class="pager">
+        <button id="prevPage" onclick="changePage(-1)">‹ Anterior</button>
+        <span>Página <b id="pageNum">1</b> de <b id="pageTotal">1</b></span>
+        <button id="nextPage" onclick="changePage(1)">Siguiente ›</button>
+      </div>
     </div>
   </section>
+
 </main>
 
 <div id="notice"></div>
 
 <script>
   const API_URL = 'https://script.google.com/macros/s/AKfycbzytvvs8Pi3garWnDCP4EjxbOzLM5UYP1lvHZIz3IcyvrL9V5MOytXPOCf2NTN2c8xp/exec';
+  const PAGE_SIZE = 20;
 
   let rows = [];
+  let page = 1;
   const $ = id => document.getElementById(id);
 
   const num = value => {
@@ -89,7 +249,7 @@
   function notice(text, good = true) {
     const box = $('notice');
     box.textContent = text;
-    box.style.background = good ? '#27765b' : '#ac453d';
+    box.style.background = good ? '#3f6b52' : '#9c3b3b';
     box.style.display = 'block';
     setTimeout(() => box.style.display = 'none', 3500);
   }
@@ -107,12 +267,11 @@
   function image(url) {
     const match = String(url || '').match(/\/d\/([^/]+)/);
     const source = match
-      ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w100`
+      ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w300`
       : url;
-
     return source
-      ? `<img class="thumbnail" src="${safe(source)}" onerror="this.style.visibility='hidden'">`
-      : '';
+      ? `<img src="${safe(source)}" alt="" onerror="this.parentElement.innerHTML='<div class=noimg>Sin imagen</div>'">`
+      : `<div class="noimg">Sin imagen</div>`;
   }
 
   async function load() {
@@ -123,9 +282,14 @@
       draw();
     } catch (error) {
       console.error(error);
-      $('table').innerHTML = '<tr><td colspan="10">No se pudo conectar a Google Sheets.</td></tr>';
+      $('catalog').innerHTML = '<div class="empty">No se pudo conectar a Google Sheets.</div>';
       notice('Revisa el despliegue de Apps Script.', false);
     }
+  }
+
+  function changePage(delta) {
+    page += delta;
+    draw();
   }
 
   function draw() {
@@ -135,35 +299,53 @@
       [r[0], r[2], r[3], r[8]].join(' ').toLowerCase().includes(filter)
     );
 
-    const body = $('table');
-    body.innerHTML = visible.length
-      ? ''
-      : '<tr><td colspan="10">No hay productos que mostrar.</td></tr>';
+    const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+    if (page > totalPages) page = totalPages;
+    if (page < 1) page = 1;
 
-    visible.forEach(r => {
+    const start = (page - 1) * PAGE_SIZE;
+    const pageItems = visible.slice(start, start + PAGE_SIZE);
+
+    const catalog = $('catalog');
+    catalog.innerHTML = pageItems.length ? '' : '<div class="empty">No hay joyas que mostrar.</div>';
+
+    pageItems.forEach((r, i) => {
       const index = rows.indexOf(r) + 2;
       const stock = num(r[6]);
       const cls = stock <= 0 ? 'out' : stock <= 2 ? 'low' : 'ok';
 
-      body.insertAdjacentHTML('beforeend', `
-        <tr>
-          <td>${image(r[1])}</td>
-          <td><span class="code">${safe(r[0])}</span></td>
-          <td><b>${safe(r[3])}</b></td>
-          <td>${safe(r[2])}</td>
-          <td>${money(r[4])}</td>
-          <td>${stock}</td>
-          <td>${money(r[7])}</td>
-          <td><span class="badge ${cls}">${safe(r[8] || stockState(stock))}</span></td>
-          <td>${safe(r[9])}</td>
-          <td>
-            <button class="action" onclick="edit(${index})">Editar</button>
-            <button class="action" onclick="sell(${index})" ${stock <= 0 ? 'disabled' : ''}>Vender</button>
-            <button class="action delete" onclick="removeRow(${index})">Eliminar</button>
-          </td>
-        </tr>
+      catalog.insertAdjacentHTML('beforeend', `
+        <article class="gem cut-sm" style="--i:${i}">
+          <div class="thumb">
+            ${image(r[1])}
+            <span class="code">${safe(r[0])}</span>
+            <span class="badge ${cls}">${safe(r[8] || stockState(stock))}</span>
+          </div>
+          <div class="body">
+            <div class="cat">${safe(r[2])}</div>
+            <div class="name">${safe(r[3])}</div>
+            <div class="row2">
+              <span class="price">${money(r[4])}</span>
+              <span class="stock">${stock} u · ${money(r[7])}</span>
+            </div>
+            <div class="prov">${r[9] ? 'Proveedor: ' + safe(r[9]) : ''}</div>
+            <div class="acts">
+              <button onclick="edit(${index})">Editar</button>
+              <button class="sell" onclick="sell(${index})" ${stock <= 0 ? 'disabled' : ''}>Vender</button>
+              <button class="del" onclick="removeRow(${index})">Eliminar</button>
+            </div>
+          </div>
+        </article>
       `);
     });
+
+    $('pageInfo').textContent = visible.length
+      ? `Mostrando ${start + 1}–${Math.min(start + PAGE_SIZE, visible.length)} de ${visible.length} joyas`
+      : 'Sin resultados';
+    $('pageNum').textContent = page;
+    $('pageTotal').textContent = totalPages;
+    $('prevPage').disabled = page <= 1;
+    $('nextPage').disabled = page >= totalPages;
 
     $('products').textContent = rows.length;
     $('units').textContent = rows.reduce((sum, r) => sum + num(r[6]), 0);
@@ -188,6 +370,7 @@
     calc();
     $('formTitle').textContent = `Editando ${r[0]}`;
     $('save').textContent = 'Actualizar joya';
+    document.querySelector('details.card').open = true;
     scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -208,7 +391,6 @@
 
   $('form').addEventListener('submit', async event => {
     event.preventDefault();
-
     const button = $('save');
     button.disabled = true;
 
@@ -238,7 +420,6 @@
 
   async function sell(index) {
     if (!confirm('¿Registrar la venta de una unidad?')) return;
-
     try {
       await post({ action: 'sell', rowIndex: index });
       notice('Venta registrada.');
@@ -250,7 +431,6 @@
 
   async function removeRow(index) {
     if (!confirm('¿Eliminar esta joya?')) return;
-
     try {
       await post({ action: 'delete', rowIndex: index });
       notice('Joya eliminada.');
@@ -260,7 +440,7 @@
     }
   }
 
-  $('search').addEventListener('input', draw);
+  $('search').addEventListener('input', () => { page = 1; draw(); });
   load();
 </script>
 </body>
