@@ -87,6 +87,7 @@
   .primary{color:#fff9ec;background:linear-gradient(135deg,var(--gold),#8a651f)}
   .primary:hover{box-shadow:0 6px 16px -6px #af7f3488}
   .secondary{color:var(--emerald);background:#eef1ea;border:1px solid var(--line)}
+  .secondary:hover{box-shadow:0 6px 16px -6px #16352844}
 
   /* ---------- toolbar / pagination ---------- */
   .toolbar{padding:15px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
@@ -96,6 +97,17 @@
   .pager button{background:#fff;border:1px solid var(--line);color:var(--emerald);padding:7px 13px;font-size:12px}
   .pager button:disabled{opacity:.35;cursor:not-allowed}
   .pager b{color:var(--ink)}
+
+  .toolbar-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  #categoryFilter{width:190px;padding:10px 12px;border:1px solid var(--line);background:#fff;font:14px Manrope;color:var(--ink)}
+  .viewToggle{display:flex;border:1px solid var(--line);overflow:hidden;flex:0 0 auto}
+  .viewToggle button{background:#fff;border:0;padding:9px 13px;font-size:13px;color:var(--muted);letter-spacing:.02em;font-weight:700}
+  .viewToggle button + button{border-left:1px solid var(--line)}
+  .viewToggle button.active{background:var(--emerald);color:#f4ecd6}
+  .exportRow{gap:10px}
+  .exportRow .hint{white-space:nowrap}
+  .exportRow .btns{display:flex;gap:8px;flex-wrap:wrap}
+  .exportRow button{padding:9px 15px;font-size:12px}
 
   /* ---------- catalog grid ---------- */
   .catalog{padding:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:18px}
@@ -114,6 +126,7 @@
   .thumb .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#b9ab84}
   .thumb .code{position:absolute;left:8px;top:8px;background:#0e2b22e0;color:#f4ecd6;font:11px 'IBM Plex Mono',monospace;padding:4px 8px;letter-spacing:.03em}
   .thumb .badge{position:absolute;right:8px;top:8px;font-size:10.5px;font-weight:700;padding:4px 9px;text-transform:uppercase;letter-spacing:.03em}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:4px 9px;text-transform:uppercase;letter-spacing:.03em;justify-self:start}
   .ok{background:#e3f0e6;color:var(--sage)}
   .low{background:#faedcf;color:#8a651f}
   .out{background:#f6dede;color:var(--ruby)}
@@ -131,6 +144,32 @@
   .gem .acts button.del{background:#f6dede;color:var(--ruby)}
   .gem .acts button:disabled{opacity:.35;cursor:not-allowed}
 
+  /* ---------- catalog: filas horizontales ---------- */
+  .catalog.rows-mode{display:block;padding:6px 0 10px;overflow-x:auto}
+  .rows-head{
+    display:grid;grid-template-columns:64px 108px 1.5fr 130px 90px 68px 68px 100px 120px 150px 200px;
+    gap:10px;align-items:center;padding:0 22px 11px;min-width:1180px;
+    font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;
+    border-bottom:1px solid var(--line);margin:0 0 4px;
+  }
+  .gem.row-item{
+    display:grid;grid-template-columns:64px 108px 1.5fr 130px 90px 68px 68px 100px 120px 150px 200px;
+    gap:10px;align-items:center;padding:9px 22px;min-width:1180px;border:0;border-bottom:1px solid var(--line);
+  }
+  .gem.row-item:last-child{border-bottom:0}
+  .gem.row-item:hover{background:#faf5e6}
+  .gem.row-item .thumb-sm{width:52px;height:52px;position:relative;background:linear-gradient(135deg,#f2ebd9,#e9dfc6);overflow:hidden;flex:0 0 auto}
+  .gem.row-item .thumb-sm img{width:100%;height:100%;object-fit:cover;display:block}
+  .gem.row-item .thumb-sm .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;color:#b9ab84;text-align:center;line-height:1.1}
+  .gem.row-item .code{font:11px 'IBM Plex Mono',monospace;color:var(--emerald);font-weight:600}
+  .gem.row-item .name{font:600 15px 'Cormorant Garamond',serif;color:var(--ink);line-height:1.2}
+  .gem.row-item .cat{font-size:11.5px;color:var(--muted);font-weight:600}
+  .gem.row-item .price{font:600 15px 'Cormorant Garamond',serif;color:var(--gold)}
+  .gem.row-item .stock{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+  .gem.row-item .prov{font-size:11.5px;color:var(--muted);min-height:0}
+  .gem.row-item .acts{display:flex;gap:6px;margin-top:0}
+  .gem.row-item .acts button{padding:7px 8px;font-size:10.5px}
+
   #notice{display:none;position:fixed;right:20px;bottom:20px;padding:13px 17px;color:#fff9ec;box-shadow:0 10px 28px #0004;font-size:13px;font-weight:600}
 
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -144,7 +183,9 @@
   @media(max-width:560px){
     .hero{flex-direction:column;align-items:flex-start}
     .toolbar{flex-direction:column;align-items:stretch}
-    .toolbar input{width:100%}
+    .toolbar input,#categoryFilter{width:100%}
+    .exportRow .btns{width:100%}
+    .exportRow .btns button{flex:1}
     .wrap{padding:16px}
   }
 </style>
@@ -209,7 +250,26 @@
   <section class="card cut">
     <div class="toolbar">
       <h2>Catálogo · 20 joyas por vista</h2>
-      <input id="search" placeholder="Buscar producto o categoría">
+      <div class="toolbar-controls">
+        <select id="categoryFilter" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+        </select>
+        <input id="search" placeholder="Buscar producto o categoría">
+        <div class="viewToggle" role="group" aria-label="Modo de vista">
+          <button type="button" id="gridViewBtn" class="active" onclick="setView('grid')" title="Vista cuadrícula">▦ Cuadrícula</button>
+          <button type="button" id="rowsViewBtn" onclick="setView('rows')" title="Vista filas">☰ Filas</button>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar exportRow">
+      <span class="hint">Exportar catálogo filtrado</span>
+      <div class="btns">
+        <button type="button" class="secondary" onclick="downloadExcel()">⬇ Descargar Excel</button>
+        <button type="button" class="secondary" onclick="downloadPDF()">⬇ Descargar PDF</button>
+      </div>
+    </div>
+    <div class="rows-head" id="rowsHead" style="display:none">
+      <span>Imagen</span><span>ID</span><span>Nombre</span><span>Categoría</span><span>Precio</span><span>Inicial</span><span>Actual</span><span>Valor</span><span>Estado</span><span>Proveedor</span><span>Acciones</span>
     </div>
     <div class="catalog" id="catalog">
       <div class="empty">Cargando inventario…</div>
@@ -230,12 +290,17 @@
 
 <div id="notice"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
 <script>
   const API_URL = 'https://script.google.com/macros/s/AKfycbzytvvs8Pi3garWnDCP4EjxbOzLM5UYP1lvHZIz3IcyvrL9V5MOytXPOCf2NTN2c8xp/exec';
   const PAGE_SIZE = 20;
 
   let rows = [];
   let page = 1;
+  let view = 'grid'; // 'grid' | 'rows'
   const $ = id => document.getElementById(id);
 
   const num = value => {
@@ -279,6 +344,7 @@
       const response = await fetch(API_URL);
       const data = await response.json();
       rows = Array.isArray(data) ? data.slice(1) : [];
+      populateCategories();
       draw();
     } catch (error) {
       console.error(error);
@@ -287,17 +353,43 @@
     }
   }
 
+  function populateCategories() {
+    const select = $('categoryFilter');
+    const current = select.value;
+    const categories = [...new Set(rows.map(r => (r[2] || '').trim()).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'es'));
+
+    select.innerHTML = '<option value="">Todas las categorías</option>' +
+      categories.map(c => `<option value="${safe(c)}">${safe(c)}</option>`).join('');
+
+    select.value = categories.includes(current) ? current : '';
+  }
+
+  function setView(next) {
+    view = next;
+    $('gridViewBtn').classList.toggle('active', view === 'grid');
+    $('rowsViewBtn').classList.toggle('active', view === 'rows');
+    $('catalog').classList.toggle('rows-mode', view === 'rows');
+    $('rowsHead').style.display = view === 'rows' ? 'grid' : 'none';
+    draw();
+  }
+
   function changePage(delta) {
     page += delta;
     draw();
   }
 
-  function draw() {
+  function filteredRows() {
     const filter = $('search').value.trim().toLowerCase();
-
-    const visible = rows.filter(r =>
+    const category = $('categoryFilter').value;
+    return rows.filter(r =>
+      (!category || (r[2] || '') === category) &&
       [r[0], r[2], r[3], r[8]].join(' ').toLowerCase().includes(filter)
     );
+  }
+
+  function draw() {
+    const visible = filteredRows();
 
     const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
     if (page > totalPages) page = totalPages;
@@ -311,32 +403,7 @@
 
     pageItems.forEach((r, i) => {
       const index = rows.indexOf(r) + 2;
-      const stock = num(r[6]);
-      const cls = stock <= 0 ? 'out' : stock <= 2 ? 'low' : 'ok';
-
-      catalog.insertAdjacentHTML('beforeend', `
-        <article class="gem cut-sm" style="--i:${i}">
-          <div class="thumb">
-            ${image(r[1])}
-            <span class="code">${safe(r[0])}</span>
-            <span class="badge ${cls}">${safe(r[8] || stockState(stock))}</span>
-          </div>
-          <div class="body">
-            <div class="cat">${safe(r[2])}</div>
-            <div class="name">${safe(r[3])}</div>
-            <div class="row2">
-              <span class="price">${money(r[4])}</span>
-              <span class="stock">${stock} u · ${money(r[7])}</span>
-            </div>
-            <div class="prov">${r[9] ? 'Proveedor: ' + safe(r[9]) : ''}</div>
-            <div class="acts">
-              <button onclick="edit(${index})">Editar</button>
-              <button class="sell" onclick="sell(${index})" ${stock <= 0 ? 'disabled' : ''}>Vender</button>
-              <button class="del" onclick="removeRow(${index})">Eliminar</button>
-            </div>
-          </div>
-        </article>
-      `);
+      catalog.insertAdjacentHTML('beforeend', view === 'rows' ? gemRowHTML(r, index, i) : gemGridHTML(r, index, i));
     });
 
     $('pageInfo').textContent = visible.length
@@ -351,6 +418,58 @@
     $('units').textContent = rows.reduce((sum, r) => sum + num(r[6]), 0);
     $('total').textContent = money(rows.reduce((sum, r) => sum + num(r[7]), 0));
     $('alerts').textContent = rows.filter(r => num(r[6]) <= 2).length;
+  }
+
+  function gemGridHTML(r, index, i) {
+    const stock = num(r[6]);
+    const cls = stock <= 0 ? 'out' : stock <= 2 ? 'low' : 'ok';
+    return `
+      <article class="gem cut-sm" style="--i:${i}">
+        <div class="thumb">
+          ${image(r[1])}
+          <span class="code">${safe(r[0])}</span>
+          <span class="badge ${cls}">${safe(r[8] || stockState(stock))}</span>
+        </div>
+        <div class="body">
+          <div class="cat">${safe(r[2])}</div>
+          <div class="name">${safe(r[3])}</div>
+          <div class="row2">
+            <span class="price">${money(r[4])}</span>
+            <span class="stock">${stock} u · ${money(r[7])}</span>
+          </div>
+          <div class="prov">${r[9] ? 'Proveedor: ' + safe(r[9]) : ''}</div>
+          <div class="acts">
+            <button onclick="edit(${index})">Editar</button>
+            <button class="sell" onclick="sell(${index})" ${stock <= 0 ? 'disabled' : ''}>Vender</button>
+            <button class="del" onclick="removeRow(${index})">Eliminar</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function gemRowHTML(r, index, i) {
+    const stock = num(r[6]);
+    const cls = stock <= 0 ? 'out' : stock <= 2 ? 'low' : 'ok';
+    return `
+      <article class="gem row-item" style="--i:${i}">
+        <div class="thumb-sm">${image(r[1])}</div>
+        <span class="code">${safe(r[0])}</span>
+        <span class="name">${safe(r[3])}</span>
+        <span class="cat">${safe(r[2])}</span>
+        <span class="price">${money(r[4])}</span>
+        <span class="stock">${num(r[5])} u</span>
+        <span class="stock">${stock} u</span>
+        <span class="price">${money(r[7])}</span>
+        <span class="tag ${cls}">${safe(r[8] || stockState(stock))}</span>
+        <span class="prov">${r[9] ? safe(r[9]) : '—'}</span>
+        <div class="acts">
+          <button onclick="edit(${index})">Editar</button>
+          <button class="sell" onclick="sell(${index})" ${stock <= 0 ? 'disabled' : ''}>Vender</button>
+          <button class="del" onclick="removeRow(${index})">Eliminar</button>
+        </div>
+      </article>
+    `;
   }
 
   function edit(index) {
@@ -440,7 +559,65 @@
     }
   }
 
+  function downloadExcel() {
+    const data = filteredRows();
+    if (!data.length) { notice('No hay datos para exportar.', false); return; }
+
+    const sheetRows = data.map(r => ({
+      'ID': r[0] || '',
+      'Categoría': r[2] || '',
+      'Nombre': r[3] || '',
+      'Precio venta (S/)': num(r[4]),
+      'Stock inicial': num(r[5]),
+      'Stock actual': num(r[6]),
+      'Valor actual (S/)': num(r[7]),
+      'Estado': r[8] || stockState(num(r[6])),
+      'Proveedor': r[9] || ''
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(sheetRows);
+    ws['!cols'] = [{ wch: 12 }, { wch: 16 }, { wch: 30 }, { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 22 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+    XLSX.writeFile(wb, `SINPAR_inventario_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    notice('Excel descargado.');
+  }
+
+  function downloadPDF() {
+    const data = filteredRows();
+    if (!data.length) { notice('No hay datos para exportar.', false); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape' });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(14, 43, 34);
+    doc.text('SINPAR · Inventario de joyería', 14, 16);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(124, 114, 98);
+    doc.text(`Generado el ${new Date().toLocaleDateString('es-PE')} · ${data.length} piezas`, 14, 22);
+
+    doc.autoTable({
+      startY: 28,
+      head: [['ID', 'Categoría', 'Nombre', 'Precio', 'Inicial', 'Actual', 'Valor', 'Estado', 'Proveedor']],
+      body: data.map(r => [
+        r[0] || '', r[2] || '', r[3] || '', money(r[4]), num(r[5]), num(r[6]), money(r[7]),
+        r[8] || stockState(num(r[6])), r[9] || ''
+      ]),
+      styles: { font: 'helvetica', fontSize: 9, textColor: [33, 26, 16] },
+      headStyles: { fillColor: [14, 43, 34], textColor: [244, 236, 214] },
+      alternateRowStyles: { fillColor: [249, 244, 232] }
+    });
+
+    doc.save(`SINPAR_inventario_${new Date().toISOString().slice(0, 10)}.pdf`);
+    notice('PDF descargado.');
+  }
+
   $('search').addEventListener('input', () => { page = 1; draw(); });
+  $('categoryFilter').addEventListener('change', () => { page = 1; draw(); });
   load();
 </script>
 </body>
