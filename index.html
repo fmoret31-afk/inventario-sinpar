@@ -1,265 +1,267 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Brillo · Inventario de joyería</title>
   <style>
-    :root{--ink:#241c14;--paper:#fbf8f3;--gold:#ac7932;--dark:#49331a;--line:#eadfce;--muted:#776d61;--red:#a9433c;--green:#26745a}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px system-ui,sans-serif}.wrap{max-width:1280px;margin:auto;padding:26px}.top{background:linear-gradient(135deg,#2d2117,#69471f);padding:19px 24px;border-radius:15px;color:white;display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{font:26px Georgia,serif}.sub{margin-top:2px;font-size:12px;color:#f2ddb8}.live{font-size:12px;border:1px solid #ffffff45;border-radius:20px;padding:7px 11px}.live:before{content:'●';color:#72dda4;margin-right:7px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.metric,.card{background:white;border:1px solid var(--line);border-radius:13px;box-shadow:0 7px 20px #5d40100d}.metric{padding:16px}.metric small{display:block;color:var(--muted);margin-bottom:7px}.metric strong{font:25px Georgia,serif}.metric.alert strong{color:var(--red)}.card{overflow:hidden;margin-bottom:20px}.card h2{font:18px Georgia,serif;margin:0;padding:16px 19px;border-bottom:1px solid var(--line);color:var(--dark)}form{padding:19px;display:grid;grid-template-columns:repeat(6,1fr);gap:13px}label{display:grid;gap:5px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}input,select{padding:10px;border:1px solid var(--line);border-radius:8px;font:14px system-ui;color:var(--ink);background:white}input:focus,select:focus{outline:2px solid #ead4ac;border-color:var(--gold)}.span2{grid-column:span 2}.actions{display:flex;justify-content:end;gap:9px;align-items:end}button{cursor:pointer;border:0;border-radius:8px;padding:10px 13px;font-weight:700}.primary{background:var(--gold);color:#fff}.secondary{background:#f1ebe1;color:#5b4b38}.toolbar{padding:13px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}.toolbar input{width:280px}.tablewrap{overflow:auto;max-height:540px}table{border-collapse:collapse;width:100%;min-width:940px}th{position:sticky;top:0;background:#3f2b17;color:#fdf4e3;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:12px}td{padding:12px;border-bottom:1px solid #f1eadd;white-space:nowrap}.code,.badge{display:inline-block;border-radius:99px;padding:4px 8px;font-size:12px;font-weight:700}.code{background:#f8eedc;color:var(--dark)}.ok{background:#e1f3e9;color:var(--green)}.low{background:#f8eedc;color:var(--dark)}.out{background:#f9e2df;color:var(--red)}.action{padding:6px 8px;background:#f8eedc;color:var(--dark);margin-right:4px}.delete{background:#f9e2df;color:var(--red)}#notice{display:none;position:fixed;right:18px;bottom:18px;padding:12px 15px;border-radius:9px;background:#2b745b;color:white;box-shadow:0 8px 25px #0003}@media(max-width:850px){.metrics{grid-template-columns:repeat(2,1fr)}form{grid-template-columns:repeat(2,1fr)}.span2{grid-column:span 1}.actions{grid-column:span 2}.wrap{padding:16px}}@media(max-width:500px){.top{align-items:start;flex-direction:column}.toolbar{align-items:stretch;flex-direction:column}.toolbar input{width:100%}}
+    :root{--ink:#211b15;--paper:#fbf8f3;--gold:#ad7931;--dark:#51371a;--line:#ecdfcc;--muted:#776c60;--red:#ac453d;--green:#27765b}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px system-ui,sans-serif}.wrap{max-width:1380px;margin:auto;padding:26px}.top{color:#fff;background:linear-gradient(135deg,#2d2117,#69471f);border-radius:15px;padding:19px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{font:27px Georgia,serif}.sub{font-size:12px;color:#f1dcb7;margin-top:3px}.live{font-size:12px;padding:7px 11px;border:1px solid #ffffff40;border-radius:99px}.live:before{content:'●';color:#70dda1;margin-right:7px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.metric,.card{background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 8px 22px #5d40100d}.metric{padding:16px}.metric small{display:block;color:var(--muted);margin-bottom:7px}.metric strong{font:25px Georgia,serif}.metric.alert strong{color:var(--red)}.card{overflow:hidden;margin-bottom:20px}.card h2{font:18px Georgia,serif;color:var(--dark);margin:0;padding:16px 19px;border-bottom:1px solid var(--line)}form{padding:19px;display:grid;grid-template-columns:repeat(5,1fr);gap:13px}label{display:grid;gap:5px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}.wide{grid-column:span 2}input,select{padding:10px;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:14px system-ui}input:focus,select:focus{outline:2px solid #edd7ad;border-color:var(--gold)}.actions{display:flex;align-items:end;justify-content:end;gap:9px}button{border:0;border-radius:8px;padding:10px 13px;font-weight:700;cursor:pointer}.primary{color:#fff;background:var(--gold)}.secondary{color:#5d4b36;background:#f3ebdf}.toolbar{padding:13px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}.toolbar input{width:290px}.tablewrap{overflow:auto;max-height:570px}table{width:100%;border-collapse:collapse;min-width:1100px}th{position:sticky;top:0;background:#3f2b17;color:#fdf4e3;font-size:11px;letter-spacing:.05em;text-transform:uppercase;text-align:left;padding:12px}td{padding:10px 12px;border-bottom:1px solid #f2ebdf;vertical-align:middle}.thumbnail{width:42px;height:42px;object-fit:cover;border-radius:7px;background:#f4ecdf}.code,.badge{display:inline-block;border-radius:99px;padding:4px 8px;font-size:12px;font-weight:700}.code{background:#f8edda;color:var(--dark)}.ok{background:#e1f3e9;color:var(--green)}.low{background:#f8edda;color:var(--dark)}.out{background:#f9e3df;color:var(--red)}.action{padding:6px 8px;background:#f8edda;color:var(--dark);margin-right:4px}.delete{background:#f9e3df;color:var(--red)}#notice{display:none;position:fixed;right:18px;bottom:18px;padding:12px 15px;border-radius:9px;color:#fff;box-shadow:0 8px 25px #0003}@media(max-width:850px){.metrics{grid-template-columns:repeat(2,1fr)}form{grid-template-columns:repeat(2,1fr)}.wide{grid-column:span 1}.actions{grid-column:span 2}.wrap{padding:16px}}@media(max-width:500px){.top{align-items:start;flex-direction:column}.toolbar{align-items:stretch;flex-direction:column}.toolbar input{width:100%}}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <header class="top">
-      <div>
-        <div class="brand">✦ Brillo</div>
-        <div class="sub">Joyería · Control de inventario</div>
+<main class="wrap">
+  <header class="top">
+    <div>
+      <div class="brand">✦ Brillo</div>
+      <div class="sub">Joyería · Inventario y ventas</div>
+    </div>
+    <span class="live">Google Sheets conectado</span>
+  </header>
+
+  <section class="metrics">
+    <div class="metric"><small>Productos registrados</small><strong id="products">0</strong></div>
+    <div class="metric"><small>Unidades disponibles</small><strong id="units">0</strong></div>
+    <div class="metric"><small>Valor disponible</small><strong id="total">S/ 0.00</strong></div>
+    <div class="metric alert"><small>Por reponer / vendidos</small><strong id="alerts">0</strong></div>
+  </section>
+
+  <section class="card">
+    <h2 id="formTitle">Registrar joya</h2>
+
+    <form id="form">
+      <input id="row" type="hidden">
+
+      <label>ID<input id="id" required placeholder="JOY-172"></label>
+      <label>Imagen URL<input id="imagen" placeholder="Enlace de Drive"></label>
+      <label>Categoría<input id="categoria" required placeholder="Collares"></label>
+      <label class="wide">Nombre del producto<input id="nombre" required placeholder="Collar dorado"></label>
+      <label>Precio venta (S/)<input id="precio" type="number" min="0" step=".01" required oninput="calc()"></label>
+      <label>Stock inicial<input id="inicial" type="number" min="0" required oninput="calc()"></label>
+      <label>Stock actual<input id="actual" type="number" min="0" required oninput="calc()"></label>
+      <label>Valor actual<input id="valor" readonly></label>
+      <label>Estado<input id="estado" placeholder="Disponible"></label>
+      <label>Proveedor<input id="proveedor" placeholder="Opcional"></label>
+
+      <div class="actions">
+        <button type="button" class="secondary" onclick="clearForm()">Limpiar</button>
+        <button id="save" class="primary">Guardar joya</button>
       </div>
-      <span class="live">Google Sheets conectado</span>
-    </header>
+    </form>
+  </section>
 
-    <section class="metrics">
-      <div class="metric"><small>Piezas registradas</small><strong id="pieces">0</strong></div>
-      <div class="metric"><small>Unidades en stock</small><strong id="stock">0</strong></div>
-      <div class="metric"><small>Valor del inventario</small><strong id="value">S/ 0.00</strong></div>
-      <div class="metric alert"><small>Por reponer</small><strong id="low">0</strong></div>
-    </section>
+  <section class="card">
+    <div class="toolbar">
+      <h2>Inventario actual</h2>
+      <input id="search" placeholder="Buscar producto o categoría">
+    </div>
 
-    <section class="card">
-      <h2 id="formTitle">Registrar pieza de joyería</h2>
-
-      <form id="form">
-        <input id="row" type="hidden">
-
-        <label>Código<input id="codigo" required placeholder="ANI-001"></label>
-        <label class="span2">Nombre / descripción<input id="descripcion" required placeholder="Anillo solitario"></label>
-        <label>Categoría<select id="categoria"><option>Anillo</option><option>Cadena</option><option>Pulsera</option><option>Aretes</option><option>Dije</option><option>Otro</option></select></label>
-        <label>Material<input id="material" required placeholder="Plata 925"></label>
-        <label>Talla / medida<input id="talla" placeholder="Talla 7"></label>
-        <label>Peso (g)<input id="peso" type="number" step=".01" min="0"></label>
-        <label>Stock inicial<input id="inicial" required type="number" min="0" oninput="calc()"></label>
-        <label>Stock actual<input id="actual" required type="number" min="0" oninput="calc()"></label>
-        <label>Costo unitario (S/)<input id="costo" required type="number" step=".01" min="0" oninput="calc()"></label>
-        <label>Precio venta (S/)<input id="venta" required type="number" step=".01" min="0"></label>
-        <label>Valor actual<input id="valorActual" readonly></label>
-        <label>Valor inicial<input id="valorInicial" readonly></label>
-        <label>Estado<select id="estado"><option>Activo</option><option>Inactivo</option></select></label>
-
-        <div class="actions span2">
-          <button type="button" class="secondary" onclick="clearForm()">Limpiar</button>
-          <button id="save" class="primary">Guardar pieza</button>
-        </div>
-      </form>
-    </section>
-
-    <section class="card">
-      <div class="toolbar">
-        <h2>Inventario de joyería</h2>
-        <input id="search" placeholder="Buscar pieza, código o material">
-      </div>
-
-      <div class="tablewrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Código</th><th>Pieza</th><th>Categoría</th><th>Material</th>
-              <th>Talla</th><th>Stock</th><th>Costo</th><th>Venta</th>
-              <th>Valor actual</th><th>Estado</th><th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="table">
-            <tr><td colspan="11">Cargando inventario…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <div id="notice"></div>
-
-  <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxqQFr_DaD5vzM_rlqx7DG96vnu8Au1FvsixmM-2a61dQ1Od2RH-9BBmsafVRJA7eZ8/exec';
-
-    let data = [];
-    const $ = id => document.getElementById(id);
-    const num = v => Number(String(v ?? '').replace(',', '.')) || 0;
-    const money = v => `S/ ${num(v).toFixed(2)}`;
-    const state = s => s <= 0 ? 'Agotado' : s <= 2 ? 'Por agotarse' : 'Disponible';
-
-    function note(text, good = true) {
-      const n = $('notice');
-      n.textContent = text;
-      n.style.background = good ? '#2b745b' : '#a9433c';
-      n.style.display = 'block';
-      setTimeout(() => n.style.display = 'none', 3500);
-    }
-
-    function calc() {
-      $('valorActual').value = money(num($('actual').value) * num($('costo').value));
-      $('valorInicial').value = money(num($('inicial').value) * num($('costo').value));
-    }
-
-    function escape(value) {
-      const d = document.createElement('div');
-      d.textContent = value ?? '';
-      return d.innerHTML;
-    }
-
-    async function load() {
-      try {
-        const response = await fetch(API_URL);
-        const rows = await response.json();
-        data = Array.isArray(rows) ? rows.slice(1) : [];
-        draw();
-      } catch (error) {
-        console.error(error);
-        $('table').innerHTML = '<tr><td colspan="11">No se pudo conectar a Google Sheets.</td></tr>';
-        note('Revisa el despliegue de Apps Script.', false);
-      }
-    }
-
-    function draw() {
-      const filter = $('search').value.toLowerCase();
-      const visible = data.filter(r =>
-        [r[0], r[1], r[2], r[3]].join(' ').toLowerCase().includes(filter)
-      );
-
-      $('table').innerHTML = visible.length
-        ? ''
-        : '<tr><td colspan="11">No hay piezas registradas.</td></tr>';
-
-      visible.forEach(r => {
-        const index = data.indexOf(r) + 2;
-        const stock = num(r[6]);
-        const cls = stock <= 0 ? 'out' : stock <= 2 ? 'low' : 'ok';
-
-        $('table').insertAdjacentHTML('beforeend', `
+    <div class="tablewrap">
+      <table>
+        <thead>
           <tr>
-            <td><span class="code">${escape(r[0])}</span></td>
-            <td><b>${escape(r[1])}</b></td>
-            <td>${escape(r[2])}</td>
-            <td>${escape(r[3])}</td>
-            <td>${escape(r[4])}</td>
-            <td>${stock}</td>
-            <td>${money(r[10])}</td>
-            <td>${money(r[11])}</td>
-            <td>${money(stock * num(r[10]))}</td>
-            <td><span class="badge ${cls}">${state(stock)}</span></td>
-            <td>
-              <button class="action" onclick="edit(${index})">Editar</button>
-              <button class="action" onclick="sell(${index})" ${stock <= 0 ? 'disabled' : ''}>Vender</button>
-              <button class="action delete" onclick="removeRow(${index})">Eliminar</button>
-            </td>
+            <th>Foto</th><th>ID</th><th>Producto</th><th>Categoría</th><th>Precio</th>
+            <th>Stock</th><th>Valor</th><th>Estado</th><th>Proveedor</th><th>Acciones</th>
           </tr>
-        `);
-      });
+        </thead>
+        <tbody id="table">
+          <tr><td colspan="10">Cargando inventario…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
 
-      $('pieces').textContent = data.length;
-      $('stock').textContent = data.reduce((s, r) => s + num(r[6]), 0);
-      $('value').textContent = money(data.reduce((s, r) => s + num(r[6]) * num(r[10]), 0));
-      $('low').textContent = data.filter(r => num(r[6]) <= 2).length;
+<div id="notice"></div>
+
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzs0lbCpCSnYW-wdBm380BOzgBBKm284jrQv-qGXnrR0DH80YtqkkaZIbZ4G8s2cgxp/exec';
+
+  let rows = [];
+  const $ = id => document.getElementById(id);
+
+  const num = value => {
+    const n = Number(String(value ?? '').replace(/[^0-9,.-]/g, '').replace(',', '.'));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const money = value => `S/ ${num(value).toFixed(2)}`;
+  const stockState = stock => stock <= 0 ? 'Vendido' : stock <= 2 ? 'Por agotarse' : 'Disponible';
+
+  function notice(text, good = true) {
+    const box = $('notice');
+    box.textContent = text;
+    box.style.background = good ? '#27765b' : '#ac453d';
+    box.style.display = 'block';
+    setTimeout(() => box.style.display = 'none', 3500);
+  }
+
+  function calc() {
+    $('valor').value = money(num($('precio').value) * num($('actual').value));
+  }
+
+  function safe(value) {
+    const box = document.createElement('div');
+    box.textContent = value ?? '';
+    return box.innerHTML;
+  }
+
+  function image(url) {
+    const match = String(url || '').match(/\/d\/([^/]+)/);
+    const source = match
+      ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w100`
+      : url;
+
+    return source
+      ? `<img class="thumbnail" src="${safe(source)}" onerror="this.style.visibility='hidden'">`
+      : '';
+  }
+
+  async function load() {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      rows = Array.isArray(data) ? data.slice(1) : [];
+      draw();
+    } catch (error) {
+      console.error(error);
+      $('table').innerHTML = '<tr><td colspan="10">No se pudo conectar a Google Sheets.</td></tr>';
+      notice('Revisa el despliegue de Apps Script.', false);
     }
+  }
 
-    function edit(index) {
-      const r = data[index - 2];
+  function draw() {
+    const filter = $('search').value.trim().toLowerCase();
 
-      $('row').value = index;
-      $('codigo').value = r[0] || '';
-      $('descripcion').value = r[1] || '';
-      $('categoria').value = r[2] || 'Otro';
-      $('material').value = r[3] || '';
-      $('talla').value = r[4] || '';
-      $('peso').value = num(r[5]);
-      $('actual').value = num(r[6]);
-      $('inicial').value = num(r[9]);
-      $('costo').value = num(r[10]);
-      $('venta').value = num(r[11]);
-      $('estado').value = r[13] || 'Activo';
+    const visible = rows.filter(r =>
+      [r[0], r[2], r[3], r[8]].join(' ').toLowerCase().includes(filter)
+    );
 
-      calc();
-      $('formTitle').textContent = `Editando pieza · fila ${index}`;
-      $('save').textContent = 'Actualizar pieza';
-      scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    const body = $('table');
+    body.innerHTML = visible.length
+      ? ''
+      : '<tr><td colspan="10">No hay productos que mostrar.</td></tr>';
 
-    function clearForm() {
-      $('form').reset();
-      $('row').value = '';
-      $('valorActual').value = '';
-      $('valorInicial').value = '';
-      $('formTitle').textContent = 'Registrar pieza de joyería';
-      $('save').textContent = 'Guardar pieza';
-    }
+    visible.forEach(r => {
+      const index = rows.indexOf(r) + 2;
+      const stock = num(r[6]);
+      const cls = stock <= 0 ? 'out' : stock <= 2 ? 'low' : 'ok';
 
-    async function post(payload) {
-      await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-    }
-
-    $('form').addEventListener('submit', async event => {
-      event.preventDefault();
-
-      const button = $('save');
-      button.disabled = true;
-
-      const actual = num($('actual').value);
-      const initial = num($('inicial').value);
-      const cost = num($('costo').value);
-
-      try {
-        await post({
-          codigo: $('codigo').value.trim(),
-          descripcion: $('descripcion').value.trim(),
-          categoria: $('categoria').value,
-          material: $('material').value.trim(),
-          tallaMedida: $('talla').value.trim(),
-          peso: num($('peso').value),
-          stockActual: actual,
-          stockInicial: initial,
-          precioCosto: cost,
-          precioVenta: num($('venta').value),
-          estado: $('estado').value,
-          rowIndex: $('row').value
-        });
-
-        clearForm();
-        note('Pieza guardada.');
-        await load();
-      } catch (error) {
-        note('No se pudo guardar la pieza.', false);
-      } finally {
-        button.disabled = false;
-      }
+      body.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td>${image(r[1])}</td>
+          <td><span class="code">${safe(r[0])}</span></td>
+          <td><b>${safe(r[3])}</b></td>
+          <td>${safe(r[2])}</td>
+          <td>${money(r[4])}</td>
+          <td>${stock}</td>
+          <td>${money(r[7])}</td>
+          <td><span class="badge ${cls}">${safe(r[8] || stockState(stock))}</span></td>
+          <td>${safe(r[9])}</td>
+          <td>
+            <button class="action" onclick="edit(${index})">Editar</button>
+            <button class="action" onclick="sell(${index})" ${stock <= 0 ? 'disabled' : ''}>Vender</button>
+            <button class="action delete" onclick="removeRow(${index})">Eliminar</button>
+          </td>
+        </tr>
+      `);
     });
 
-    async function sell(index) {
-      if (!confirm('¿Registrar la venta de una unidad?')) return;
+    $('products').textContent = rows.length;
+    $('units').textContent = rows.reduce((sum, r) => sum + num(r[6]), 0);
+    $('total').textContent = money(rows.reduce((sum, r) => sum + num(r[7]), 0));
+    $('alerts').textContent = rows.filter(r => num(r[6]) <= 2).length;
+  }
 
-      try {
-        await post({ action: 'sell', rowIndex: index });
-        note('Venta registrada.');
-        load();
-      } catch (error) {
-        note('No se pudo registrar la venta.', false);
-      }
+  function edit(index) {
+    const r = rows[index - 2];
+
+    $('row').value = index;
+    $('id').value = r[0] || '';
+    $('imagen').value = r[1] || '';
+    $('categoria').value = r[2] || '';
+    $('nombre').value = r[3] || '';
+    $('precio').value = num(r[4]);
+    $('inicial').value = num(r[5]);
+    $('actual').value = num(r[6]);
+    $('estado').value = r[8] || stockState(num(r[6]));
+    $('proveedor').value = r[9] || '';
+
+    calc();
+    $('formTitle').textContent = `Editando ${r[0]}`;
+    $('save').textContent = 'Actualizar joya';
+    scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function clearForm() {
+    $('form').reset();
+    $('row').value = '';
+    $('valor').value = '';
+    $('formTitle').textContent = 'Registrar joya';
+    $('save').textContent = 'Guardar joya';
+  }
+
+  async function post(payload) {
+    await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  $('form').addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const button = $('save');
+    button.disabled = true;
+
+    try {
+      await post({
+        id: $('id').value.trim(),
+        imagen: $('imagen').value.trim(),
+        categoria: $('categoria').value.trim(),
+        nombre: $('nombre').value.trim(),
+        precioVenta: num($('precio').value),
+        stockInicial: num($('inicial').value),
+        stockActual: num($('actual').value),
+        estado: $('estado').value.trim() || stockState(num($('actual').value)),
+        proveedor: $('proveedor').value.trim(),
+        rowIndex: $('row').value
+      });
+
+      clearForm();
+      notice('Joya guardada.');
+      await load();
+    } catch (error) {
+      notice('No se pudo guardar la joya.', false);
+    } finally {
+      button.disabled = false;
     }
+  });
 
-    async function removeRow(index) {
-      if (!confirm('¿Eliminar esta pieza?')) return;
+  async function sell(index) {
+    if (!confirm('¿Registrar la venta de una unidad?')) return;
 
-      try {
-        await post({ action: 'delete', rowIndex: index });
-        note('Pieza eliminada.');
-        load();
-      } catch (error) {
-        note('No se pudo eliminar.', false);
-      }
+    try {
+      await post({ action: 'sell', rowIndex: index });
+      notice('Venta registrada.');
+      load();
+    } catch (error) {
+      notice('No se pudo registrar la venta.', false);
     }
+  }
 
-    $('search').addEventListener('input', draw);
-    load();
-  </script>
+  async function removeRow(index) {
+    if (!confirm('¿Eliminar esta joya?')) return;
+
+    try {
+      await post({ action: 'delete', rowIndex: index });
+      notice('Joya eliminada.');
+      load();
+    } catch (error) {
+      notice('No se pudo eliminar.', false);
+    }
+  }
+
+  $('search').addEventListener('input', draw);
+  load();
+</script>
 </body>
 </html>
